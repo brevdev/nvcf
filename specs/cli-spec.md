@@ -26,7 +26,7 @@ The NVIDIA Cloud Functions CLI (`nvcf`) is a command-line interface for managing
 To install the NVIDIA Cloud Functions CLI, run:
 
 ```
-go install github.com/tmc/nvcf-cli@latest
+go install github.com/tmc/nvcf@latest
 ```
 
 ## Authentication
