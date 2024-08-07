@@ -1,11 +1,9 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
-	"github.com/your-username/nvcf-cli/config"
-	"github.com/your-username/nvcf-cli/output"
+	"github.com/tmc/nvcf/config"
+	"github.com/tmc/nvcf/output"
 )
 
 func AuthCmd() *cobra.Command {

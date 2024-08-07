@@ -1,11 +1,12 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
-	"github.com/your-username/nvcf-cli/config"
-	"github.com/your-username/nvcf-cli/nvcf"
+	nvcf "github.com/stainless-sdks/nvcf-go"
+	"github.com/tmc/nvcf/config"
 )
 
 type Client struct {
@@ -15,8 +16,9 @@ type Client struct {
 
 func NewClient() *Client {
 	apiKey := config.GetAPIKey()
+	fmt.Println("apiKey:", apiKey)
 	return &Client{
-		nvcfClient: nvcf.NewClient(nvcf.WithAPIKey(apiKey)),
+		nvcfClient: nvcf.NewClient(),
 		httpClient: &http.Client{
 			Timeout: time.Second * 30,
 		},

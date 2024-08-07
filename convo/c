@@ -21,8 +21,8 @@ import (
 	"runtime"
 
 	"github.com/spf13/cobra"
-	"github.com/your-username/nvcf-cli/cmd"
-	"github.com/your-username/nvcf-cli/config"
+	"github.com/tmc/nvcf/cmd"
+	"github.com/tmc/nvcf/config"
 )
 
 func main() {
@@ -73,8 +73,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/your-username/nvcf-cli/api"
-	"github.com/your-username/nvcf-cli/output"
+	"github.com/tmc/nvcf/api"
+	"github.com/tmc/nvcf/output"
 )
 
 func FunctionCmd() *cobra.Command {
@@ -126,8 +126,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/your-username/nvcf-cli/config"
-	"github.com/your-username/nvcf-cli/output"
+	"github.com/tmc/nvcf/config"
+	"github.com/tmc/nvcf/output"
 )
 
 func AuthCmd() *cobra.Command {
@@ -168,8 +168,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/your-username/nvcf-cli/config"
-	"github.com/your-username/nvcf-cli/nvcf"
+	"github.com/tmc/nvcf/config"
+	"github.com/tmc/nvcf/nvcf"
 )
 
 type Client struct {

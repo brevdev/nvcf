@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/your-username/nvcf-cli/api"
-	"github.com/your-username/nvcf-cli/output"
+	"github.com/tmc/nvcf/api"
+	"github.com/tmc/nvcf/output"
 )
 
 func FunctionCmd() *cobra.Command {

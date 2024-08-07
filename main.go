@@ -3,11 +3,10 @@ package main
 import (
 	"fmt"
 	"os"
-	"runtime"
 
 	"github.com/spf13/cobra"
-	"github.com/your-username/nvcf-cli/cmd"
-	"github.com/your-username/nvcf-cli/config"
+	"github.com/tmc/nvcf/cmd"
+	"github.com/tmc/nvcf/config"
 )
 
 func main() {
