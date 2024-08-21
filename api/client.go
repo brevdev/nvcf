@@ -1,24 +1,27 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
-	nvcf "github.com/stainless-sdks/nvcf-go"
-	"github.com/tmc/nvcf/config"
+	nvcf "github.com/tmc/nvcf-go"
+	"github.com/tmc/nvcf-go/option"
 )
 
 type Client struct {
-	nvcfClient *nvcf.Client
+	*nvcf.Client
 	httpClient *http.Client
 }
 
-func NewClient() *Client {
-	apiKey := config.GetAPIKey()
-	fmt.Println("apiKey:", apiKey)
+type Option (*Client)
+
+// Options to create: WithHTTPClient, header manips, BaseURL, env handling
+
+func NewClient(apiKey string, opts ...Option) *Client {
 	return &Client{
-		nvcfClient: nvcf.NewClient(),
+		Client: nvcf.NewClient(
+			option.WithHeader("Authorization", "Bearer "+apiKey),
+		),
 		httpClient: &http.Client{
 			Timeout: time.Second * 30,
 		},

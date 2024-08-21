@@ -13,8 +13,8 @@ func AuthCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(authLoginCmd())
-	cmd.AddCommand(authLogoutCmd())
-	cmd.AddCommand(authStatusCmd())
+	// cmd.AddCommand(authLogoutCmd())
+	// cmd.AddCommand(authStatusCmd())
 
 	return cmd
 }
