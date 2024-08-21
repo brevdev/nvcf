@@ -31,18 +31,18 @@ func main() {
 
 	// Add commands
 	rootCmd.AddCommand(cmd.FunctionCmd())
-	rootCmd.AddCommand(cmd.DeploymentCmd())
-	rootCmd.AddCommand(cmd.InvokeCmd())
-	rootCmd.AddCommand(cmd.AssetCmd())
-	rootCmd.AddCommand(cmd.AuthCmd())
-	rootCmd.AddCommand(cmd.QueueCmd())
-	rootCmd.AddCommand(cmd.ClusterGroupCmd())
-	rootCmd.AddCommand(cmd.ConfigCmd())
-	rootCmd.AddCommand(cmd.VersionCmd())
+	// rootCmd.AddCommand(cmd.DeploymentCmd())
+	// rootCmd.AddCommand(cmd.InvokeCmd())
+	// rootCmd.AddCommand(cmd.AssetCmd())
+	// rootCmd.AddCommand(cmd.AuthCmd())
+	// rootCmd.AddCommand(cmd.QueueCmd())
+	// rootCmd.AddCommand(cmd.ClusterGroupCmd())
+	// rootCmd.AddCommand(cmd.ConfigCmd())
+	// rootCmd.AddCommand(cmd.VersionCmd())
 
-	// Enable command auto-completion
-	rootCmd.CompletionOptions.DisableDefaultCmd = true
-	rootCmd.AddCommand(cmd.CompletionCmd())
+	// // Enable command auto-completion
+	// rootCmd.CompletionOptions.DisableDefaultCmd = true
+	// rootCmd.AddCommand(cmd.CompletionCmd())
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

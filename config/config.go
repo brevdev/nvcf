@@ -18,10 +18,18 @@ func Init() {
 		panic(err)
 	}
 
+	// TODO: consider more robust config loading here
 	configPath := filepath.Join(configDir, "nvcf", "config.json")
 	data, err := os.ReadFile(configPath)
 	if err == nil {
 		json.Unmarshal(data, &cfg)
+	}
+
+	if v := os.Getenv("NGC_API_KEY"); v != "" {
+		cfg.APIKey = v
+	}
+	if v := os.Getenv("NGC_CLI_API_KEY"); v != "" {
+		cfg.APIKey = v
 	}
 }
 

@@ -5,7 +5,9 @@ import (
 	"fmt"
 
 	"github.com/fatih/color"
+	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
+	"github.com/tmc/nvcf-go"
 )
 
 func Error(cmd *cobra.Command, message string, err error) {
@@ -26,12 +28,21 @@ func Info(cmd *cobra.Command, message string) {
 	}
 }
 
-func Functions(cmd *cobra.Command, functions interface{}) {
+func Functions(cmd *cobra.Command, functions []nvcf.ListFunctionsResponseFunction) {
 	if isJSON(cmd) {
 		printJSON(cmd, functions)
 	} else {
-		// Implement table output for functions
+		printFunctionsTable(cmd, functions)
 	}
+}
+func printFunctionsTable(cmd *cobra.Command, functions []nvcf.ListFunctionsResponseFunction) {
+	table := tablewriter.NewWriter(cmd.OutOrStdout())
+	table.SetHeader([]string{"Name", "ID", "Status"})
+	table.SetBorder(false)
+	for _, f := range functions {
+		table.Append([]string{f.Name, f.ID, string(f.Status)})
+	}
+	table.Render()
 }
 
 func Prompt(message string, isSecret bool) string {
