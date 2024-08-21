@@ -1,0 +1,113 @@
+<ant-meta-thought eventual-goal="list-of-improvement-toolchain-scripts-to-generate.sh"
+  current-task="Analyze the provided codebase and generate a meta-prompt for extending it">
+
+To generate an effective meta-prompt, I'll need to analyze the codebase structure, identify key components, and determine areas where AI assistance could be most beneficial. This will help create a comprehensive guide for Claude to extend and improve the nvcf codebase.
+
+</ant-meta-thought>
+
+<scratchpad>
+Key observations:
+1. The codebase is for a CLI tool interacting with NVIDIA Cloud Functions
+2. Main packages: api, cmd, config, output
+3. Uses Cobra for CLI command structure
+4. Implements basic authentication and function management
+5. Many planned features are not yet implemented (commented out in main.go)
+6. The API client (api/client.go) needs expansion
+7. Error handling and output formatting can be improved
+8. Test coverage is likely minimal or non-existent
+9. The project uses a Go workspace with a separate nvcf-go module
+
+Areas for improvement:
+1. Implement missing CLI commands
+2. Expand API client functionality
+3. Enhance function management capabilities
+4. Implement deployment and invocation features
+5. Add asset management functionality
+6. Implement queue management
+7. Add cluster group management features
+8. Improve error handling and logging
+9. Enhance output formatting
+10. Add unit tests and integration tests
+11. Implement configuration management
+12. Add documentation and examples
+</scratchpad>
+
+<ant-meta-thought>
+Based on the analysis, I'll create a comprehensive meta-prompt that guides Claude in extending and improving the nvcf codebase. The prompt will cover various aspects of the project, from implementing missing features to improving code quality and user experience.
+</ant-meta-thought>
+
+Here's the meta-prompt for Claude to extend the nvcf codebase:
+
+```
+As an AI assistant with expertise in Go programming and CLI development, your task is to extend and improve the nvcf codebase. Follow these guidelines:
+
+1. Implement missing CLI commands:
+   - Add authLogoutCmd and authStatusCmd in cmd/auth.go
+   - Implement functionCreateCmd, functionGetCmd, functionUpdateCmd, functionDeleteCmd, and functionVersionCmd in cmd/function.go
+   - Create new files for deployment, invoke, asset, queue, and cluster-group commands
+
+2. Expand API client functionality in api/client.go:
+   - Implement WithHTTPClient, header manipulations, BaseURL, and env handling options
+   - Add methods for creating, updating, and deleting functions
+   - Implement methods for deployment, invocation, and asset management
+
+3. Enhance function management capabilities:
+   - Add support for function versioning
+   - Implement function update and delete operations
+   - Add validation for function creation and update parameters
+
+4. Implement deployment and invocation features:
+   - Create a new file cmd/deployment.go for deployment-related commands
+   - Implement deployment creation, update, and deletion
+   - Add invocation functionality in cmd/invoke.go, including support for synchronous and asynchronous invocations
+
+5. Add asset management functionality:
+   - Create a new file cmd/asset.go for asset-related commands
+   - Implement asset upload, download, list, and delete operations
+
+6. Implement queue management:
+   - Create a new file cmd/queue.go for queue-related commands
+   - Add support for listing queues and checking request positions
+
+7. Add cluster group management features:
+   - Create a new file cmd/cluster_group.go for cluster group-related commands
+   - Implement listing and managing cluster groups
+
+8. Improve error handling and logging:
+   - Implement a consistent error handling mechanism across the codebase
+   - Add detailed logging for debugging purposes
+
+9. Enhance output formatting:
+   - Expand the output package to support multiple formats (e.g., JSON, YAML, table)
+   - Implement color-coded output for different message types
+
+10. Add unit tests and integration tests:
+    - Create test files for each package
+    - Implement unit tests for critical functions
+    - Add integration tests for CLI commands
+
+11. Implement configuration management:
+    - Enhance the config package to support multiple configuration sources (e.g., config file, environment variables, CLI flags)
+    - Add support for configuration profiles
+
+12. Add documentation and examples:
+    - Write godoc comments for all exported functions, types, and methods
+    - Create usage examples for each CLI command
+    - Update the README.md file with installation instructions and basic usage
+
+For each task, provide the Go code implementation along with brief comments explaining the functionality. Ensure that the code follows Go best practices and maintains consistency with the existing codebase structure.
+
+When implementing new features or modifying existing code, consider the following:
+- Maintain backwards compatibility where possible
+- Use idiomatic Go patterns and conventions
+- Ensure proper error handling and input validation
+- Write clear and concise comments
+- Follow the existing code style and formatting
+
+If you need any clarification or additional information about the existing codebase or NVIDIA Cloud Functions API, please ask before proceeding with the implementation.
+
+```
+
+<ant-meta-thought>
+This meta-prompt provides a comprehensive guide for Claude to extend and improve the nvcf codebase. It covers all the major areas identified for improvement and expansion, while maintaining consistency with the existing structure and coding style. The prompt is structured to encourage a systematic approach to implementing new features and enhancing existing functionality.
+</ant-meta-thought>

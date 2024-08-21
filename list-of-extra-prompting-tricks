@@ -1,0 +1,112 @@
+<ant-meta-thought eventual-goal="list-of-files-to-generate" hint="use shell history, ant-thinking, ant-meta-thought, scratchpad, and leverage the cgpt cli tool with the system prompting and prefil options">
+
+To generate an effective meta-prompt for extending the nvcf codebase, I'll analyze the existing structure, identify areas for improvement, and create a list of files to generate or modify. I'll use the provided hints and leverage the cgpt CLI tool with system prompting and prefill options.
+
+</ant-meta-thought>
+
+<scratchpad>
+Existing structure:
+- api/: API client implementation
+- cmd/: CLI commands
+- config/: Configuration management
+- output/: Output formatting
+- main.go: Entry point
+- go.mod, go.work: Go module files
+- specs/: CLI and SDK specifications
+
+Areas for improvement:
+1. Implement missing CLI commands
+2. Expand API client functionality
+3. Add more robust error handling
+4. Implement comprehensive testing
+5. Enhance documentation
+6. Add new features (deployment, invocation, asset management)
+
+Files to generate or modify:
+1. cmd/deployment.go
+2. cmd/invoke.go
+3. cmd/asset.go
+4. cmd/queue.go
+5. cmd/cluster_group.go
+6. api/deployment.go
+7. api/invoke.go
+8. api/asset.go
+9. api/queue.go
+10. api/cluster_group.go
+11. test/api_test.go
+12. test/cmd_test.go
+13. docs/usage.md
+14. examples/deployment_example.go
+15. examples/invoke_example.go
+</scratchpad>
+
+<ant-meta-thought>
+Now that I have identified the files to generate or modify, I'll create a meta-prompt that leverages the cgpt CLI tool with system prompting and prefill options to guide the AI in extending the nvcf codebase.
+</ant-meta-thought>
+
+Here's the meta-prompt for extending the nvcf codebase:
+
+```
+You are an expert Go developer tasked with extending the nvcf codebase. Use the following command structure to generate or modify files:
+
+(echo 'Generate or modify the following file: [FILE_PATH]'; cat [EXISTING_FILE_PATH]) | cgpt -s 'You are an expert Go developer. Implement the requested functionality while maintaining consistency with the existing codebase.' -p 'Implement the following functionality: [FUNCTIONALITY_DESCRIPTION]'
+
+For each file, follow these guidelines:
+1. Maintain consistency with the existing code style and structure.
+2. Implement robust error handling.
+3. Add comprehensive comments and documentation.
+4. Consider adding unit tests for new functionality.
+
+Generate or modify the following files:
+
+1. cmd/deployment.go:
+   Functionality: Implement CLI commands for managing function deployments (create, update, delete, list).
+
+2. cmd/invoke.go:
+   Functionality: Implement CLI commands for invoking functions (sync and async invocation).
+
+3. cmd/asset.go:
+   Functionality: Implement CLI commands for managing assets (upload, download, list, delete).
+
+4. cmd/queue.go:
+   Functionality: Implement CLI commands for managing and viewing function queues.
+
+5. cmd/cluster_group.go:
+   Functionality: Implement CLI commands for managing cluster groups.
+
+6. api/deployment.go:
+   Functionality: Implement API client methods for managing function deployments.
+
+7. api/invoke.go:
+   Functionality: Implement API client methods for invoking functions.
+
+8. api/asset.go:
+   Functionality: Implement API client methods for managing assets.
+
+9. api/queue.go:
+   Functionality: Implement API client methods for managing and viewing function queues.
+
+10. api/cluster_group.go:
+    Functionality: Implement API client methods for managing cluster groups.
+
+11. test/api_test.go:
+    Functionality: Implement unit tests for the new API client methods.
+
+12. test/cmd_test.go:
+    Functionality: Implement integration tests for the new CLI commands.
+
+13. docs/usage.md:
+    Functionality: Create comprehensive documentation for the new CLI commands and features.
+
+14. examples/deployment_example.go:
+    Functionality: Provide a usage example for deploying and managing function deployments.
+
+15. examples/invoke_example.go:
+    Functionality: Provide a usage example for invoking functions using the nvcf CLI.
+
+After generating each file, review the output and make any necessary adjustments to ensure consistency and completeness.
+```
+
+<ant-meta-thought>
+This meta-prompt provides a structured approach to extending the nvcf codebase using the cgpt CLI tool. It covers the implementation of new features, API client methods, CLI commands, tests, documentation, and examples. The use of the cgpt tool with system prompting and prefill options ensures that the AI assistant maintains consistency with the existing codebase while implementing the new functionality.
+</ant-meta-thought>

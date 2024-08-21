@@ -1,0 +1,122 @@
+<ant-meta-thought eventual-goal="list-of-files-to-generate" hint="use shell history, ant-thinking, ant-meta-thought, scratchpad, and leverage the cgpt cli tool with the system prompting and prefill option">
+
+To generate an effective meta-prompt for extending the nvcf codebase, I'll analyze the existing structure, identify areas for improvement, and create a list of files to generate or modify. I'll use the provided hints and leverage the cgpt CLI tool with system prompting and prefill options.
+
+</ant-meta-thought>
+
+<scratchpad>
+Existing structure:
+- api/: API client implementation
+- cmd/: CLI commands
+- config/: Configuration management
+- output/: Output formatting
+- main.go: Entry point
+- go.mod, go.work: Go module files
+- specs/: CLI and SDK specifications
+
+Areas for improvement:
+1. Implement missing CLI commands
+2. Expand API client functionality
+3. Add more robust error handling
+4. Implement comprehensive testing
+5. Enhance documentation
+6. Add new features (deployment, invocation, asset management)
+
+Files to generate or modify:
+1. cmd/deployment.go
+2. cmd/invoke.go
+3. cmd/asset.go
+4. cmd/queue.go
+5. cmd/cluster_group.go
+6. api/deployment.go
+7. api/invoke.go
+8. api/asset.go
+9. api/queue.go
+10. api/cluster_group.go
+11. test/api_test.go
+12. test/cmd_test.go
+13. docs/usage.md
+14. examples/deployment_example.go
+15. examples/invoke_example.go
+</scratchpad>
+
+<ant-meta-thought>
+Now that I have identified the files to generate or modify, I'll create a meta-prompt that leverages the cgpt CLI tool with system prompting and prefill options to guide the AI in extending the nvcf codebase.
+</ant-meta-thought>
+
+Here's the meta-prompt for extending the nvcf codebase:
+
+```
+(echo 'Generate or modify the following files to extend the nvcf codebase:
+
+1. cmd/deployment.go
+2. cmd/invoke.go
+3. cmd/asset.go
+4. cmd/queue.go
+5. cmd/cluster_group.go
+6. api/deployment.go
+7. api/invoke.go
+8. api/asset.go
+9. api/queue.go
+10. api/cluster_group.go
+11. test/api_test.go
+12. test/cmd_test.go
+13. docs/usage.md
+14. examples/deployment_example.go
+15. examples/invoke_example.go
+
+For each file, provide a brief description of its purpose and the key functionalities it should implement. Consider the existing codebase structure and maintain consistency with the current implementation style.'; ~/code-to-gpt.sh) | cgpt -s 'You are an expert Go developer with experience in building CLI tools and SDK libraries. Your task is to extend the nvcf codebase by generating new files and modifying existing ones. Provide detailed descriptions for each file, including its purpose, key functionalities, and how it fits into the overall project structure. Ensure that your suggestions maintain consistency with the existing codebase and follow Go best practices.' -p 'Here are the descriptions for each file to be generated or modified:
+
+1. cmd/deployment.go:
+Purpose: Implement CLI commands for managing function deployments.
+Key functionalities:
+- Create a new deployment
+- Update an existing deployment
+- Delete a deployment
+- List deployments
+- Get deployment details
+
+2. cmd/invoke.go:
+Purpose: Implement CLI commands for invoking functions.
+Key functionalities:
+- Synchronous function invocation
+- Asynchronous function invocation
+- Get invocation results
+
+3. cmd/asset.go:
+Purpose: Implement CLI commands for managing assets.
+Key functionalities:
+- Upload an asset
+- Download an asset
+- List assets
+- Delete an asset
+
+4. cmd/queue.go:
+Purpose: Implement CLI commands for managing and viewing function queues.
+Key functionalities:
+- List queues for a function
+- Get queue details
+- View queue position for a request
+
+5. cmd/cluster_group.go:
+Purpose: Implement CLI commands for managing cluster groups.
+Key functionalities:
+- List cluster groups
+- Get cluster group details
+- Create a cluster group
+- Update a cluster group
+- Delete a cluster group
+
+6. api/deployment.go:
+Purpose: Implement API client methods for managing function deployments.
+Key functionalities:
+- CreateDeployment
+- UpdateDeployment
+- DeleteDeployment
+- ListDeployments
+- GetDeployment
+
+7. api/invoke.go:
+Purpose: Implement API client methods for invoking functions.
+Key functionalities:
+- In
