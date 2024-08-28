@@ -1,3 +1,5 @@
+<exec-output cmd="go doc github.com/tmc/nvcf-go">
+<stdout>
 package nvcf // import "github.com/tmc/nvcf-go"
 
 const FunctionResponseFunctionAPIBodyFormatCustom = shared.FunctionResponseFunctionAPIBodyFormatCustom
@@ -33,10 +35,6 @@ func Int(value int64) param.Field[int64]
 func Null[T any]() param.Field[T]
 func Raw[T any](value any) param.Field[T]
 func String(value string) param.Field[string]
-type AssetManagementAssetService struct{ ... }
-    func NewAssetManagementAssetService(opts ...option.RequestOption) (r *AssetManagementAssetService)
-type AssetManagementService struct{ ... }
-    func NewAssetManagementService(opts ...option.RequestOption) (r *AssetManagementService)
 type AssetNewParams struct{ ... }
 type AssetResponse struct{ ... }
 type AssetResponseAsset struct{ ... }
@@ -44,35 +42,24 @@ type AssetService struct{ ... }
     func NewAssetService(opts ...option.RequestOption) (r *AssetService)
 type AuthorizationFunctionAddParams struct{ ... }
 type AuthorizationFunctionAddParamsAuthorizedParty struct{ ... }
-type AuthorizationFunctionAuthorizeParams struct{ ... }
-type AuthorizationFunctionAuthorizeParamsAuthorizedParty struct{ ... }
-type AuthorizationFunctionListResponse struct{ ... }
-type AuthorizationFunctionListResponseFunction struct{ ... }
-type AuthorizationFunctionListResponseFunctionsAuthorizedParty struct{ ... }
 type AuthorizationFunctionRemoveParams struct{ ... }
 type AuthorizationFunctionRemoveParamsAuthorizedParty struct{ ... }
 type AuthorizationFunctionService struct{ ... }
     func NewAuthorizationFunctionService(opts ...option.RequestOption) (r *AuthorizationFunctionService)
 type AuthorizationFunctionVersionAddParams struct{ ... }
 type AuthorizationFunctionVersionAddParamsAuthorizedParty struct{ ... }
-type AuthorizationFunctionVersionAuthorizeParams struct{ ... }
-type AuthorizationFunctionVersionAuthorizeParamsAuthorizedParty struct{ ... }
 type AuthorizationFunctionVersionRemoveParams struct{ ... }
 type AuthorizationFunctionVersionRemoveParamsAuthorizedParty struct{ ... }
 type AuthorizationFunctionVersionService struct{ ... }
     func NewAuthorizationFunctionVersionService(opts ...option.RequestOption) (r *AuthorizationFunctionVersionService)
 type AuthorizationService struct{ ... }
     func NewAuthorizationService(opts ...option.RequestOption) (r *AuthorizationService)
-type AuthorizedAccountFunctionAddParams struct{ ... }
-type AuthorizedAccountFunctionAddParamsAuthorizedParty struct{ ... }
-type AuthorizedAccountFunctionRemoveParams struct{ ... }
-type AuthorizedAccountFunctionRemoveParamsAuthorizedParty struct{ ... }
+type AuthorizedAccountFunctionAuthorizeParams struct{ ... }
+type AuthorizedAccountFunctionAuthorizeParamsAuthorizedParty struct{ ... }
 type AuthorizedAccountFunctionService struct{ ... }
     func NewAuthorizedAccountFunctionService(opts ...option.RequestOption) (r *AuthorizedAccountFunctionService)
-type AuthorizedAccountFunctionVersionAddParams struct{ ... }
-type AuthorizedAccountFunctionVersionAddParamsAuthorizedParty struct{ ... }
-type AuthorizedAccountFunctionVersionRemoveParams struct{ ... }
-type AuthorizedAccountFunctionVersionRemoveParamsAuthorizedParty struct{ ... }
+type AuthorizedAccountFunctionVersionAuthorizeParams struct{ ... }
+type AuthorizedAccountFunctionVersionAuthorizeParamsAuthorizedParty struct{ ... }
 type AuthorizedAccountFunctionVersionService struct{ ... }
     func NewAuthorizedAccountFunctionVersionService(opts ...option.RequestOption) (r *AuthorizedAccountFunctionVersionService)
 type AuthorizedAccountService struct{ ... }
@@ -82,16 +69,8 @@ type AuthorizedPartiesResponseFunction = shared.AuthorizedPartiesResponseFunctio
 type AuthorizedPartiesResponseFunctionAuthorizedParty = shared.AuthorizedPartiesResponseFunctionAuthorizedParty
 type Client struct{ ... }
     func NewClient(opts ...option.RequestOption) (r *Client)
-type ClientManagementForNvidiaSuperAdminClientGetResponse struct{ ... }
-type ClientManagementForNvidiaSuperAdminClientGetResponseClient struct{ ... }
-type ClientManagementForNvidiaSuperAdminClientService struct{ ... }
-    func NewClientManagementForNvidiaSuperAdminClientService(opts ...option.RequestOption) (r *ClientManagementForNvidiaSuperAdminClientService)
-type ClientManagementForNvidiaSuperAdminService struct{ ... }
-    func NewClientManagementForNvidiaSuperAdminService(opts ...option.RequestOption) (r *ClientManagementForNvidiaSuperAdminService)
-type ClusterGroupsAndGPUClusterGroupService struct{ ... }
-    func NewClusterGroupsAndGPUClusterGroupService(opts ...option.RequestOption) (r *ClusterGroupsAndGPUClusterGroupService)
-type ClusterGroupsAndGPUService struct{ ... }
-    func NewClusterGroupsAndGPUService(opts ...option.RequestOption) (r *ClusterGroupsAndGPUService)
+type ClusterGroupService struct{ ... }
+    func NewClusterGroupService(opts ...option.RequestOption) (r *ClusterGroupService)
 type ClusterGroupsResponse struct{ ... }
 type ClusterGroupsResponseClusterGroup struct{ ... }
 type ClusterGroupsResponseClusterGroupsCluster struct{ ... }
@@ -121,22 +100,18 @@ type DeploymentResponseDeploymentDeploymentSpecification struct{ ... }
 type DeploymentResponseDeploymentFunctionStatus string
     const DeploymentResponseDeploymentFunctionStatusActive DeploymentResponseDeploymentFunctionStatus = "ACTIVE" ...
 type DeploymentResponseDeploymentHealthInfo struct{ ... }
-type EnvelopeFunctionInvocationExecService struct{ ... }
-    func NewEnvelopeFunctionInvocationExecService(opts ...option.RequestOption) (r *EnvelopeFunctionInvocationExecService)
-type EnvelopeFunctionInvocationFunctionInvokeParams struct{ ... }
-type EnvelopeFunctionInvocationFunctionInvokeParamsRequestHeader struct{ ... }
-type EnvelopeFunctionInvocationFunctionInvokeParamsRequestHeaderMeteringData struct{ ... }
+type EnvelopeFunctionInvocationFunctionInvokeEnvelopeParams struct{ ... }
+type EnvelopeFunctionInvocationFunctionInvokeEnvelopeParamsRequestHeader struct{ ... }
+type EnvelopeFunctionInvocationFunctionInvokeEnvelopeParamsRequestHeaderMeteringData struct{ ... }
 type EnvelopeFunctionInvocationFunctionService struct{ ... }
     func NewEnvelopeFunctionInvocationFunctionService(opts ...option.RequestOption) (r *EnvelopeFunctionInvocationFunctionService)
-type EnvelopeFunctionInvocationFunctionVersionInvokeParams struct{ ... }
-type EnvelopeFunctionInvocationFunctionVersionInvokeParamsRequestHeader struct{ ... }
-type EnvelopeFunctionInvocationFunctionVersionInvokeParamsRequestHeaderMeteringData struct{ ... }
+type EnvelopeFunctionInvocationFunctionVersionInvokeEnvelopeParams struct{ ... }
+type EnvelopeFunctionInvocationFunctionVersionInvokeEnvelopeParamsRequestHeader struct{ ... }
+type EnvelopeFunctionInvocationFunctionVersionInvokeEnvelopeParamsRequestHeaderMeteringData struct{ ... }
 type EnvelopeFunctionInvocationFunctionVersionService struct{ ... }
     func NewEnvelopeFunctionInvocationFunctionVersionService(opts ...option.RequestOption) (r *EnvelopeFunctionInvocationFunctionVersionService)
 type EnvelopeFunctionInvocationService struct{ ... }
     func NewEnvelopeFunctionInvocationService(opts ...option.RequestOption) (r *EnvelopeFunctionInvocationService)
-type EnvelopeFunctionInvocationStatusService struct{ ... }
-    func NewEnvelopeFunctionInvocationStatusService(opts ...option.RequestOption) (r *EnvelopeFunctionInvocationStatusService)
 type Error = apierror.Error
 type ExecService struct{ ... }
     func NewExecService(opts ...option.RequestOption) (r *ExecService)
@@ -145,14 +120,19 @@ type ExecStatusService struct{ ... }
 type FunctionDeploymentFunctionService struct{ ... }
     func NewFunctionDeploymentFunctionService(opts ...option.RequestOption) (r *FunctionDeploymentFunctionService)
 type FunctionDeploymentFunctionVersionDeleteDeploymentParams struct{ ... }
-type FunctionDeploymentFunctionVersionNewDeploymentParams struct{ ... }
-type FunctionDeploymentFunctionVersionNewDeploymentParamsDeploymentSpecification struct{ ... }
+type FunctionDeploymentFunctionVersionInitiateDeploymentParams struct{ ... }
+type FunctionDeploymentFunctionVersionInitiateDeploymentParamsDeploymentSpecification struct{ ... }
 type FunctionDeploymentFunctionVersionService struct{ ... }
     func NewFunctionDeploymentFunctionVersionService(opts ...option.RequestOption) (r *FunctionDeploymentFunctionVersionService)
-type FunctionDeploymentFunctionVersionUpdateDeploymentSpecsParams struct{ ... }
-type FunctionDeploymentFunctionVersionUpdateDeploymentSpecsParamsDeploymentSpecification struct{ ... }
+type FunctionDeploymentFunctionVersionUpdateDeploymentParams struct{ ... }
+type FunctionDeploymentFunctionVersionUpdateDeploymentParamsDeploymentSpecification struct{ ... }
 type FunctionDeploymentService struct{ ... }
     func NewFunctionDeploymentService(opts ...option.RequestOption) (r *FunctionDeploymentService)
+type FunctionIDListParams struct{ ... }
+type FunctionIDListParamsVisibility string
+    const FunctionIDListParamsVisibilityAuthorized FunctionIDListParamsVisibility = "authorized" ...
+type FunctionIDService struct{ ... }
+    func NewFunctionIDService(opts ...option.RequestOption) (r *FunctionIDService)
 type FunctionInvocationFunctionInvokeParams struct{ ... }
 type FunctionInvocationFunctionInvokeResponse struct{ ... }
 type FunctionInvocationFunctionService struct{ ... }
@@ -161,18 +141,8 @@ type FunctionInvocationFunctionVersionInvokeParams struct{ ... }
 type FunctionInvocationFunctionVersionInvokeResponse struct{ ... }
 type FunctionInvocationFunctionVersionService struct{ ... }
     func NewFunctionInvocationFunctionVersionService(opts ...option.RequestOption) (r *FunctionInvocationFunctionVersionService)
-type FunctionInvocationPexecService struct{ ... }
-    func NewFunctionInvocationPexecService(opts ...option.RequestOption) (r *FunctionInvocationPexecService)
-type FunctionInvocationPexecStatusService struct{ ... }
-    func NewFunctionInvocationPexecStatusService(opts ...option.RequestOption) (r *FunctionInvocationPexecStatusService)
 type FunctionInvocationService struct{ ... }
     func NewFunctionInvocationService(opts ...option.RequestOption) (r *FunctionInvocationService)
-type FunctionInvocationStatusGetParams struct{ ... }
-type FunctionInvocationStatusGetResponse struct{ ... }
-type FunctionInvocationStatusService struct{ ... }
-    func NewFunctionInvocationStatusService(opts ...option.RequestOption) (r *FunctionInvocationStatusService)
-type FunctionInvocationVersionService struct{ ... }
-    func NewFunctionInvocationVersionService(opts ...option.RequestOption) (r *FunctionInvocationVersionService)
 type FunctionListParams struct{ ... }
 type FunctionListParamsVisibility string
     const FunctionListParamsVisibilityAuthorized FunctionListParamsVisibility = "authorized" ...
@@ -180,15 +150,11 @@ type FunctionManagementFunctionService struct{ ... }
     func NewFunctionManagementFunctionService(opts ...option.RequestOption) (r *FunctionManagementFunctionService)
 type FunctionManagementFunctionVersionService struct{ ... }
     func NewFunctionManagementFunctionVersionService(opts ...option.RequestOption) (r *FunctionManagementFunctionVersionService)
-type FunctionManagementIDListParams struct{ ... }
-type FunctionManagementIDListParamsVisibility string
-    const FunctionManagementIDListParamsVisibilityAuthorized FunctionManagementIDListParamsVisibility = "authorized" ...
+type FunctionManagementFunctionVersionUpdateMetadataParams struct{ ... }
 type FunctionManagementIDService struct{ ... }
     func NewFunctionManagementIDService(opts ...option.RequestOption) (r *FunctionManagementIDService)
 type FunctionManagementService struct{ ... }
     func NewFunctionManagementService(opts ...option.RequestOption) (r *FunctionManagementService)
-type FunctionManagementVersionService struct{ ... }
-    func NewFunctionManagementVersionService(opts ...option.RequestOption) (r *FunctionManagementVersionService)
 type FunctionNewParams struct{ ... }
 type FunctionNewParamsAPIBodyFormat string
     const FunctionNewParamsAPIBodyFormatPredictV2 FunctionNewParamsAPIBodyFormat = "PREDICT_V2" ...
@@ -237,6 +203,9 @@ type InvokeFunctionResponse = shared.InvokeFunctionResponse
 type InvokeFunctionResponseStatus = shared.InvokeFunctionResponseStatus
 type ListAssetsResponse struct{ ... }
 type ListAssetsResponseAsset struct{ ... }
+type ListAuthorizedPartiesResponse struct{ ... }
+type ListAuthorizedPartiesResponseFunction struct{ ... }
+type ListAuthorizedPartiesResponseFunctionsAuthorizedParty struct{ ... }
 type ListFunctionIDsResponse struct{ ... }
 type ListFunctionsResponse struct{ ... }
 type ListFunctionsResponseFunction struct{ ... }
@@ -261,25 +230,6 @@ type PexecStatusGetParams struct{ ... }
 type PexecStatusGetResponse struct{ ... }
 type PexecStatusService struct{ ... }
     func NewPexecStatusService(opts ...option.RequestOption) (r *PexecStatusService)
-type QueueDetailQueueFunctionListResponse struct{ ... }
-type QueueDetailQueueFunctionListResponseQueue struct{ ... }
-type QueueDetailQueueFunctionListResponseQueuesFunctionStatus string
-    const QueueDetailQueueFunctionListResponseQueuesFunctionStatusActive QueueDetailQueueFunctionListResponseQueuesFunctionStatus = "ACTIVE" ...
-type QueueDetailQueueFunctionService struct{ ... }
-    func NewQueueDetailQueueFunctionService(opts ...option.RequestOption) (r *QueueDetailQueueFunctionService)
-type QueueDetailQueueFunctionVersionGetResponse struct{ ... }
-type QueueDetailQueueFunctionVersionGetResponseQueue struct{ ... }
-type QueueDetailQueueFunctionVersionGetResponseQueuesFunctionStatus string
-    const QueueDetailQueueFunctionVersionGetResponseQueuesFunctionStatusActive QueueDetailQueueFunctionVersionGetResponseQueuesFunctionStatus = "ACTIVE" ...
-type QueueDetailQueueFunctionVersionService struct{ ... }
-    func NewQueueDetailQueueFunctionVersionService(opts ...option.RequestOption) (r *QueueDetailQueueFunctionVersionService)
-type QueueDetailQueuePositionGetResponse struct{ ... }
-type QueueDetailQueuePositionService struct{ ... }
-    func NewQueueDetailQueuePositionService(opts ...option.RequestOption) (r *QueueDetailQueuePositionService)
-type QueueDetailQueueService struct{ ... }
-    func NewQueueDetailQueueService(opts ...option.RequestOption) (r *QueueDetailQueueService)
-type QueueDetailService struct{ ... }
-    func NewQueueDetailService(opts ...option.RequestOption) (r *QueueDetailService)
 type QueueFunctionService struct{ ... }
     func NewQueueFunctionService(opts ...option.RequestOption) (r *QueueFunctionService)
 type QueueFunctionVersionService struct{ ... }
@@ -296,3 +246,141 @@ type UserSecretManagementFunctionVersionUpdateSecretsParams struct{ ... }
 type UserSecretManagementFunctionVersionUpdateSecretsParamsSecret struct{ ... }
 type UserSecretManagementService struct{ ... }
     func NewUserSecretManagementService(opts ...option.RequestOption) (r *UserSecretManagementService)
+</stdout>
+</exec-output>
+<exec-output cmd="go doc github.com/tmc/nvcf-go/internal">
+<stdout>
+package internal // import "github.com/tmc/nvcf-go/internal"
+
+const PackageVersion = "0.0.1-alpha.0"
+</stdout>
+</exec-output>
+<exec-output cmd="go doc github.com/tmc/nvcf-go/internal/apierror">
+<stdout>
+package apierror // import "github.com/tmc/nvcf-go/internal/apierror"
+
+type Error struct{ ... }
+</stdout>
+</exec-output>
+<exec-output cmd="go doc github.com/tmc/nvcf-go/internal/apiform">
+<stdout>
+package apiform // import "github.com/tmc/nvcf-go/internal/apiform"
+
+func Marshal(value interface{}, writer *multipart.Writer) error
+func MarshalRoot(value interface{}, writer *multipart.Writer) error
+type Marshaler interface{ ... }
+</stdout>
+</exec-output>
+<exec-output cmd="go doc github.com/tmc/nvcf-go/internal/apijson">
+<stdout>
+package apijson // import "github.com/tmc/nvcf-go/internal/apijson"
+
+func Marshal(value interface{}) ([]byte, error)
+func MarshalRoot(value interface{}) ([]byte, error)
+func Port(from any, to any) error
+func RegisterUnion(typ reflect.Type, discriminator string, variants ...UnionVariant)
+func Unmarshal(raw []byte, to any) error
+func UnmarshalRoot(raw []byte, to any) error
+type Field struct{ ... }
+type UnionVariant struct{ ... }
+</stdout>
+</exec-output>
+<exec-output cmd="go doc github.com/tmc/nvcf-go/internal/apiquery">
+<stdout>
+package apiquery // import "github.com/tmc/nvcf-go/internal/apiquery"
+
+func Marshal(value interface{}) url.Values
+func MarshalWithSettings(value interface{}, settings QuerySettings) url.Values
+type ArrayQueryFormat int
+    const ArrayQueryFormatComma ArrayQueryFormat = iota ...
+type NestedQueryFormat int
+    const NestedQueryFormatBrackets NestedQueryFormat = iota ...
+type Pair struct{ ... }
+type QuerySettings struct{ ... }
+type Queryer interface{ ... }
+</stdout>
+</exec-output>
+<exec-output cmd="go doc github.com/tmc/nvcf-go/internal/param">
+<stdout>
+package param // import "github.com/tmc/nvcf-go/internal/param"
+
+type Field[T any] struct{ ... }
+type FieldLike interface{ ... }
+</stdout>
+</exec-output>
+<exec-output cmd="go doc github.com/tmc/nvcf-go/internal/requestconfig">
+<stdout>
+package requestconfig // import "github.com/tmc/nvcf-go/internal/requestconfig"
+
+func ExecuteNewRequest(ctx context.Context, method string, u string, body interface{}, ...) error
+type RequestConfig struct{ ... }
+    func NewRequestConfig(ctx context.Context, method string, u string, body interface{}, ...) (*RequestConfig, error)
+</stdout>
+</exec-output>
+<exec-output cmd="go doc github.com/tmc/nvcf-go/internal/testutil">
+<stdout>
+package testutil // import "github.com/tmc/nvcf-go/internal/testutil"
+
+func CheckTestServer(t *testing.T, url string) bool
+</stdout>
+</exec-output>
+<exec-output cmd="go doc github.com/tmc/nvcf-go/option">
+<stdout>
+package option // import "github.com/tmc/nvcf-go/option"
+
+type Middleware = func(*http.Request, MiddlewareNext) (*http.Response, error)
+type MiddlewareNext = func(*http.Request) (*http.Response, error)
+type RequestOption = func(*requestconfig.RequestConfig) error
+    func WithBaseURL(base string) RequestOption
+    func WithBearerToken(value string) RequestOption
+    func WithEnvironmentProduction() RequestOption
+    func WithHTTPClient(client *http.Client) RequestOption
+    func WithHeader(key, value string) RequestOption
+    func WithHeaderAdd(key, value string) RequestOption
+    func WithHeaderDel(key string) RequestOption
+    func WithJSONDel(key string) RequestOption
+    func WithJSONSet(key string, value interface{}) RequestOption
+    func WithMaxRetries(retries int) RequestOption
+    func WithMiddleware(middlewares ...Middleware) RequestOption
+    func WithQuery(key, value string) RequestOption
+    func WithQueryAdd(key, value string) RequestOption
+    func WithQueryDel(key string) RequestOption
+    func WithRequestBody(contentType string, body any) RequestOption
+    func WithRequestTimeout(dur time.Duration) RequestOption
+    func WithResponseBodyInto(dst any) RequestOption
+    func WithResponseInto(dst **http.Response) RequestOption
+</stdout>
+</exec-output>
+<exec-output cmd="go doc github.com/tmc/nvcf-go/shared">
+<stdout>
+package shared // import "github.com/tmc/nvcf-go/shared"
+
+type AuthorizedPartiesResponse struct{ ... }
+type AuthorizedPartiesResponseFunction struct{ ... }
+type AuthorizedPartiesResponseFunctionAuthorizedParty struct{ ... }
+type FunctionResponse struct{ ... }
+type FunctionResponseFunction struct{ ... }
+type FunctionResponseFunctionAPIBodyFormat string
+    const FunctionResponseFunctionAPIBodyFormatPredictV2 FunctionResponseFunctionAPIBodyFormat = "PREDICT_V2" ...
+type FunctionResponseFunctionActiveInstance struct{ ... }
+type FunctionResponseFunctionActiveInstancesInstanceStatus string
+    const FunctionResponseFunctionActiveInstancesInstanceStatusActive FunctionResponseFunctionActiveInstancesInstanceStatus = "ACTIVE" ...
+type FunctionResponseFunctionContainerEnvironment struct{ ... }
+type FunctionResponseFunctionFunctionType string
+    const FunctionResponseFunctionFunctionTypeDefault FunctionResponseFunctionFunctionType = "DEFAULT" ...
+type FunctionResponseFunctionHealth struct{ ... }
+type FunctionResponseFunctionHealthProtocol string
+    const FunctionResponseFunctionHealthProtocolHTTP FunctionResponseFunctionHealthProtocol = "HTTP" ...
+type FunctionResponseFunctionModel struct{ ... }
+type FunctionResponseFunctionResource struct{ ... }
+type FunctionResponseFunctionStatus string
+    const FunctionResponseFunctionStatusActive FunctionResponseFunctionStatus = "ACTIVE" ...
+type GetQueuesResponse struct{ ... }
+type GetQueuesResponseQueue struct{ ... }
+type GetQueuesResponseQueuesFunctionStatus string
+    const GetQueuesResponseQueuesFunctionStatusActive GetQueuesResponseQueuesFunctionStatus = "ACTIVE" ...
+type InvokeFunctionResponse struct{ ... }
+type InvokeFunctionResponseStatus string
+    const InvokeFunctionResponseStatusErrored InvokeFunctionResponseStatus = "errored" ...
+</stdout>
+</exec-output>
