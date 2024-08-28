@@ -6,7 +6,6 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/tmc/nvcf/cmd"
-	"github.com/tmc/nvcf/config"
 )
 
 func main() {
@@ -14,13 +13,6 @@ func main() {
 		Use:   "nvcf",
 		Short: "NVIDIA Cloud Functions CLI",
 		Long:  `A command-line interface for managing and interacting with NVIDIA Cloud Functions.`,
-		PersistentPreRun: func(cmd *cobra.Command, args []string) {
-			config.Init()
-			if cmd.Name() != "auth" && !config.IsAuthenticated() {
-				fmt.Println("You are not authenticated. Please run 'nvcf auth login' first.")
-				os.Exit(1)
-			}
-		},
 	}
 
 	// Add global flags
@@ -39,10 +31,11 @@ func main() {
 	// rootCmd.AddCommand(cmd.ClusterGroupCmd())
 	// rootCmd.AddCommand(cmd.ConfigCmd())
 	// rootCmd.AddCommand(cmd.VersionCmd())
+	rootCmd.AddCommand(cmd.DocsCmd())
 
 	// // Enable command auto-completion
-	// rootCmd.CompletionOptions.DisableDefaultCmd = true
-	// rootCmd.AddCommand(cmd.CompletionCmd())
+	rootCmd.CompletionOptions.DisableDefaultCmd = true
+	rootCmd.AddCommand(cmd.CompletionCmd())
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)

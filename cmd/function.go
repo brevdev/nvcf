@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/tmc/nvcf-go"
@@ -16,6 +17,13 @@ func FunctionCmd() *cobra.Command {
 		Aliases: []string{"fn", "fns", "cf"},
 		Short:   "Manage NVIDIA Cloud Functions",
 		Long:    `Create, list, update, call, deploy, and delete NVIDIA Cloud Functions.`,
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			config.Init()
+			if cmd.Name() != "auth" && !config.IsAuthenticated() {
+				fmt.Println("You are not authenticated. Please run 'nvcf auth login' first.")
+				os.Exit(1)
+			}
+		},
 	}
 
 	cmd.AddCommand(functionListCmd())
