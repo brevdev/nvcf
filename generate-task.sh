@@ -5,33 +5,43 @@ set -euo pipefail
 # Function to generate a system prompt
 generate_system_prompt() {
     cat <<EOF
-You are an expert Go developer specializing in CLI tools and SDK libraries. Your task is to extend and improve the nvcf codebase. Follow these guidelines:
-1. Maintain consistency with the existing code style and structure.
-2. Implement robust error handling and logging.
+You are an AI assistant specialized in generating Bash scripts. Your task is to create a script that uses cgpt to generate Go code for the nvcf codebase. Follow these guidelines:
+1. Maintain a clear and organized script structure.
+2. Implement robust error handling and input validation.
 3. Add comprehensive comments and documentation.
-4. Consider adding unit tests for new functionality.
+4. Ensure the script is efficient and follows Bash best practices.
+5. Implement proper quoting and escaping of variables.
+6. Use cgpt for AI tasks and handle its output appropriately.
 
-Use cgpt for AI tasks: <cgpt-usage cmd
+Use cgpt for AI tasks: $(cgpt -h 2>&1)
 EOF
 }
 
 # Function to generate prefill content
 generate_prefill() {
-    local task="$1"
     cat <<EOF
 <ant-thinking>
-To implement ${task}, I'll need to:
-1. Analyze the existing codebase structure
-2. Identify the appropriate package and file for the new functionality
-3. Implement the feature while maintaining consistency with existing code
-4. Add error handling and logging
+To create a script that uses cgpt to generate Go code for the nvcf codebase, I'll need to:
+1. Analyze the existing script structure
+2. Identify the key components and functions
+3. Adapt the script to use cgpt for generating Go code
+4. Add error handling and input validation
 5. Write comprehensive comments and documentation
-6. Consider adding unit tests
+6. Ensure efficient implementation and follow Bash best practices
+7. Implement proper quoting and escaping of variables
+8. Handle cgpt output appropriately
 </ant-thinking>
 
-Here's the implementation for ${task}:
+<ant-scratchpad>
+- Review the existing script for reusable components
+- Consider potential edge cases and error scenarios
+- Plan for extensibility and future improvements
+- Ensure proper integration with cgpt
+</ant-scratchpad>
 
-\`\`\`go
+Here's the implementation of the new script:
+
+\`\`\`bash
 EOF
 }
 
@@ -42,21 +52,19 @@ get_source_code() {
 
 # Main script
 main() {
-    local task="$1"
-    local output_file="${task// /_}.go"
+    local output_file="generate_nvcf_code.sh"
 
     # Generate system prompt and prefill content
     local system_prompt=$(generate_system_prompt)
-    local prefill=$(generate_prefill "$task")
+    local prefill=$(generate_prefill)
 
     # Get the script's source code
     local source_code=$(get_source_code)
 
     # Execute cgpt command
-    echo "Implementing: $task"
+    echo "Generating script to create Go code for nvcf codebase using cgpt"
     (
-        echo "Implement the following feature for the nvcf codebase: $task"
-        echo "Here's the source code of the script that generated this task (you can invoke it again)
+        echo "Create a Bash script that uses cgpt to generate Go code for the nvcf codebase. The script should be based on the following source code but adapted to use cgpt for generating Go code:"
         echo "\`\`\`bash"
         echo "$source_code"
         echo "\`\`\`"
@@ -64,13 +72,8 @@ main() {
     ) | cgpt -s "$system_prompt" -p "$prefill" | tee "$output_file"
 
     echo "Output saved to $output_file"
+    chmod +x "$output_file"
 }
 
-# Check if a task is provided
-if [ $# -eq 0 ]; then
-    echo "Usage: $0 <task_description>"
-    exit 1
-fi
-
 # Run the main function
-main "$*"
+main
