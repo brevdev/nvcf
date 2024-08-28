@@ -74,7 +74,8 @@ call_generate_task() {
 # Main script logic
 main() {
     local task="$1"
-    local output_file="${task// /_}.sh"
+    local output_file="${task:0:40}"
+    output_file="${output_file// /_}.sh"
 
     log "Generating Go code for task: $task"
 
