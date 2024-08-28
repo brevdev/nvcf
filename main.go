@@ -22,7 +22,7 @@ func main() {
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Enable verbose output")
 
 	// Add commands
-	rootCmd.AddCommand(cmd.Functions())
+	rootCmd.AddCommand(cmd.FunctionCmd())
 	// rootCmd.AddCommand(cmd.DeploymentCmd())
 	// rootCmd.AddCommand(cmd.InvokeCmd())
 	// rootCmd.AddCommand(cmd.AssetCmd())
