@@ -1,0 +1,56 @@
+1. Function Versions:
+   - `nvcf function versions list <function-id>`
+   - `nvcf function versions create <function-id>`
+   - `nvcf function versions get <function-id> <version-id>`
+   - `nvcf function versions delete <function-id> <version-id>`
+
+2. Function Deployment:
+   - `nvcf function deploy <function-id> <version-id>`
+   - `nvcf function deployment get <function-id> <version-id>`
+   - `nvcf function deployment update <function-id> <version-id>`
+   - `nvcf function deployment delete <function-id> <version-id>`
+
+3. Function Invocation:
+   - `nvcf function invoke <function-id> [version-id]`
+   - `nvcf function invoke-async <function-id> [version-id]`
+
+4. Asset Management:
+   - `nvcf asset list`
+   - `nvcf asset create`
+   - `nvcf asset get <asset-id>`
+   - `nvcf asset delete <asset-id>`
+
+5. Queue Management:
+   - `nvcf queue list <function-id> [version-id]`
+   - `nvcf queue position <request-id>`
+
+6. Cluster Group Management:
+   - `nvcf cluster-group list`
+   - `nvcf cluster-group get <cluster-group-id>`
+
+7. Configuration:
+   - `nvcf config set <key> <value>`
+   - `nvcf config get <key>`
+   - `nvcf config list`
+
+8. Authentication:
+   - `nvcf auth logout`
+   - `nvcf auth status`
+
+9. Function Logs:
+   - `nvcf function logs <function-id> [version-id]`
+
+10. Function Metrics:
+    - `nvcf function metrics <function-id> [version-id]`
+
+To implement these subcommands, you would need to create new Go files in the `cmd` directory, similar to the existing `function.go` and `function_create.go`. For example:
+
+- `cmd/function_versions.go`
+- `cmd/function_deployment.go`
+- `cmd/function_invoke.go`
+- `cmd/asset.go`
+- `cmd/queue.go`
+- `cmd/cluster_group.go`
+- `cmd/config.go`
+- `cmd/function_logs.go`
+- `cmd/function_metrics.go`
