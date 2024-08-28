@@ -4,8 +4,8 @@ set -euo pipefail
 
 # Function to display script usage
 usage() {
-    echo "Usage: $0 <command_name>"
-    echo "Generates Go code for the specified nvcf command using cgpt."
+    echo "Usage: $0 <task_description>"
+    echo "Generates Go code for the nvcf codebase using cgpt."
     exit 1
 }
 
@@ -17,60 +17,69 @@ log() {
 # Function to generate a system prompt for cgpt
 generate_system_prompt() {
     cat <<EOF
-You are an expert Go developer specializing in CLI tools and SDK libraries. Your task is to generate Go code for the nvcf codebase. Follow these guidelines:
-1. Use idiomatic Go patterns and best practices.
-2. Implement robust error handling and logging.
-3. Add comprehensive comments and documentation.
-4. Ensure consistency with the existing codebase structure.
-5. Consider adding unit tests for new functionality.
+You are an expert Go developer specializing in CLI tools and SDK libraries. Your task is to generate Go code for the nvcf codebase based on the given task description. Follow these guidelines:
+1. Use idiomatic Go patterns and best practices
+2. Implement robust error handling and logging
+3. Add comprehensive comments and documentation
+4. Ensure code is efficient and follows Go style guidelines
+5. Consider potential edge cases and handle them appropriately
+6. Integrate well with the existing nvcf codebase structure
 EOF
 }
 
 # Function to generate prefill content for cgpt
 generate_prefill() {
-    local command_name="$1"
+    local task="$1"
     cat <<EOF
 <ant-thinking>
-To implement the '${command_name}' command for the nvcf CLI, I'll need to:
-1. Analyze the existing codebase structure
-2. Identify the appropriate package and file for the new command
-3. Implement the command functionality
-4. Add error handling and logging
-5. Write comprehensive comments and documentation
-6. Consider adding unit tests
+To implement the task "${task}" for the nvcf codebase, I'll need to:
+1. Analyze the requirements and existing codebase structure
+2. Design a suitable implementation approach
+3. Write efficient and idiomatic Go code
+4. Implement error handling and logging
+5. Add comprehensive comments and documentation
+6. Consider integration with existing components
+7. Handle potential edge cases
 </ant-thinking>
 
-Here's the Go code for the '${command_name}' command:
+Here's the Go code implementation for the task:
 
 \`\`\`go
 EOF
 }
 
-# Function to get the existing codebase structure
+# Function to get the nvcf codebase structure
 get_codebase_structure() {
-    tree -L 2 ~/go/src/github.com/tmc/nvcf
+    find . -type f -name "*.go" | sort | xargs -I {} echo "File: {}"
 }
 
 # Main script logic
 main() {
-    local command_name="$1"
-    local output_file="${command_name// /_}.go"
+    # Check if a task description is provided
+    if [ $# -eq 0 ]; then
+        log "Error: No task description provided"
+        usage
+    fi
 
-    log "Generating Go code for nvcf command: $command_name"
+    local task="$*"
+    local output_file="${task// /_}.go"
+
+    log "Generating Go code for task: $task"
 
     # Generate system prompt and prefill content
     local system_prompt=$(generate_system_prompt)
-    local prefill=$(generate_prefill "$command_name")
+    local prefill=$(generate_prefill "$task")
 
-    # Get the existing codebase structure
+    # Get the nvcf codebase structure
     local codebase_structure=$(get_codebase_structure)
 
     # Execute cgpt command
-    log "Executing cgpt to generate Go code"
+    log "Executing AI model to generate Go code"
     (
-        echo "Generate Go code for the '${command_name}' command in the nvcf CLI tool. Consider the following codebase structure:"
+        echo "Generate Go code for the nvcf codebase to perform the following task: $task"
+        echo "Existing codebase structure:"
         echo "$codebase_structure"
-        echo "Ensure the new code is consistent with the existing structure and follows Go best practices."
+        echo "Ensure the generated code integrates well with the existing structure."
     ) | cgpt -s "$system_prompt" -p "$prefill" > "$output_file"
 
     log "Go code generated and saved to $output_file"
@@ -79,14 +88,8 @@ main() {
     echo "------------------------"
     cat "$output_file"
     echo "------------------------"
-    echo "You can now integrate this code into the appropriate file in the nvcf codebase."
+    echo "You can find the generated Go code in: $output_file"
 }
 
-# Check if a command name is provided
-if [ $# -eq 0 ]; then
-    log "Error: No command name provided"
-    usage
-fi
-
 # Run the main function
-main "$*"
+main "$@"
