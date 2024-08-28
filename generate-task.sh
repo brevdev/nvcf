@@ -10,6 +10,8 @@ You are an expert Go developer specializing in CLI tools and SDK libraries. Your
 2. Implement robust error handling and logging.
 3. Add comprehensive comments and documentation.
 4. Consider adding unit tests for new functionality.
+
+Use cgpt for AI tasks: <cgpt-usage cmd
 EOF
 }
 
@@ -33,6 +35,11 @@ Here's the implementation for ${task}:
 EOF
 }
 
+# Function to get the script's source code
+get_source_code() {
+    cat "$0"
+}
+
 # Main script
 main() {
     local task="$1"
@@ -42,11 +49,19 @@ main() {
     local system_prompt=$(generate_system_prompt)
     local prefill=$(generate_prefill "$task")
 
+    # Get the script's source code
+    local source_code=$(get_source_code)
+
     # Execute cgpt command
     echo "Implementing: $task"
-    (echo "Implement the following feature for the nvcf codebase: $task"; ~/code-to-gpt.sh) | \
-    cgpt -s "$system_prompt" -p "$prefill" | \
-    tee "$output_file"
+    (
+        echo "Implement the following feature for the nvcf codebase: $task"
+        echo "Here's the source code of the script that generated this task (you can invoke it again)
+        echo "\`\`\`bash"
+        echo "$source_code"
+        echo "\`\`\`"
+        ~/code-to-gpt.sh
+    ) | cgpt -s "$system_prompt" -p "$prefill" | tee "$output_file"
 
     echo "Output saved to $output_file"
 }
