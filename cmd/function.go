@@ -15,11 +15,11 @@ func FunctionCmd() *cobra.Command {
 		Use:     "functions",
 		Aliases: []string{"fn", "fns", "cf"},
 		Short:   "Manage NVIDIA Cloud Functions",
-		Long:    `Create, list, update, and delete NVIDIA Cloud Functions.`,
+		Long:    `Create, list, update, call, deploy, and delete NVIDIA Cloud Functions.`,
 	}
 
 	cmd.AddCommand(functionListCmd())
-	// cmd.AddCommand(functionCreateCmd())
+	cmd.AddCommand(functionCreateCmd())
 	// cmd.AddCommand(functionGetCmd())
 	// cmd.AddCommand(functionUpdateCmd())
 	// cmd.AddCommand(functionDeleteCmd())

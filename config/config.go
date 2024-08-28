@@ -51,6 +51,7 @@ func IsAuthenticated() bool {
 	return cfg.APIKey != ""
 }
 
+// todo: consider reaching for more secret-specific storage.
 func saveConfig() error {
 	configDir, err := os.UserConfigDir()
 	if err != nil {
