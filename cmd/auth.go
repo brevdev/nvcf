@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -13,11 +15,20 @@ func AuthCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "auth",
 		Short: "Manage authentication for the CLI",
+		Long:  `Authenticate with NVIDIA Cloud and configure the CLI to use your API key.`,
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			config.Init()
+			if cmd.Name() != "auth" && !config.IsAuthenticated() {
+				fmt.Println("You are not authenticated. Please run 'nvcf auth login' first.")
+				os.Exit(1)
+			}
+		},
 	}
 
 	cmd.AddCommand(authLoginCmd())
 	// cmd.AddCommand(authLogoutCmd())
-	// cmd.AddCommand(authStatusCmd())
+	cmd.AddCommand(authStatusCmd())
+	cmd.AddCommand(authConfigureDockerCmd())
 
 	return cmd
 }
@@ -60,6 +71,20 @@ func authConfigureDockerCmd() *cobra.Command {
 			}
 			output.Success(cmd, "Docker configured successfully for nvcr.io")
 			cmd.Println(string(out))
+		},
+	}
+}
+
+func authStatusCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "status",
+		Short: "Check the authentication status",
+		Run: func(cmd *cobra.Command, args []string) {
+			if config.IsAuthenticated() {
+				output.Success(cmd, "Authenticated")
+			} else {
+				output.Error(cmd, "Not authenticated", nil)
+			}
 		},
 	}
 }

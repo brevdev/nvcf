@@ -12,7 +12,7 @@ GOFILES=$(shell find . -name '*.go' -not -path "./vendor/*")
 # Linting
 GOLINT=golangci-lint
 
-.PHONY: all build clean test vet lint fmt quickbuild
+.PHONY: all build clean test vet lint fmt q
 
 all: build
 
@@ -48,6 +48,6 @@ build-all:
 	GOOS=darwin GOARCH=amd64 $(GOBUILD) -o $(BINARY_NAME)-darwin-amd64
 	GOOS=windows GOARCH=amd64 $(GOBUILD) -o $(BINARY_NAME)-windows-amd64.exe
 
-quickbuild:
+q:
 	make clean
 	make build

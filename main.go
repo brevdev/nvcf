@@ -26,7 +26,7 @@ func main() {
 	// rootCmd.AddCommand(cmd.DeploymentCmd())
 	// rootCmd.AddCommand(cmd.InvokeCmd())
 	// rootCmd.AddCommand(cmd.AssetCmd())
-	// rootCmd.AddCommand(cmd.AuthCmd())
+	rootCmd.AddCommand(cmd.AuthCmd())
 	// rootCmd.AddCommand(cmd.QueueCmd())
 	// rootCmd.AddCommand(cmd.ClusterGroupCmd())
 	// rootCmd.AddCommand(cmd.ConfigCmd())

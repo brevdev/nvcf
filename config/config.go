@@ -13,13 +13,13 @@ type Config struct {
 var cfg Config
 
 func Init() {
-	configDir, err := os.UserConfigDir()
+	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		panic(err)
 	}
 
 	// TODO: consider more robust config loading here
-	configPath := filepath.Join(configDir, "nvcf", "config.json")
+	configPath := filepath.Join(homeDir, ".nvcf", "config.json")
 	data, err := os.ReadFile(configPath)
 	if err == nil {
 		json.Unmarshal(data, &cfg)
@@ -51,23 +51,23 @@ func IsAuthenticated() bool {
 	return cfg.APIKey != ""
 }
 
-// todo: consider reaching for more secret-specific storage.
+// save to ~/.nvcf/config.json
 func saveConfig() error {
-	configDir, err := os.UserConfigDir()
+	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return err
 	}
 
-	configPath := filepath.Join(configDir, "nvcf", "config.json")
+	configPath := filepath.Join(homeDir, ".nvcf", "config.json")
 	data, err := json.MarshalIndent(cfg, "", "  ")
 	if err != nil {
 		return err
 	}
 
-	err = os.MkdirAll(filepath.Dir(configPath), 0755)
+	err = os.MkdirAll(filepath.Dir(configPath), 0700)
 	if err != nil {
 		return err
 	}
 
-	return os.WriteFile(configPath, data, 0644)
+	return os.WriteFile(configPath, data, 0600)
 }
