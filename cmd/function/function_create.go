@@ -115,7 +115,6 @@ func prepareFunctionParams(name, inferenceURL string, inferencePort int64, healt
 		Name:           nvcf.String(name),
 		InferenceURL:   nvcf.String(inferenceURL),
 		InferencePort:  nvcf.Int(inferencePort),
-		HealthUri:      nvcf.String(healthUri),
 		ContainerImage: nvcf.String(containerImage),
 		ContainerArgs:  nvcf.String(containerArgs),
 		APIBodyFormat:  nvcf.F(nvcf.FunctionNewParamsAPIBodyFormat(apiBodyFormat)),
