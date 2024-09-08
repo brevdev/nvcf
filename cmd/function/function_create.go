@@ -12,23 +12,35 @@ import (
 	"github.com/tmc/nvcf-go"
 )
 
+// functionCreateCmd creates a new Cobra command for function creation and deployment
 func functionCreateCmd() *cobra.Command {
+	// Define command-line flags
 	var (
-		name             string
-		inferenceURL     string
-		containerImage   string
-		description      string
-		tags             []string
-		minInstances     int64
-		maxInstances     int64
-		gpu              string
-		instanceType     string
-		apiBodyFormat    string
-		functionType     string
+		// Function creation parameters
+		name           string
+		inferenceURL   string
+		inferencePort  int64
+		healthUri      string
+		containerImage string
+		description    string
+		tags           []string
+		apiBodyFormat  string
+		functionType   string
+		deploy         bool
+
+		// Health check parameters
 		healthProtocol   string
 		healthPort       int64
 		healthTimeout    string
 		healthStatusCode int64
+
+		// Deployment parameters
+		minInstances          int64
+		maxInstances          int64
+		gpu                   string
+		instanceType          string
+		backend               string
+		maxRequestConcurrency int64
 	)
 
 	cmd := &cobra.Command{
@@ -36,66 +48,120 @@ func functionCreateCmd() *cobra.Command {
 		Short: "Create a new function",
 		Long:  `Create a new NVIDIA Cloud Function with the specified parameters.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			// Create a new API client
 			client := api.NewClient(config.GetAPIKey())
 
-			params := nvcf.FunctionNewParams{
-				Name:           nvcf.F(name),
-				InferenceURL:   nvcf.F(inferenceURL),
-				ContainerImage: nvcf.F(containerImage),
-				Description:    nvcf.F(description),
-				Tags:           nvcf.F(tags),
-				APIBodyFormat:  nvcf.F(nvcf.FunctionNewParamsAPIBodyFormat(apiBodyFormat)),
-				FunctionType:   nvcf.F(nvcf.FunctionNewParamsFunctionType(functionType)),
-				Health: nvcf.F(nvcf.FunctionNewParamsHealth{
-					Protocol:           nvcf.F(nvcf.FunctionNewParamsHealthProtocol(healthProtocol)),
-					Port:               nvcf.F(healthPort),
-					Timeout:            nvcf.F(healthTimeout),
-					ExpectedStatusCode: nvcf.F(healthStatusCode),
-				}),
-			}
+			// Prepare function creation parameters
+			params := prepareFunctionParams(name, inferenceURL, inferencePort, healthUri, containerImage, apiBodyFormat, description, tags, functionType, healthProtocol, healthPort, healthTimeout, healthStatusCode)
 
-			// Remove the DeploymentSpecifications field
-			// Instead, we'll use the minInstances, maxInstances, gpu, and instanceType
-			// to configure the function after creation if needed
+			output.Info(cmd, "Creating function")
 
+			// Create the function
 			resp, err := client.Functions.New(cmd.Context(), params)
 			if err != nil {
-				return err
+				return fmt.Errorf("error creating function: %w", err)
 			}
 
-			var fn nvcf.ListFunctionsResponseFunction
-			if err := jsonMarshalUnmarshal(&fn, resp.Function); err != nil {
-				return fmt.Errorf("issue marshaling+unmarshaling: %w", err)
+			if !deploy {
+				output.Success(cmd, fmt.Sprintf("Function with FunctionID %s and VersionID %s created successfully", resp.Function.ID, resp.Function.VersionID))
+				return nil
 			}
-			output.Function(cmd, fn)
-			return nil
+
+			// Deploy the function if the deploy flag is set
+			return deployFunction(cmd, client, resp, gpu, instanceType, backend, maxInstances, minInstances, maxRequestConcurrency)
 		},
 	}
 
+	// Add flags to the command
 	cmd.Flags().StringVar(&name, "name", "", "Name of the function (required)")
 	cmd.Flags().StringVar(&inferenceURL, "inference-url", "", "URL for function invocation (required)")
+	cmd.Flags().Int64Var(&inferencePort, "inference-port", 80, "Port for function invocation")
 	cmd.Flags().StringVar(&containerImage, "container-image", "", "Container image for the function")
 	cmd.Flags().StringVar(&description, "description", "", "Description of the function")
 	cmd.Flags().StringSliceVar(&tags, "tag", nil, "Tags for the function (can be used multiple times)")
 	cmd.Flags().Int64Var(&minInstances, "min-instances", 0, "Minimum number of instances")
 	cmd.Flags().Int64Var(&maxInstances, "max-instances", 0, "Maximum number of instances")
-	cmd.Flags().StringVar(&gpu, "gpu", "", "GPU type to use")
-	cmd.Flags().StringVar(&instanceType, "instance-type", "", "Instance type to use")
-	cmd.Flags().StringVar(&apiBodyFormat, "api-body-format", "PREDICT_V2", "API body format (PREDICT_V2 or CUSTOM)")
+	cmd.Flags().StringVar(&gpu, "gpu", "H100", "GPU type to use")
+	cmd.Flags().StringVar(&instanceType, "instance-type", "GCP.GPU.H100_1x", "Instance type to use")
+	cmd.Flags().StringVar(&apiBodyFormat, "api-body-format", "CUSTOM", "API body format (PREDICT_V2 or CUSTOM)")
 	cmd.Flags().StringVar(&functionType, "function-type", "DEFAULT", "Function type (DEFAULT or STREAMING)")
 	cmd.Flags().StringVar(&healthProtocol, "health-protocol", "HTTP", "Health check protocol (HTTP or GRPC)")
-	cmd.Flags().Int64Var(&healthPort, "health-port", 8080, "Health check port")
+	cmd.Flags().Int64Var(&healthPort, "health-port", 80, "Health check port")
 	cmd.Flags().StringVar(&healthTimeout, "health-timeout", "5s", "Health check timeout")
 	cmd.Flags().Int64Var(&healthStatusCode, "health-status-code", 200, "Expected health check status code")
-	// todo: handle this correctly
-	cmd.Flags().Bool("deploy", false, "Create and deploy the function in one step")
+	cmd.Flags().StringVar(&healthUri, "health-uri", "/health", "Health check URI")
+	cmd.Flags().StringVar(&backend, "backend", "gcp-asia-se-1a", "Backend to deploy the function to (see NGC for available backends)")
+	cmd.Flags().Int64Var(&maxRequestConcurrency, "max-request-concurrency", 0, "Maximum number of concurrent requests")
+	cmd.Flags().BoolVar(&deploy, "deploy", false, "Create and deploy the function in one step")
 
 	cmd.MarkFlagRequired("name")
 	cmd.MarkFlagRequired("inference-url")
+	cmd.MarkFlagRequired("inference-port")
+	cmd.MarkFlagRequired("health-uri")
+	cmd.MarkFlagRequired("container-image")
 
 	return cmd
 }
 
+// prepareFunctionParams creates and returns the FunctionNewParams struct
+func prepareFunctionParams(name, inferenceURL string, inferencePort int64, healthUri, containerImage, apiBodyFormat, description string,
+	tags []string, functionType, healthProtocol string, healthPort int64, healthTimeout string, healthStatusCode int64) nvcf.FunctionNewParams {
+	return nvcf.FunctionNewParams{
+		Name:           nvcf.String(name),
+		InferenceURL:   nvcf.String(inferenceURL),
+		InferencePort:  nvcf.Int(inferencePort),
+		HealthUri:      nvcf.String(healthUri),
+		ContainerImage: nvcf.String(containerImage),
+		APIBodyFormat:  nvcf.F(nvcf.FunctionNewParamsAPIBodyFormat(apiBodyFormat)),
+		Description:    nvcf.F(description),
+		Tags:           nvcf.F(tags),
+		FunctionType:   nvcf.F(nvcf.FunctionNewParamsFunctionType(functionType)),
+		Health: nvcf.F(nvcf.FunctionNewParamsHealth{
+			Protocol:           nvcf.F(nvcf.FunctionNewParamsHealthProtocol(healthProtocol)),
+			Port:               nvcf.F(healthPort),
+			Timeout:            nvcf.F(healthTimeout),
+			ExpectedStatusCode: nvcf.F(healthStatusCode),
+		}),
+	}
+}
+
+// deployFunction handles the deployment of the created function
+func deployFunction(cmd *cobra.Command, client *api.Client, resp *nvcf.CreateFunctionResponse, gpu, instanceType, backend string,
+	maxInstances, minInstances, maxRequestConcurrency int64) error {
+	output.Info(cmd, "Deployment flag was provided. Deploying function...")
+
+	deploymentParams := nvcf.FunctionDeploymentFunctionVersionNewParams{
+		DeploymentSpecifications: nvcf.F([]nvcf.FunctionDeploymentFunctionVersionNewParamsDeploymentSpecification{{
+			GPU:                   nvcf.String(gpu),
+			InstanceType:          nvcf.String(instanceType),
+			Backend:               nvcf.String(backend),
+			MaxInstances:          nvcf.Int(maxInstances),
+			MinInstances:          nvcf.Int(minInstances),
+			MaxRequestConcurrency: nvcf.Int(maxRequestConcurrency),
+		}}),
+	}
+
+	_, err := client.FunctionDeployment.Functions.Versions.New(
+		cmd.Context(),
+		resp.Function.ID,
+		resp.Function.VersionID,
+		deploymentParams,
+	)
+	if err != nil {
+		return fmt.Errorf("error deploying function: %w", err)
+	}
+
+	output.Success(cmd, fmt.Sprintf("Function with FunctionID %s and VersionID %s deployed successfully", resp.Function.ID, resp.Function.VersionID))
+
+	var fn nvcf.ListFunctionsResponseFunction
+	if err := jsonMarshalUnmarshal(&fn, resp.Function); err != nil {
+		return fmt.Errorf("issue marshaling+unmarshaling: %w", err)
+	}
+	output.Function(cmd, fn)
+	return nil
+}
+
+// jsonMarshalUnmarshal marshals the src to JSON and then unmarshals it into dest
 func jsonMarshalUnmarshal(dest any, src any) error {
 	// Validate dest is a pointer
 	if reflect.ValueOf(dest).Kind() != reflect.Ptr {

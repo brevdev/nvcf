@@ -13,7 +13,7 @@ import (
 
 func FunctionCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "functions",
+		Use:     "function",
 		Aliases: []string{"fn", "fns", "cf"},
 		Short:   "Manage NVIDIA Cloud Functions",
 		Long:    `Create, list, update, call, deploy, and delete NVIDIA Cloud Functions.`,

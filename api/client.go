@@ -20,12 +20,13 @@ type Option (*Client)
 func NewClient(apiKey string, opts ...Option) *Client {
 	return &Client{
 		Client: nvcf.NewClient(
+			option.WithHeader("Content-Type", "application/json"),
+			option.WithHeader("Accept", "application/json"),
 			option.WithHeader("Authorization", "Bearer "+apiKey),
+			option.WithBaseURL("https://api.ngc.nvidia.com/"),
 		),
 		httpClient: &http.Client{
 			Timeout: time.Second * 30,
 		},
 	}
 }
-
-// Implement API methods (ListFunctions, CreateFunction, etc.) here
