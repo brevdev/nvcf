@@ -6,6 +6,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/tmc/nvcf/cmd"
+	"github.com/tmc/nvcf/cmd/auth"
+	"github.com/tmc/nvcf/cmd/function"
 )
 
 func main() {
@@ -22,11 +24,11 @@ func main() {
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Enable verbose output")
 
 	// Add commands
-	rootCmd.AddCommand(cmd.FunctionCmd())
+	rootCmd.AddCommand(function.FunctionCmd())
 	// rootCmd.AddCommand(cmd.DeploymentCmd())
 	// rootCmd.AddCommand(cmd.InvokeCmd())
 	// rootCmd.AddCommand(cmd.AssetCmd())
-	rootCmd.AddCommand(cmd.AuthCmd())
+	rootCmd.AddCommand(auth.AuthCmd())
 	// rootCmd.AddCommand(cmd.QueueCmd())
 	// rootCmd.AddCommand(cmd.ClusterGroupCmd())
 	// rootCmd.AddCommand(cmd.ConfigCmd())

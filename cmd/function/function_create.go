@@ -1,7 +1,9 @@
-package cmd
+package function
 
 import (
+	"encoding/json"
 	"fmt"
+	"reflect"
 
 	"github.com/spf13/cobra"
 	"github.com/tmc/nvcf-go"
@@ -85,9 +87,23 @@ func functionCreateCmd() *cobra.Command {
 	cmd.Flags().Int64Var(&healthPort, "health-port", 8080, "Health check port")
 	cmd.Flags().StringVar(&healthTimeout, "health-timeout", "5s", "Health check timeout")
 	cmd.Flags().Int64Var(&healthStatusCode, "health-status-code", 200, "Expected health check status code")
+	// todo: handle this correctly
+	cmd.Flags().Bool("deploy", false, "Create and deploy the function in one step")
 
 	cmd.MarkFlagRequired("name")
 	cmd.MarkFlagRequired("inference-url")
 
 	return cmd
+}
+
+func jsonMarshalUnmarshal(dest any, src any) error {
+	// Validate dest is a pointer
+	if reflect.ValueOf(dest).Kind() != reflect.Ptr {
+		return fmt.Errorf("destination must be a pointer")
+	}
+	jsonData, err := json.Marshal(src)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(jsonData, dest)
 }
