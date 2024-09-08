@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -18,7 +19,8 @@ func AuthCmd() *cobra.Command {
 		Long:  `Authenticate with NVIDIA Cloud and configure the CLI to use your API key.`,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			config.Init()
-			if cmd.Name() != "auth" && !config.IsAuthenticated() {
+			// Allow all 'auth' subcommands to run without authentication
+			if cmd.Parent().Name() != "auth" && !config.IsAuthenticated() {
 				fmt.Println("You are not authenticated. Please run 'nvcf auth login' first.")
 				os.Exit(1)
 			}
@@ -26,7 +28,7 @@ func AuthCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(authLoginCmd())
-	// cmd.AddCommand(authLogoutCmd())
+	cmd.AddCommand(authLogoutCmd())
 	cmd.AddCommand(authStatusCmd())
 	cmd.AddCommand(authConfigureDockerCmd())
 
@@ -59,7 +61,12 @@ func authConfigureDockerCmd() *cobra.Command {
 				output.Error(cmd, "NGC API key not found. Please run 'nvcf auth login' first.", nil)
 				return
 			}
-			// TODO: check for 'docker'
+			// Check if Docker is installed
+			_, err := exec.LookPath("docker")
+			if err != nil {
+				output.Error(cmd, "Docker is not installed or not in the system PATH", err)
+				return
+			}
 			// TODO: check for existing nvcr.io config?
 			dockerCmd := exec.Command("docker", "login", "nvcr.io", "-u", "$oauthtoken", "--password-stdin")
 			dockerCmd.Stdin = strings.NewReader(apiKey)
@@ -83,10 +90,23 @@ func authStatusCmd() *cobra.Command {
 			if config.IsAuthenticated() {
 				output.Success(cmd, "Authenticated")
 			} else {
-				output.Error(cmd, "Not authenticated", nil)
+				output.Error(cmd, "Not authenticated", errors.New(":("))
 			}
 		},
 	}
 }
 
-// Implement authLogoutCmd and authStatusCmd here
+func authLogoutCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "logout",
+		Short: "Logout from NVIDIA Cloud",
+		Run: func(cmd *cobra.Command, args []string) {
+			if !config.IsAuthenticated() {
+				output.Info(cmd, "You are currently not logged in")
+				return
+			}
+			config.ClearAPIKey()
+			output.Success(cmd, "Logged out successfully")
+		},
+	}
+}
