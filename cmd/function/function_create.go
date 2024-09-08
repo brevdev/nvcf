@@ -15,9 +15,7 @@ import (
 	"github.com/tmc/nvcf-go"
 )
 
-// functionCreateCmd creates a new Cobra command for function creation and deployment
 func functionCreateCmd() *cobra.Command {
-	// Define command-line flags
 	var (
 		// Function creation parameters
 		name           string
@@ -52,15 +50,14 @@ func functionCreateCmd() *cobra.Command {
 		Short: "Create a new function",
 		Long:  `Create a new NVIDIA Cloud Function with the specified parameters.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// Create a new API client
 			client := api.NewClient(config.GetAPIKey())
 
-			// Prepare function creation parameters
+			// build function creation parameters
 			params := prepareFunctionParams(name, inferenceURL, inferencePort, healthUri, containerImage, apiBodyFormat, description, tags, functionType, healthProtocol, healthPort, healthTimeout, healthStatusCode, containerArgs)
 
-			output.Info(cmd, "Creating function")
+			output.Info(cmd, "Creating function...")
 
-			// Create the function
+			// create the function
 			resp, err := client.Functions.New(cmd.Context(), params)
 			if err != nil {
 				return fmt.Errorf("error creating function: %w", err)
@@ -82,27 +79,27 @@ func functionCreateCmd() *cobra.Command {
 	cmd.Flags().Int64Var(&inferencePort, "inference-port", 80, "Port for function invocation")
 	cmd.Flags().StringVar(&healthUri, "health-uri", "/health", "Health check URI")
 	cmd.Flags().StringVar(&containerImage, "container-image", "", "Container image for the function")
-	cmd.Flags().StringVar(&containerArgs, "container-args", "", "Container arguments")
+	cmd.Flags().StringVar(&containerArgs, "container-args", "", "Container arguments. Put these in quotes if you are passing flags")
 	cmd.Flags().StringVar(&apiBodyFormat, "api-body-format", "CUSTOM", "API body format (PREDICT_V2 or CUSTOM)")
 	cmd.Flags().StringVar(&description, "description", "", "Description of the function")
 	cmd.Flags().StringSliceVar(&tags, "tag", nil, "Tags for the function (can be used multiple times)")
 	cmd.Flags().StringVar(&functionType, "function-type", "DEFAULT", "Function type (DEFAULT or STREAMING)")
+
 	// optional health specification flags
 	cmd.Flags().StringVar(&healthProtocol, "health-protocol", "HTTP", "Health check protocol (HTTP or GRPC)")
 	cmd.Flags().Int64Var(&healthPort, "health-port", 80, "Health check port")
-	cmd.Flags().StringVar(&healthTimeout, "health-timeout", "5s", "Health check timeout")
+	cmd.Flags().StringVar(&healthTimeout, "health-timeout", "PT20S", "Health check timeout") //TODO: allow user to specify in s and we convert
 	cmd.Flags().Int64Var(&healthStatusCode, "health-status-code", 200, "Expected health check status code")
 
 	// deployment flags
 	cmd.Flags().Int64Var(&minInstances, "min-instances", 0, "Minimum number of instances")
-	cmd.Flags().Int64Var(&maxInstances, "max-instances", 0, "Maximum number of instances")
+	cmd.Flags().Int64Var(&maxInstances, "max-instances", 1, "Maximum number of instances")
 	cmd.Flags().StringVar(&gpu, "gpu", "H100", "GPU type to use")
 	cmd.Flags().StringVar(&instanceType, "instance-type", "GCP.GPU.H100_1x", "Instance type to use")
 	cmd.Flags().StringVar(&backend, "backend", "gcp-asia-se-1a", "Backend to deploy the function to (see NGC for available backends)")
-	cmd.Flags().Int64Var(&maxRequestConcurrency, "max-request-concurrency", 0, "Maximum number of concurrent requests")
+	cmd.Flags().Int64Var(&maxRequestConcurrency, "max-request-concurrency", 1, "Maximum number of concurrent requests")
 	cmd.Flags().BoolVar(&deploy, "deploy", false, "Create and deploy the function in one step")
 
-	// these follow current nvcf-ci specs
 	cmd.MarkFlagRequired("name")
 	cmd.MarkFlagRequired("inference-url")
 	cmd.MarkFlagRequired("inference-port")
@@ -112,10 +109,9 @@ func functionCreateCmd() *cobra.Command {
 	return cmd
 }
 
-// prepareFunctionParams creates and returns the FunctionNewParams struct
 func prepareFunctionParams(name, inferenceURL string, inferencePort int64, healthUri, containerImage, apiBodyFormat, description string,
 	tags []string, functionType, healthProtocol string, healthPort int64, healthTimeout string, healthStatusCode int64, containerArgs string) nvcf.FunctionNewParams {
-	return nvcf.FunctionNewParams{
+	params := nvcf.FunctionNewParams{
 		Name:           nvcf.String(name),
 		InferenceURL:   nvcf.String(inferenceURL),
 		InferencePort:  nvcf.Int(inferencePort),
@@ -131,11 +127,12 @@ func prepareFunctionParams(name, inferenceURL string, inferencePort int64, healt
 			Port:               nvcf.F(healthPort),
 			Timeout:            nvcf.F(healthTimeout),
 			ExpectedStatusCode: nvcf.F(healthStatusCode),
+			Uri:                nvcf.String(healthUri),
 		}),
 	}
+	return params
 }
 
-// deployFunction handles the deployment of the created function
 func deployFunction(cmd *cobra.Command, client *api.Client, resp *nvcf.CreateFunctionResponse, gpu, instanceType, backend string,
 	maxInstances, minInstances, maxRequestConcurrency int64) error {
 	output.Info(cmd, "Deployment flag was provided. Deploying function...")
