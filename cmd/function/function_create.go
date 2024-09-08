@@ -1,3 +1,6 @@
+// TODO
+// - add support for asset/model mounting
+// - add support for env vars
 package function
 
 import (
@@ -22,11 +25,11 @@ func functionCreateCmd() *cobra.Command {
 		inferencePort  int64
 		healthUri      string
 		containerImage string
+		containerArgs  string
 		description    string
 		tags           []string
 		apiBodyFormat  string
 		functionType   string
-		deploy         bool
 
 		// Health check parameters
 		healthProtocol   string
@@ -41,6 +44,7 @@ func functionCreateCmd() *cobra.Command {
 		instanceType          string
 		backend               string
 		maxRequestConcurrency int64
+		deploy                bool
 	)
 
 	cmd := &cobra.Command{
@@ -52,7 +56,7 @@ func functionCreateCmd() *cobra.Command {
 			client := api.NewClient(config.GetAPIKey())
 
 			// Prepare function creation parameters
-			params := prepareFunctionParams(name, inferenceURL, inferencePort, healthUri, containerImage, apiBodyFormat, description, tags, functionType, healthProtocol, healthPort, healthTimeout, healthStatusCode)
+			params := prepareFunctionParams(name, inferenceURL, inferencePort, healthUri, containerImage, apiBodyFormat, description, tags, functionType, healthProtocol, healthPort, healthTimeout, healthStatusCode, containerArgs)
 
 			output.Info(cmd, "Creating function")
 
@@ -72,28 +76,33 @@ func functionCreateCmd() *cobra.Command {
 		},
 	}
 
-	// Add flags to the command
+	// function create flags
 	cmd.Flags().StringVar(&name, "name", "", "Name of the function (required)")
 	cmd.Flags().StringVar(&inferenceURL, "inference-url", "", "URL for function invocation (required)")
 	cmd.Flags().Int64Var(&inferencePort, "inference-port", 80, "Port for function invocation")
+	cmd.Flags().StringVar(&healthUri, "health-uri", "/health", "Health check URI")
 	cmd.Flags().StringVar(&containerImage, "container-image", "", "Container image for the function")
+	cmd.Flags().StringVar(&containerArgs, "container-args", "", "Container arguments")
+	cmd.Flags().StringVar(&apiBodyFormat, "api-body-format", "CUSTOM", "API body format (PREDICT_V2 or CUSTOM)")
 	cmd.Flags().StringVar(&description, "description", "", "Description of the function")
 	cmd.Flags().StringSliceVar(&tags, "tag", nil, "Tags for the function (can be used multiple times)")
-	cmd.Flags().Int64Var(&minInstances, "min-instances", 0, "Minimum number of instances")
-	cmd.Flags().Int64Var(&maxInstances, "max-instances", 0, "Maximum number of instances")
-	cmd.Flags().StringVar(&gpu, "gpu", "H100", "GPU type to use")
-	cmd.Flags().StringVar(&instanceType, "instance-type", "GCP.GPU.H100_1x", "Instance type to use")
-	cmd.Flags().StringVar(&apiBodyFormat, "api-body-format", "CUSTOM", "API body format (PREDICT_V2 or CUSTOM)")
 	cmd.Flags().StringVar(&functionType, "function-type", "DEFAULT", "Function type (DEFAULT or STREAMING)")
+	// optional health specification flags
 	cmd.Flags().StringVar(&healthProtocol, "health-protocol", "HTTP", "Health check protocol (HTTP or GRPC)")
 	cmd.Flags().Int64Var(&healthPort, "health-port", 80, "Health check port")
 	cmd.Flags().StringVar(&healthTimeout, "health-timeout", "5s", "Health check timeout")
 	cmd.Flags().Int64Var(&healthStatusCode, "health-status-code", 200, "Expected health check status code")
-	cmd.Flags().StringVar(&healthUri, "health-uri", "/health", "Health check URI")
+
+	// deployment flags
+	cmd.Flags().Int64Var(&minInstances, "min-instances", 0, "Minimum number of instances")
+	cmd.Flags().Int64Var(&maxInstances, "max-instances", 0, "Maximum number of instances")
+	cmd.Flags().StringVar(&gpu, "gpu", "H100", "GPU type to use")
+	cmd.Flags().StringVar(&instanceType, "instance-type", "GCP.GPU.H100_1x", "Instance type to use")
 	cmd.Flags().StringVar(&backend, "backend", "gcp-asia-se-1a", "Backend to deploy the function to (see NGC for available backends)")
 	cmd.Flags().Int64Var(&maxRequestConcurrency, "max-request-concurrency", 0, "Maximum number of concurrent requests")
 	cmd.Flags().BoolVar(&deploy, "deploy", false, "Create and deploy the function in one step")
 
+	// these follow current nvcf-ci specs
 	cmd.MarkFlagRequired("name")
 	cmd.MarkFlagRequired("inference-url")
 	cmd.MarkFlagRequired("inference-port")
@@ -105,13 +114,14 @@ func functionCreateCmd() *cobra.Command {
 
 // prepareFunctionParams creates and returns the FunctionNewParams struct
 func prepareFunctionParams(name, inferenceURL string, inferencePort int64, healthUri, containerImage, apiBodyFormat, description string,
-	tags []string, functionType, healthProtocol string, healthPort int64, healthTimeout string, healthStatusCode int64) nvcf.FunctionNewParams {
+	tags []string, functionType, healthProtocol string, healthPort int64, healthTimeout string, healthStatusCode int64, containerArgs string) nvcf.FunctionNewParams {
 	return nvcf.FunctionNewParams{
 		Name:           nvcf.String(name),
 		InferenceURL:   nvcf.String(inferenceURL),
 		InferencePort:  nvcf.Int(inferencePort),
 		HealthUri:      nvcf.String(healthUri),
 		ContainerImage: nvcf.String(containerImage),
+		ContainerArgs:  nvcf.String(containerArgs),
 		APIBodyFormat:  nvcf.F(nvcf.FunctionNewParamsAPIBodyFormat(apiBodyFormat)),
 		Description:    nvcf.F(description),
 		Tags:           nvcf.F(tags),
