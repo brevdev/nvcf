@@ -88,7 +88,36 @@ func functionCreateCmd() *cobra.Command {
 				return fmt.Errorf("error parsing models: %w", err)
 			}
 
-			params := prepareFunctionParams(name, inferenceURL, inferencePort, healthUri, containerImage, formatPredictV2, description, tags, streaming, healthProtocol, healthPort, healthTimeout, healthStatusCode, containerArgs, containerEnv, models)
+			apiBodyFormat := defaultAPIBodyFormat
+			if formatPredictV2 {
+				apiBodyFormat = "PREDICT_V2"
+			}
+
+			functionType := defaultFunctionType
+			if streaming {
+				functionType = "STREAMING"
+			}
+
+			params := nvcf.FunctionNewParams{
+				Name:                 nvcf.String(name),
+				InferenceURL:         nvcf.String(inferenceURL),
+				InferencePort:        nvcf.Int(inferencePort),
+				ContainerImage:       nvcf.String(containerImage),
+				ContainerArgs:        nvcf.String(containerArgs),
+				ContainerEnvironment: nvcf.F(containerEnv),
+				APIBodyFormat:        nvcf.F(nvcf.FunctionNewParamsAPIBodyFormat(apiBodyFormat)),
+				Description:          nvcf.F(description),
+				Tags:                 nvcf.F(tags),
+				FunctionType:         nvcf.F(nvcf.FunctionNewParamsFunctionType(functionType)),
+				Models:               nvcf.F(models),
+				Health: nvcf.F(nvcf.FunctionNewParamsHealth{
+					Protocol:           nvcf.F(nvcf.FunctionNewParamsHealthProtocol(healthProtocol)),
+					Port:               nvcf.F(healthPort),
+					Timeout:            nvcf.F(healthTimeout),
+					ExpectedStatusCode: nvcf.F(healthStatusCode),
+					Uri:                nvcf.String(healthUri),
+				}),
+			}
 			output.Info(cmd, fmt.Sprintf("Creating function %s...", name))
 
 			// create function
@@ -174,40 +203,6 @@ func parseModels(modelVars []string) ([]nvcf.FunctionNewParamsModel, error) {
 	}
 
 	return models, nil
-}
-
-func prepareFunctionParams(name, inferenceURL string, inferencePort int64, healthUri string, containerImage string, formatPredictV2 bool, description string,
-	tags []string, streaming bool, healthProtocol string, healthPort int64, healthTimeout string, healthStatusCode int64, containerArgs string, containerEnv []nvcf.FunctionNewParamsContainerEnvironment, models []nvcf.FunctionNewParamsModel) nvcf.FunctionNewParams {
-	apiBodyFormat := defaultAPIBodyFormat
-	if formatPredictV2 {
-		apiBodyFormat = "PREDICT_V2"
-	}
-
-	functionType := defaultFunctionType
-	if streaming {
-		functionType = "STREAMING"
-	}
-	params := nvcf.FunctionNewParams{
-		Name:                 nvcf.String(name),
-		InferenceURL:         nvcf.String(inferenceURL),
-		InferencePort:        nvcf.Int(inferencePort),
-		ContainerImage:       nvcf.String(containerImage),
-		ContainerArgs:        nvcf.String(containerArgs),
-		ContainerEnvironment: nvcf.F(containerEnv),
-		APIBodyFormat:        nvcf.F(nvcf.FunctionNewParamsAPIBodyFormat(apiBodyFormat)),
-		Description:          nvcf.F(description),
-		Tags:                 nvcf.F(tags),
-		FunctionType:         nvcf.F(nvcf.FunctionNewParamsFunctionType(functionType)),
-		Models:               nvcf.F(models),
-		Health: nvcf.F(nvcf.FunctionNewParamsHealth{
-			Protocol:           nvcf.F(nvcf.FunctionNewParamsHealthProtocol(healthProtocol)),
-			Port:               nvcf.F(healthPort),
-			Timeout:            nvcf.F(healthTimeout),
-			ExpectedStatusCode: nvcf.F(healthStatusCode),
-			Uri:                nvcf.String(healthUri),
-		}),
-	}
-	return params
 }
 
 func deployFunction(cmd *cobra.Command, client *api.Client, resp *nvcf.CreateFunctionResponse, gpu, instanceType, backend string,
