@@ -22,18 +22,19 @@ import (
 func functionCreateCmd() *cobra.Command {
 	var (
 		// Function creation parameters
-		name                   string
-		inferenceURL           string
-		inferencePort          int64
-		healthUri              string
-		containerImage         string
-		containerArgs          string
-		description            string
-		tags                   []string
-		apiBodyFormatPredictV2 bool //this sets apiBodyFormat to PREDICT_V2
-		functionType           string
-		envVars                []string
-		modelVars              []string
+		name            string
+		inferenceURL    string
+		inferencePort   int64
+		healthUri       string
+		containerImage  string
+		containerArgs   string
+		description     string
+		tags            []string
+		formatPredictV2 bool //if false this sets apiBodyFormat to PREDICT_V2
+		streaming       bool //if false this sets functionType to DEFAULT
+		functionType    string
+		envVars         []string
+		modelVars       []string
 
 		// Health check parameters
 		healthProtocol   string
@@ -86,7 +87,7 @@ func functionCreateCmd() *cobra.Command {
 				return fmt.Errorf("error parsing models: %w", err)
 			}
 
-			params := prepareFunctionParams(name, inferenceURL, inferencePort, healthUri, containerImage, apiBodyFormatPredictV2, description, tags, functionType, healthProtocol, healthPort, healthTimeout, healthStatusCode, containerArgs, containerEnv, models)
+			params := prepareFunctionParams(name, inferenceURL, inferencePort, healthUri, containerImage, formatPredictV2, description, tags, streaming, healthProtocol, healthPort, healthTimeout, healthStatusCode, containerArgs, containerEnv, models)
 			output.Info(cmd, fmt.Sprintf("Creating function %s...", name))
 
 			// create function
@@ -112,9 +113,10 @@ func functionCreateCmd() *cobra.Command {
 	cmd.Flags().StringVar(&healthUri, "health-uri", "/health", "Health check URI. Default is /health")
 	cmd.Flags().StringVar(&containerImage, "container-image", "", "Container image for the function")
 	cmd.Flags().StringVar(&containerArgs, "container-args", "", "Container arguments. Put these in quotes if you are passing flags")
-	cmd.Flags().BoolVar(&apiBodyFormatPredictV2, "predict-v2", false, "Set API body format to PREDICT_V2")
+	cmd.Flags().BoolVar(&formatPredictV2, "format-predict-v2", false, "Set API body format to PREDICT_V2. Default is CUSTOM")
 	cmd.Flags().StringVar(&description, "description", "", "Description of the function")
 	cmd.Flags().StringSliceVar(&tags, "tag", nil, "Tags for the function (can be used multiple times)")
+	cmd.Flags().BoolVar(&streaming, "streaming", true, "Set function type to STREAMING. Default is true")
 	cmd.Flags().StringVar(&functionType, "function-type", defaultFunctionType, "Function type (DEFAULT or STREAMING). Default is DEFAULT")
 	cmd.Flags().StringSliceVar(&envVars, "env", []string{}, "Environment variables for the function (can be used multiple times, format: key:value)")
 	cmd.Flags().StringSliceVar(&modelVars, "model", []string{}, "Models for the function (can be used multiple times, format: name:uri:version)")
@@ -173,11 +175,16 @@ func parseModels(modelVars []string) ([]nvcf.FunctionNewParamsModel, error) {
 	return models, nil
 }
 
-func prepareFunctionParams(name, inferenceURL string, inferencePort int64, healthUri string, containerImage string, apiBodyFormatPredictV2 bool, description string,
-	tags []string, functionType, healthProtocol string, healthPort int64, healthTimeout string, healthStatusCode int64, containerArgs string, containerEnv []nvcf.FunctionNewParamsContainerEnvironment, models []nvcf.FunctionNewParamsModel) nvcf.FunctionNewParams {
+func prepareFunctionParams(name, inferenceURL string, inferencePort int64, healthUri string, containerImage string, formatPredictV2 bool, description string,
+	tags []string, streaming bool, healthProtocol string, healthPort int64, healthTimeout string, healthStatusCode int64, containerArgs string, containerEnv []nvcf.FunctionNewParamsContainerEnvironment, models []nvcf.FunctionNewParamsModel) nvcf.FunctionNewParams {
 	apiBodyFormat := defaultAPIBodyFormat
-	if apiBodyFormatPredictV2 {
+	if formatPredictV2 {
 		apiBodyFormat = "PREDICT_V2"
+	}
+
+	functionType := defaultFunctionType
+	if streaming {
+		functionType = "STREAMING"
 	}
 	params := nvcf.FunctionNewParams{
 		Name:                 nvcf.String(name),
