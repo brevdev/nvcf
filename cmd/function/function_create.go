@@ -307,10 +307,10 @@ func createAndDeployFunctionFromFile(cmd *cobra.Command, client *api.Client, par
 		return fmt.Errorf("error creating function: %w", err)
 	}
 
-	if !deploy {
-		output.Success(cmd, fmt.Sprintf("Function %s with id %s and version %s created successfully", params.Name, resp.Function.ID, resp.Function.VersionID))
-		return nil
+	if deploy {
+		return deployFunction(cmd, client, resp, gpu, instanceType, backend, maxInstances, minInstances, maxRequestConcurrency)
 	}
 
-	return deployFunction(cmd, client, resp, gpu, instanceType, backend, maxInstances, minInstances, maxRequestConcurrency)
+	output.Success(cmd, fmt.Sprintf("Function %s with id %s and version %s created successfully", params.Name, resp.Function.ID, resp.Function.VersionID))
+	return nil
 }
