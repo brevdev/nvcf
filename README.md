@@ -59,14 +59,6 @@ The project is organized as follows:
 - `output/`: Manages output formatting and display
 - `main.go`: Entry point of the CLI application
 
-Key files:
-
-- `cmd/function.go`: Implements function-related commands
-- `cmd/auth.go`: Handles authentication commands
-- `api/client.go`: Implements the API client
-- `config/config.go`: Manages configuration settings
-- `output/output.go`: Handles output formatting
-
 ## Dependencies
 
 The project uses the following main dependencies:
