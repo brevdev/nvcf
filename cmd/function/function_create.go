@@ -36,6 +36,7 @@ func functionCreateCmd() *cobra.Command {
 		apiBodyFormat  string
 		functionType   string
 		envVars        []string
+		modelVars      []string
 
 		// Health check parameters
 		healthProtocol   string
@@ -72,7 +73,12 @@ func functionCreateCmd() *cobra.Command {
 				return fmt.Errorf("error parsing environment variables: %w", err)
 			}
 
-			params := prepareFunctionParams(name, inferenceURL, inferencePort, healthUri, containerImage, apiBodyFormat, description, tags, functionType, healthProtocol, healthPort, healthTimeout, healthStatusCode, containerArgs, containerEnv)
+			models, err := parseModels(modelVars)
+			if err != nil {
+				return fmt.Errorf("error parsing models: %w", err)
+			}
+
+			params := prepareFunctionParams(name, inferenceURL, inferencePort, healthUri, containerImage, apiBodyFormat, description, tags, functionType, healthProtocol, healthPort, healthTimeout, healthStatusCode, containerArgs, containerEnv, models)
 			output.Info(cmd, fmt.Sprintf("Creating function %s...", name))
 
 			// create function
@@ -103,6 +109,7 @@ func functionCreateCmd() *cobra.Command {
 	cmd.Flags().StringSliceVar(&tags, "tag", nil, "Tags for the function (can be used multiple times)")
 	cmd.Flags().StringVar(&functionType, "function-type", defaultFunctionType, "Function type (DEFAULT or STREAMING). Default is DEFAULT")
 	cmd.Flags().StringSliceVar(&envVars, "env", []string{}, "Environment variables for the function (can be used multiple times, format: key:value)")
+	cmd.Flags().StringSliceVar(&modelVars, "model", []string{}, "Models for the function (can be used multiple times, format: name:uri:version)")
 
 	// optional health specification flags
 	cmd.Flags().StringVar(&healthProtocol, "health-protocol", "HTTP", "Health check protocol (HTTP or GRPC). Default is HTTP")
@@ -135,7 +142,7 @@ func parseEnvVars(envVars []string) ([]nvcf.FunctionNewParamsContainerEnvironmen
 	for _, env := range envVars {
 		parts := strings.SplitN(env, ":", 2)
 		if len(parts) != 2 {
-			return nil, fmt.Errorf("invalid environment variable format: %s", env)
+			return nil, fmt.Errorf("invalid environment variable format: %s. ensure that you are using the format key:value", env)
 		}
 		containerEnv = append(containerEnv, nvcf.FunctionNewParamsContainerEnvironment{
 			Key:   nvcf.F(parts[0]),
@@ -146,8 +153,26 @@ func parseEnvVars(envVars []string) ([]nvcf.FunctionNewParamsContainerEnvironmen
 	return containerEnv, nil
 }
 
+func parseModels(modelVars []string) ([]nvcf.FunctionNewParamsModel, error) {
+	var models []nvcf.FunctionNewParamsModel
+
+	for _, model := range modelVars {
+		parts := strings.Split(model, ":")
+		if len(parts) != 3 {
+			return nil, fmt.Errorf("invalid model format: %s", model)
+		}
+		models = append(models, nvcf.FunctionNewParamsModel{
+			Name:    nvcf.F(parts[0]),
+			Uri:     nvcf.F(parts[1]),
+			Version: nvcf.F(parts[2]),
+		})
+	}
+
+	return models, nil
+}
+
 func prepareFunctionParams(name, inferenceURL string, inferencePort int64, healthUri, containerImage, apiBodyFormat, description string,
-	tags []string, functionType, healthProtocol string, healthPort int64, healthTimeout string, healthStatusCode int64, containerArgs string, containerEnv []nvcf.FunctionNewParamsContainerEnvironment) nvcf.FunctionNewParams {
+	tags []string, functionType, healthProtocol string, healthPort int64, healthTimeout string, healthStatusCode int64, containerArgs string, containerEnv []nvcf.FunctionNewParamsContainerEnvironment, models []nvcf.FunctionNewParamsModel) nvcf.FunctionNewParams {
 	params := nvcf.FunctionNewParams{
 		Name:                 nvcf.String(name),
 		InferenceURL:         nvcf.String(inferenceURL),
@@ -159,6 +184,7 @@ func prepareFunctionParams(name, inferenceURL string, inferencePort int64, healt
 		Description:          nvcf.F(description),
 		Tags:                 nvcf.F(tags),
 		FunctionType:         nvcf.F(nvcf.FunctionNewParamsFunctionType(functionType)),
+		Models:               nvcf.F(models),
 		Health: nvcf.F(nvcf.FunctionNewParamsHealth{
 			Protocol:           nvcf.F(nvcf.FunctionNewParamsHealthProtocol(healthProtocol)),
 			Port:               nvcf.F(healthPort),
