@@ -7,30 +7,32 @@ type FunctionSpec struct {
 
 type FunctionDef struct {
 	FnName                    string      `yaml:"fn_name"`
-	ContainerArgs             string      `yaml:"containerArgs"`
-	InferenceURL              string      `yaml:"inferenceURL"`
-	InferencePort             int64       `yaml:"inferencePort"`
+	InferenceURL              string      `yaml:"inferenceUrl"`
+	InferencePort             int64       `yaml:"inferencePort,omitempty"`
+	HealthUri                 string      `yaml:"healthUri,omitempty"`
+	ContainerImage            string      `yaml:"containerImage,omitempty"`
+	ContainerArgs             string      `yaml:"containerArgs,omitempty"`
 	APIBodyFormat             string      `yaml:"apiBodyFormat,omitempty"`
+	Description               string      `yaml:"description,omitempty"`
 	FunctionType              string      `yaml:"functionType,omitempty"`
-	Description               string      `yaml:"description"`
-	Tags                      []string    `yaml:"tags"`
+	Tags                      []string    `yaml:"tags,omitempty"`
 	Health                    HealthCheck `yaml:"health"`
-	Env                       []EnvVar    `yaml:"env"`
 	InstBackend               string      `yaml:"inst_backend"`
 	InstGPUType               string      `yaml:"inst_gpu_type"`
-	InstMax                   int64       `yaml:"inst_max"`
-	InstMaxRequestConcurrency int64       `yaml:"inst_max_request_concurrency"`
-	InstMin                   int64       `yaml:"inst_min"`
 	InstType                  string      `yaml:"inst_type"`
-	Models                    []ModelDef  `yaml:"models"`
+	InstMin                   int64       `yaml:"inst_min,omitempty"`
+	InstMax                   int64       `yaml:"inst_max,omitempty"`
+	InstMaxRequestConcurrency int64       `yaml:"inst_max_request_concurrency,omitempty"`
+	ContainerEnvironment      []EnvVar    `yaml:"containerEnvironment,omitempty"`
+	Models                    []ModelDef  `yaml:"models,omitempty"`
 }
 
 type HealthCheck struct {
-	URI        string `yaml:"uri"`
-	Protocol   string `yaml:"protocol"`
-	Port       int64  `yaml:"port"`
-	Timeout    string `yaml:"timeout"`
-	StatusCode int64  `yaml:"statusCode"`
+	Protocol           string `yaml:"protocol,omitempty"`
+	Port               int64  `yaml:"port,omitempty"`
+	Timeout            string `yaml:"timeout,omitempty"`
+	ExpectedStatusCode int64  `yaml:"expectedStatusCode,omitempty"`
+	Uri                string `yaml:"uri,omitempty"`
 }
 
 type EnvVar struct {
@@ -40,6 +42,6 @@ type EnvVar struct {
 
 type ModelDef struct {
 	Name    string `yaml:"name"`
-	URI     string `yaml:"uri"`
 	Version string `yaml:"version"`
+	Uri     string `yaml:"uri"`
 }

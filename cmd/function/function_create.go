@@ -1,8 +1,5 @@
 // TODO
-// - add support for asset/model mounting
-// - add support for env vars
 // - Implement HelmChart and HelmChartServiceName functionality
-// - Add support for Models array
 // - Implement Resources array functionality
 // - Add support for Secrets array
 package function
@@ -61,11 +58,22 @@ func functionCreateCmd() *cobra.Command {
 		Use:   "create",
 		Short: "Create a new function",
 		Long:  `Create a new NVIDIA Cloud Function with the specified parameters.`,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			fileSpec, _ := cmd.Flags().GetString("file")
+			if fileSpec == "" {
+				requiredFlags := []string{"name", "inference-url", "inference-port", "health-uri", "container-image"}
+				for _, flag := range requiredFlags {
+					if err := cmd.MarkFlagRequired(flag); err != nil {
+						return err
+					}
+				}
+			}
+			return nil
+		}, RunE: func(cmd *cobra.Command, args []string) error {
 			client := api.NewClient(config.GetAPIKey())
 
 			if fileSpec != "" {
-				return createFunctionsFromFile(cmd, client, fileSpec)
+				return createFunctionsFromFile(cmd, client, fileSpec, deploy)
 			}
 
 			containerEnv, err := parseEnvVars(envVars)
@@ -89,7 +97,7 @@ func functionCreateCmd() *cobra.Command {
 			output.Success(cmd, fmt.Sprintf("Function %s with id %s and version %s created successfully", name, resp.Function.ID, resp.Function.VersionID))
 
 			// deploy function if the deploy flag is set
-			if !deploy {
+			if deploy {
 				return deployFunction(cmd, client, resp, gpu, instanceType, backend, maxInstances, minInstances, maxRequestConcurrency)
 			}
 
@@ -126,12 +134,6 @@ func functionCreateCmd() *cobra.Command {
 	cmd.Flags().Int64Var(&maxRequestConcurrency, "max-request-concurrency", 1, "Maximum number of concurrent requests. Default is 1")
 	cmd.Flags().BoolVar(&deploy, "deploy", false, "Create and deploy the function in one step. Default is false")
 	cmd.Flags().StringVarP(&fileSpec, "file", "f", "", "Path to a YAML file containing function specifications")
-
-	cmd.MarkFlagRequired("name")
-	cmd.MarkFlagRequired("inference-url")
-	cmd.MarkFlagRequired("inference-port")
-	cmd.MarkFlagRequired("health-uri")
-	cmd.MarkFlagRequired("container-image")
 
 	return cmd
 }
@@ -201,6 +203,7 @@ func deployFunction(cmd *cobra.Command, client *api.Client, resp *nvcf.CreateFun
 	output.Info(cmd, "Deployment flag was provided. Deploying function...")
 
 	deploymentParams := nvcf.FunctionDeploymentFunctionVersionNewParams{
+		// TODO: there's a couple more args to add here
 		DeploymentSpecifications: nvcf.F([]nvcf.FunctionDeploymentFunctionVersionNewParamsDeploymentSpecification{{
 			GPU:                   nvcf.String(gpu),
 			InstanceType:          nvcf.String(instanceType),
@@ -244,7 +247,7 @@ func jsonMarshalUnmarshal(dest any, src any) error {
 	return json.Unmarshal(jsonData, dest)
 }
 
-func createFunctionsFromFile(cmd *cobra.Command, client *api.Client, yamlFile string) error {
+func createFunctionsFromFile(cmd *cobra.Command, client *api.Client, yamlFile string, deploy bool) error {
 	data, err := os.ReadFile(yamlFile)
 	if err != nil {
 		return fmt.Errorf("error reading YAML file: %w", err)
@@ -257,7 +260,7 @@ func createFunctionsFromFile(cmd *cobra.Command, client *api.Client, yamlFile st
 
 	for _, fn := range spec.Functions {
 		params := prepareFunctionParamsFromFile(spec.FnImage, fn)
-		if err := createAndDeployFunctionFromFile(cmd, client, params, true, fn.InstGPUType, fn.InstType, fn.InstBackend, fn.InstMax, fn.InstMin, fn.InstMaxRequestConcurrency); err != nil {
+		if err := createAndDeployFunctionFromFile(cmd, client, params, deploy, fn.InstGPUType, fn.InstType, fn.InstBackend, fn.InstMax, fn.InstMin, fn.InstMaxRequestConcurrency); err != nil {
 			return err
 		}
 	}
@@ -291,8 +294,8 @@ func prepareFunctionParamsFromFile(fnImage string, fn FunctionDef) nvcf.Function
 			Protocol:           nvcf.F(nvcf.FunctionNewParamsHealthProtocol(fn.Health.Protocol)),
 			Port:               nvcf.F(fn.Health.Port),
 			Timeout:            nvcf.F(fn.Health.Timeout),
-			ExpectedStatusCode: nvcf.F(fn.Health.StatusCode),
-			Uri:                nvcf.String(fn.Health.URI),
+			ExpectedStatusCode: nvcf.F(fn.Health.ExpectedStatusCode),
+			Uri:                nvcf.String(fn.Health.Uri),
 		}),
 	}
 }

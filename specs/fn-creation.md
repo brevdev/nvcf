@@ -22,7 +22,6 @@ Each function in the `functions` array can have the following properties:
 | `fn_name` | The name of the function | Yes | N/A |
 | `inferenceUrl` | The entrypoint URL for invoking the container | Yes | N/A |
 | `inferencePort` | The port number for the inference listener | No | 80 |
-| `healthUri` | The health check endpoint URI | No | "/health" |
 | `containerImage` | The container image for this function | No | Value of `fn_image` |
 | `containerArgs` | Command-line arguments for the container | No | "" |
 | `apiBodyFormat` | The format of the API request body (PREDICT_V2 or CUSTOM) | No | "CUSTOM" |
@@ -49,7 +48,7 @@ The `health` property must include:
 | `port` | The port for health checks | No | 80 |
 | `timeout` | The timeout for health checks | No | "PT20S" |
 | `expectedStatusCode` | Expected status code for a successful check | No | 200 |
-| `uri` | The health check endpoint URI | No | "/health" |
+| `uri` | The health check endpoint URI | Yes | "/health" |
 
 ### Environment Variables
 
@@ -79,7 +78,7 @@ functions:
     inferenceUrl: "/v1/chat/completions"
     inferencePort: 80
     healthUri: "/health"
-    containerArgs: "--model-id example-model"
+    containerArgs: "--model-id nvidia/nemotron-340b"
     apiBodyFormat: CUSTOM
     description: "Example function for NLP tasks"
     functionType: DEFAULT
