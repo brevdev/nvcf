@@ -12,7 +12,7 @@ import (
 
 func functionGetCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "get",
+		Use:   "get [function-id]",
 		Args:  cobra.ExactArgs(1),
 		Short: "Get details about a single function. If you want to get a specific version, use the --version-id flag.",
 		Run:   runFunctionGet,
@@ -40,16 +40,15 @@ func runFunctionGet(cmd *cobra.Command, args []string) {
 		}
 	} else {
 		output.Info(cmd, fmt.Sprintf("Getting version %s of function %s", versionID, functionID))
+		query := nvcf.FunctionVersionGetParams{
+			IncludeSecrets: nvcf.Bool(includeSecrets),
+		}
+		getFunctionResponse, err := client.Functions.Versions.Get(cmd.Context(), functionID, versionID, query)
+		if err != nil {
+			output.Error(cmd, "Error getting function", err)
+			return
+		}
+		output.SingleFunction(cmd, getFunctionResponse.Function)
 	}
-	client := api.NewClient(config.GetAPIKey())
 
-	query := nvcf.FunctionVersionGetParams{
-		IncludeSecrets: nvcf.Bool(includeSecrets),
-	}
-	getFunctionResponse, err := client.Functions.Versions.Get(cmd.Context(), functionID, versionID, query)
-	if err != nil {
-		output.Error(cmd, "Error getting function", err)
-		return
-	}
-	output.SingleFunction(cmd, getFunctionResponse.Function)
 }

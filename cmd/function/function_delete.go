@@ -11,7 +11,7 @@ import (
 
 func functionDeleteCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "delete",
+		Use:   "delete [function-id]",
 		Short: "Delete a function. If you want to delete a specific version, use the --version-id flag.",
 		Args:  cobra.ExactArgs(1),
 		Run:   runFunctionDelete,
@@ -34,7 +34,8 @@ func runFunctionDelete(cmd *cobra.Command, args []string) {
 			return
 		}
 		for _, version := range versions.Functions {
-			err := client.Functions.Versions.Delete(cmd.Context(), functionId, version.ID)
+			output.Info(cmd, fmt.Sprintf("Deleting version %s of function %s", version.VersionID, functionId))
+			err := client.Functions.Versions.Delete(cmd.Context(), functionId, version.VersionID)
 			if err != nil {
 				output.Error(cmd, "Error deleting function version", err)
 			}
