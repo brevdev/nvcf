@@ -1,6 +1,6 @@
-# NVIDIA Cloud Functions (NVCF) Specification
+# NVIDIA Cloud Functions (NVCF) Function Specification
 
-This document outlines the structure and components of the YAML specification used to create and deploy functions via the NVCF CLI. Users can utilize this spec with the command `nvcf fn create -f <path-to-file>`.
+This document outlines the structure and components of the YAML specification used to create and deploy functions via the NVCF CLI. Users can utilize this spec with the command `nvcf fn create -f <path-to-file>`. You can also auto deploy the function by using the `--deploy` flag.
 
 ## Overview
 
@@ -11,7 +11,7 @@ The specification defines the container image and one or more functions to be de
 ### Root Level
 
 - `fn_image`: The container image URL from NVCR (NVIDIA Container Registry).
-- `functions`: An array of function configurations.
+- `functions`: An array of function configurations based on the `fn_image`.
 
 ### Function Configuration
 
@@ -72,15 +72,15 @@ Each item in the `models` array should have:
 ## Example Specification
 
 ```yaml
-fn_image: nvcr.io/nvidia/example-image:v1.0
+fn_image: nvcr.io/sklmhpjhptei/test-team/brev-tgi:2.2.0
 functions:
   - fn_name: example-function
     inferenceUrl: "/v1/chat/completions"
     inferencePort: 80
     healthUri: "/health"
-    containerArgs: "--model-id nvidia/nemotron-340b"
+    containerArgs: "--model-id Qwen/Qwen2-7B-Instruct"
     apiBodyFormat: CUSTOM
-    description: "Example function for NLP tasks"
+    description: "Example function for CLI fn testing"
     functionType: DEFAULT
     tags:
       - "nlp"
@@ -91,11 +91,11 @@ functions:
       timeout: "PT20S"
       expectedStatusCode: 200
       uri: "/health"
-    inst_backend: GFN
-    inst_gpu_type: A100
-    inst_type: gn1.a100.2x.30gb
+    inst_backend: gcp-asia-se-1a
+    inst_gpu_type: H100
+    inst_type: GCP.GPU.H100_1x
     inst_min: 1
-    inst_max: 3
+    inst_max: 2
     inst_max_request_concurrency: 2
     containerEnvironment:
       - key: DEBUG
