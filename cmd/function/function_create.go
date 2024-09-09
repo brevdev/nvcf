@@ -22,18 +22,18 @@ import (
 func functionCreateCmd() *cobra.Command {
 	var (
 		// Function creation parameters
-		name           string
-		inferenceURL   string
-		inferencePort  int64
-		healthUri      string
-		containerImage string
-		containerArgs  string
-		description    string
-		tags           []string
-		apiBodyFormat  string
-		functionType   string
-		envVars        []string
-		modelVars      []string
+		name                   string
+		inferenceURL           string
+		inferencePort          int64
+		healthUri              string
+		containerImage         string
+		containerArgs          string
+		description            string
+		tags                   []string
+		apiBodyFormatPredictV2 bool //this sets apiBodyFormat to PREDICT_V2
+		functionType           string
+		envVars                []string
+		modelVars              []string
 
 		// Health check parameters
 		healthProtocol   string
@@ -86,7 +86,7 @@ func functionCreateCmd() *cobra.Command {
 				return fmt.Errorf("error parsing models: %w", err)
 			}
 
-			params := prepareFunctionParams(name, inferenceURL, inferencePort, healthUri, containerImage, apiBodyFormat, description, tags, functionType, healthProtocol, healthPort, healthTimeout, healthStatusCode, containerArgs, containerEnv, models)
+			params := prepareFunctionParams(name, inferenceURL, inferencePort, healthUri, containerImage, apiBodyFormatPredictV2, description, tags, functionType, healthProtocol, healthPort, healthTimeout, healthStatusCode, containerArgs, containerEnv, models)
 			output.Info(cmd, fmt.Sprintf("Creating function %s...", name))
 
 			// create function
@@ -112,7 +112,7 @@ func functionCreateCmd() *cobra.Command {
 	cmd.Flags().StringVar(&healthUri, "health-uri", "/health", "Health check URI. Default is /health")
 	cmd.Flags().StringVar(&containerImage, "container-image", "", "Container image for the function")
 	cmd.Flags().StringVar(&containerArgs, "container-args", "", "Container arguments. Put these in quotes if you are passing flags")
-	cmd.Flags().StringVar(&apiBodyFormat, "api-body-format", defaultAPIBodyFormat, "API body format (PREDICT_V2 or CUSTOM). Default is CUSTOM")
+	cmd.Flags().BoolVar(&apiBodyFormatPredictV2, "predict-v2", false, "Set API body format to PREDICT_V2")
 	cmd.Flags().StringVar(&description, "description", "", "Description of the function")
 	cmd.Flags().StringSliceVar(&tags, "tag", nil, "Tags for the function (can be used multiple times)")
 	cmd.Flags().StringVar(&functionType, "function-type", defaultFunctionType, "Function type (DEFAULT or STREAMING). Default is DEFAULT")
@@ -173,8 +173,12 @@ func parseModels(modelVars []string) ([]nvcf.FunctionNewParamsModel, error) {
 	return models, nil
 }
 
-func prepareFunctionParams(name, inferenceURL string, inferencePort int64, healthUri, containerImage, apiBodyFormat, description string,
+func prepareFunctionParams(name, inferenceURL string, inferencePort int64, healthUri string, containerImage string, apiBodyFormatPredictV2 bool, description string,
 	tags []string, functionType, healthProtocol string, healthPort int64, healthTimeout string, healthStatusCode int64, containerArgs string, containerEnv []nvcf.FunctionNewParamsContainerEnvironment, models []nvcf.FunctionNewParamsModel) nvcf.FunctionNewParams {
+	apiBodyFormat := defaultAPIBodyFormat
+	if apiBodyFormatPredictV2 {
+		apiBodyFormat = "PREDICT_V2"
+	}
 	params := nvcf.FunctionNewParams{
 		Name:                 nvcf.String(name),
 		InferenceURL:         nvcf.String(inferenceURL),
@@ -202,9 +206,8 @@ func deployFunction(cmd *cobra.Command, client *api.Client, resp *nvcf.CreateFun
 	maxInstances, minInstances, maxRequestConcurrency int64) error {
 	output.Info(cmd, "Deployment flag was provided. Deploying function...")
 
-	deploymentParams := nvcf.FunctionDeploymentFunctionVersionNewParams{
-		// TODO: there's a couple more args to add here
-		DeploymentSpecifications: nvcf.F([]nvcf.FunctionDeploymentFunctionVersionNewParamsDeploymentSpecification{{
+	deploymentParams := nvcf.FunctionDeploymentFunctionVersionInitiateDeploymentParams{
+		DeploymentSpecifications: nvcf.F([]nvcf.FunctionDeploymentFunctionVersionInitiateDeploymentParamsDeploymentSpecification{{
 			GPU:                   nvcf.String(gpu),
 			InstanceType:          nvcf.String(instanceType),
 			Backend:               nvcf.String(backend),
@@ -214,7 +217,7 @@ func deployFunction(cmd *cobra.Command, client *api.Client, resp *nvcf.CreateFun
 		}}),
 	}
 
-	_, err := client.FunctionDeployment.Functions.Versions.New(
+	_, err := client.FunctionDeployment.Functions.Versions.InitiateDeployment(
 		cmd.Context(),
 		resp.Function.ID,
 		resp.Function.VersionID,
