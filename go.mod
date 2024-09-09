@@ -1,4 +1,4 @@
-module github.com/tmc/nvcf
+module github.com/brevdev/nvcf
 
 go 1.22.5
 

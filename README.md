@@ -19,7 +19,7 @@ NVCF is a command-line interface (CLI) tool for managing and interacting with NV
 To install the NVCF CLI, you need to have Go installed on your system. Then, you can use the following command:
 
 ```bash
-go install github.com/tmc/nvcf@latest
+go install github.com/brevdev/nvcf@latest
 ```
 
 ## Usage
@@ -72,7 +72,7 @@ Key files:
 The project uses the following main dependencies:
 
 - `github.com/spf13/cobra`: For building the CLI command structure
-- `github.com/tmc/nvcf-go`: NVIDIA Cloud Functions Go SDK
+- `github.com/brevdev/nvcf-go`: NVIDIA Cloud Functions Go SDK
 - `github.com/fatih/color`: For color-coded output
 - `github.com/olekukonko/tablewriter`: For table-formatted output
 
@@ -94,11 +94,11 @@ This project is licensed under the [MIT License](LICENSE).
 
 ## Badges
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/tmc/nvcf)](https://goreportcard.com/report/github.com/tmc/nvcf)
-[![GoDoc](https://godoc.org/github.com/tmc/nvcf?status.svg)](https://godoc.org/github.com/tmc/nvcf)
+[![Go Report Card](https://goreportcard.com/badge/github.com/brevdev/nvcf)](https://goreportcard.com/report/github.com/brevdev/nvcf)
+[![GoDoc](https://godoc.org/github.com/brevdev/nvcf?status.svg)](https://godoc.org/github.com/brevdev/nvcf)
 
 ## Support
 
-For issues, feature requests, or questions, please open an issue on the [GitHub repository](https://github.com/tmc/nvcf/issues).
+For issues, feature requests, or questions, please open an issue on the [GitHub repository](https://github.com/brevdev/nvcf/issues).
 
 For more information about NVIDIA Cloud Functions, visit the [official documentation](https://docs.nvidia.com/cloud-functions/)

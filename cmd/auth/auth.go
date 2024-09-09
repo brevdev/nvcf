@@ -7,9 +7,9 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/brevdev/nvcf/config"
+	"github.com/brevdev/nvcf/output"
 	"github.com/spf13/cobra"
-	"github.com/tmc/nvcf/config"
-	"github.com/tmc/nvcf/output"
 )
 
 func AuthCmd() *cobra.Command {
