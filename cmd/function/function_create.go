@@ -2,6 +2,7 @@
 // - Implement HelmChart and HelmChartServiceName functionality
 // - Implement Resources array functionality
 // - Add support for Secrets array
+// - We cannot programatically get backends just yet. A user has to go to NGC to find their backend and gpu allocation
 package function
 
 import (
@@ -132,7 +133,7 @@ func functionCreateCmd() *cobra.Command {
 	cmd.Flags().Int64Var(&maxInstances, "max-instances", 1, "Maximum number of instances. Default is 1")
 	cmd.Flags().StringVar(&gpu, "gpu", "", "GPU type to use")
 	cmd.Flags().StringVar(&instanceType, "instance-type", "", "Instance type to use. Default is GCP.GPU.H100_1x")
-	cmd.Flags().StringVar(&backend, "backend", "gcp-asia-se-1a", "Backend to deploy the function to (see NGC for available backends). Default is gcp-asia-se-1a")
+	cmd.Flags().StringVar(&backend, "backend", "", "Backend to deploy the function to (see your NGC org available backends)")
 	cmd.Flags().Int64Var(&maxRequestConcurrency, "max-request-concurrency", 1, "Maximum number of concurrent requests. Default is 1")
 	cmd.Flags().BoolVar(&deploy, "deploy", false, "Create and deploy the function in one step. Default is false")
 	cmd.Flags().StringVarP(&fileSpec, "file", "f", "", "Path to a YAML file containing function specifications")
@@ -221,6 +222,7 @@ func deployFunction(cmd *cobra.Command, client *api.Client, resp *nvcf.CreateFun
 			MaxInstances:          nvcf.Int(maxInstances),
 			MinInstances:          nvcf.Int(minInstances),
 			MaxRequestConcurrency: nvcf.Int(maxRequestConcurrency),
+			// missing attributes, availabilityZones, clusters, configuration, preferredOrder, regions
 		}}),
 	}
 
