@@ -75,14 +75,30 @@ func printFunctionsTable(cmd *cobra.Command, functions []nvcf.ListFunctionsRespo
 	table.Render()
 }
 
-func Function(cmd *cobra.Command, fn nvcf.ListFunctionsResponseFunction) {
+func MultiFunction(cmd *cobra.Command, fn nvcf.ListFunctionsResponseFunction) {
 	if isJSON(cmd) {
 		printJSON(cmd, fn)
 	} else {
-		printFunctionTable(cmd, fn)
+		printMultiFunctionTable(cmd, fn)
 	}
 }
-func printFunctionTable(cmd *cobra.Command, fn nvcf.ListFunctionsResponseFunction) {
+func printMultiFunctionTable(cmd *cobra.Command, fn nvcf.ListFunctionsResponseFunction) {
+	table := tablewriter.NewWriter(cmd.OutOrStdout())
+	table.SetHeader([]string{"Name", "ID", "Status"})
+	table.SetBorder(false)
+	table.Append([]string{fn.Name, fn.ID, string(fn.Status)})
+	table.Render()
+}
+
+func SingleFunction(cmd *cobra.Command, fn nvcf.FunctionResponseFunction) {
+	if isJSON(cmd) {
+		printJSON(cmd, fn)
+	} else {
+		printSingleFunctionTable(cmd, fn)
+	}
+}
+
+func printSingleFunctionTable(cmd *cobra.Command, fn nvcf.FunctionResponseFunction) {
 	table := tablewriter.NewWriter(cmd.OutOrStdout())
 	table.SetHeader([]string{"Name", "ID", "Status"})
 	table.SetBorder(false)

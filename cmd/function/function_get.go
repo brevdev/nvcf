@@ -34,5 +34,5 @@ func runFunctionGet(cmd *cobra.Command, args []string) {
 		output.Error(cmd, "Error getting function", err)
 		return
 	}
-	fmt.Println(funcRes.Function)
+	output.SingleFunction(cmd, funcRes.Function)
 }
