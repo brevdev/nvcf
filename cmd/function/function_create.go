@@ -128,9 +128,9 @@ func functionCreateCmd() *cobra.Command {
 	// deployment flags
 	cmd.Flags().Int64Var(&minInstances, "min-instances", 0, "Minimum number of instances. Default is 0")
 	cmd.Flags().Int64Var(&maxInstances, "max-instances", 1, "Maximum number of instances. Default is 1")
-	cmd.Flags().StringVar(&gpu, "gpu", "H100", "GPU type to use. Default is H100")
-	cmd.Flags().StringVar(&instanceType, "instance-type", "GCP.GPU.H100_1x", "Instance type to use. Default is GCP.GPU.H100_1x")
-	cmd.Flags().StringVar(&backend, "backend", "gcp-asia-se-1a", "Backend to deploy the function to (see NGC for available backends). Default is gcp-asia-se-1a")
+	cmd.Flags().StringVar(&gpu, "gpu", "", "GPU type to use")
+	cmd.Flags().StringVar(&instanceType, "instance-type", "", "Instance type to use")
+	cmd.Flags().StringVar(&backend, "backend", "", "Backend to deploy the function to (see NGC for available backends)")
 	cmd.Flags().Int64Var(&maxRequestConcurrency, "max-request-concurrency", 1, "Maximum number of concurrent requests. Default is 1")
 	cmd.Flags().BoolVar(&deploy, "deploy", false, "Create and deploy the function in one step. Default is false")
 	cmd.Flags().StringVarP(&fileSpec, "file", "f", "", "Path to a YAML file containing function specifications")
