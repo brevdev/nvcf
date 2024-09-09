@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"strings"
 
 	"github.com/brevdev/nvcf/api"
 	"github.com/brevdev/nvcf/config"
@@ -34,6 +35,7 @@ func functionCreateCmd() *cobra.Command {
 		tags           []string
 		apiBodyFormat  string
 		functionType   string
+		envVars        []string
 
 		// Health check parameters
 		healthProtocol   string
@@ -51,7 +53,7 @@ func functionCreateCmd() *cobra.Command {
 		deploy                bool
 
 		// Optional function specification file
-		yamlSpec string
+		fileSpec string
 	)
 
 	cmd := &cobra.Command{
@@ -61,11 +63,16 @@ func functionCreateCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := api.NewClient(config.GetAPIKey())
 
-			if yamlSpec != "" {
-				return createFunctionsFromYAML(cmd, client, yamlSpec)
+			if fileSpec != "" {
+				return createFunctionsFromFile(cmd, client, fileSpec)
 			}
 
-			params := prepareFunctionParams(name, inferenceURL, inferencePort, healthUri, containerImage, apiBodyFormat, description, tags, functionType, healthProtocol, healthPort, healthTimeout, healthStatusCode, containerArgs)
+			containerEnv, err := parseEnvVars(envVars)
+			if err != nil {
+				return fmt.Errorf("error parsing environment variables: %w", err)
+			}
+
+			params := prepareFunctionParams(name, inferenceURL, inferencePort, healthUri, containerImage, apiBodyFormat, description, tags, functionType, healthProtocol, healthPort, healthTimeout, healthStatusCode, containerArgs, containerEnv)
 			output.Info(cmd, fmt.Sprintf("Creating function %s...", name))
 
 			// create function
@@ -95,6 +102,7 @@ func functionCreateCmd() *cobra.Command {
 	cmd.Flags().StringVar(&description, "description", "", "Description of the function")
 	cmd.Flags().StringSliceVar(&tags, "tag", nil, "Tags for the function (can be used multiple times)")
 	cmd.Flags().StringVar(&functionType, "function-type", defaultFunctionType, "Function type (DEFAULT or STREAMING). Default is DEFAULT")
+	cmd.Flags().StringSliceVar(&envVars, "env", []string{}, "Environment variables for the function (can be used multiple times, format: key:value)")
 
 	// optional health specification flags
 	cmd.Flags().StringVar(&healthProtocol, "health-protocol", "HTTP", "Health check protocol (HTTP or GRPC). Default is HTTP")
@@ -110,6 +118,7 @@ func functionCreateCmd() *cobra.Command {
 	cmd.Flags().StringVar(&backend, "backend", "gcp-asia-se-1a", "Backend to deploy the function to (see NGC for available backends). Default is gcp-asia-se-1a")
 	cmd.Flags().Int64Var(&maxRequestConcurrency, "max-request-concurrency", 1, "Maximum number of concurrent requests. Default is 1")
 	cmd.Flags().BoolVar(&deploy, "deploy", false, "Create and deploy the function in one step. Default is false")
+	cmd.Flags().StringVarP(&fileSpec, "file", "f", "", "Path to a YAML file containing function specifications")
 
 	cmd.MarkFlagRequired("name")
 	cmd.MarkFlagRequired("inference-url")
@@ -120,18 +129,36 @@ func functionCreateCmd() *cobra.Command {
 	return cmd
 }
 
+func parseEnvVars(envVars []string) ([]nvcf.FunctionNewParamsContainerEnvironment, error) {
+	var containerEnv []nvcf.FunctionNewParamsContainerEnvironment
+
+	for _, env := range envVars {
+		parts := strings.SplitN(env, ":", 2)
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("invalid environment variable format: %s", env)
+		}
+		containerEnv = append(containerEnv, nvcf.FunctionNewParamsContainerEnvironment{
+			Key:   nvcf.F(parts[0]),
+			Value: nvcf.F(parts[1]),
+		})
+	}
+
+	return containerEnv, nil
+}
+
 func prepareFunctionParams(name, inferenceURL string, inferencePort int64, healthUri, containerImage, apiBodyFormat, description string,
-	tags []string, functionType, healthProtocol string, healthPort int64, healthTimeout string, healthStatusCode int64, containerArgs string) nvcf.FunctionNewParams {
+	tags []string, functionType, healthProtocol string, healthPort int64, healthTimeout string, healthStatusCode int64, containerArgs string, containerEnv []nvcf.FunctionNewParamsContainerEnvironment) nvcf.FunctionNewParams {
 	params := nvcf.FunctionNewParams{
-		Name:           nvcf.String(name),
-		InferenceURL:   nvcf.String(inferenceURL),
-		InferencePort:  nvcf.Int(inferencePort),
-		ContainerImage: nvcf.String(containerImage),
-		ContainerArgs:  nvcf.String(containerArgs),
-		APIBodyFormat:  nvcf.F(nvcf.FunctionNewParamsAPIBodyFormat(apiBodyFormat)),
-		Description:    nvcf.F(description),
-		Tags:           nvcf.F(tags),
-		FunctionType:   nvcf.F(nvcf.FunctionNewParamsFunctionType(functionType)),
+		Name:                 nvcf.String(name),
+		InferenceURL:         nvcf.String(inferenceURL),
+		InferencePort:        nvcf.Int(inferencePort),
+		ContainerImage:       nvcf.String(containerImage),
+		ContainerArgs:        nvcf.String(containerArgs),
+		ContainerEnvironment: nvcf.F(containerEnv),
+		APIBodyFormat:        nvcf.F(nvcf.FunctionNewParamsAPIBodyFormat(apiBodyFormat)),
+		Description:          nvcf.F(description),
+		Tags:                 nvcf.F(tags),
+		FunctionType:         nvcf.F(nvcf.FunctionNewParamsFunctionType(functionType)),
 		Health: nvcf.F(nvcf.FunctionNewParamsHealth{
 			Protocol:           nvcf.F(nvcf.FunctionNewParamsHealthProtocol(healthProtocol)),
 			Port:               nvcf.F(healthPort),
@@ -191,7 +218,7 @@ func jsonMarshalUnmarshal(dest any, src any) error {
 	return json.Unmarshal(jsonData, dest)
 }
 
-func createFunctionsFromYAML(cmd *cobra.Command, client *api.Client, yamlFile string) error {
+func createFunctionsFromFile(cmd *cobra.Command, client *api.Client, yamlFile string) error {
 	data, err := os.ReadFile(yamlFile)
 	if err != nil {
 		return fmt.Errorf("error reading YAML file: %w", err)
@@ -203,8 +230,8 @@ func createFunctionsFromYAML(cmd *cobra.Command, client *api.Client, yamlFile st
 	}
 
 	for _, fn := range spec.Functions {
-		params := prepareFunctionParamsFromYAML(spec.FnImage, fn)
-		if err := createAndDeployFunctionFromYAML(cmd, client, params, true, fn.InstGPUType, fn.InstType, fn.InstBackend, fn.InstMax, fn.InstMin, fn.InstMaxRequestConcurrency); err != nil {
+		params := prepareFunctionParamsFromFile(spec.FnImage, fn)
+		if err := createAndDeployFunctionFromFile(cmd, client, params, true, fn.InstGPUType, fn.InstType, fn.InstBackend, fn.InstMax, fn.InstMin, fn.InstMaxRequestConcurrency); err != nil {
 			return err
 		}
 	}
@@ -212,7 +239,7 @@ func createFunctionsFromYAML(cmd *cobra.Command, client *api.Client, yamlFile st
 	return nil
 }
 
-func prepareFunctionParamsFromYAML(fnImage string, fn FunctionDef) nvcf.FunctionNewParams {
+func prepareFunctionParamsFromFile(fnImage string, fn FunctionDef) nvcf.FunctionNewParams {
 	// Use provided values if present, otherwise use defaults
 	apiBodyFormat := fn.APIBodyFormat
 	if apiBodyFormat == "" {
@@ -244,7 +271,7 @@ func prepareFunctionParamsFromYAML(fnImage string, fn FunctionDef) nvcf.Function
 	}
 }
 
-func createAndDeployFunctionFromYAML(cmd *cobra.Command, client *api.Client, params nvcf.FunctionNewParams, deploy bool, gpu, instanceType, backend string, maxInstances, minInstances, maxRequestConcurrency int64) error {
+func createAndDeployFunctionFromFile(cmd *cobra.Command, client *api.Client, params nvcf.FunctionNewParams, deploy bool, gpu, instanceType, backend string, maxInstances, minInstances, maxRequestConcurrency int64) error {
 	resp, err := client.Functions.New(cmd.Context(), params)
 	if err != nil {
 		return fmt.Errorf("error creating function: %w", err)

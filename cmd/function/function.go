@@ -16,7 +16,7 @@ func FunctionCmd() *cobra.Command {
 		Use:     "function",
 		Aliases: []string{"fn", "fns", "cf"},
 		Short:   "Manage NVIDIA Cloud Functions",
-		Long:    `Create, list, update, call, deploy, and delete NVIDIA Cloud Functions.`,
+		Long:    `Create, list, update, call, deploy, and delete NVIDIA Cloud Functions. You can also specify a YAML file to create multiple functions at once.`,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			config.Init()
 			if cmd.Name() != "auth" && !config.IsAuthenticated() {
