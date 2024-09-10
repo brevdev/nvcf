@@ -26,9 +26,7 @@ func FunctionCmd() *cobra.Command {
 	cmd.AddCommand(functionListCmd())
 	cmd.AddCommand(functionCreateCmd())
 	cmd.AddCommand(functionGetCmd())
-	// cmd.AddCommand(functionUpdateCmd())
 	cmd.AddCommand(functionDeleteCmd())
-	// cmd.AddCommand(functionVersionCmd())
 
 	return cmd
 }

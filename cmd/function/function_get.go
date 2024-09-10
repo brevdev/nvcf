@@ -12,10 +12,11 @@ import (
 
 func functionGetCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "get [function-id]",
-		Args:  cobra.ExactArgs(1),
-		Short: "Get details about a single function. If you want to get a specific version, use the --version-id flag.",
-		Run:   runFunctionGet,
+		Use:     "get <function-id>",
+		Args:    cobra.ExactArgs(1),
+		Short:   "Get details and versions of a single function. If you want to get a specific version, use the --version-id flag.",
+		Example: "nvcf function get fid --version-id vid --include-secrets",
+		Run:     runFunctionGet,
 	}
 	cmd.Flags().String("version-id", "", "The ID of the version")
 	cmd.Flags().Bool("include-secrets", false, "Include secrets in the response")
