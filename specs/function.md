@@ -19,7 +19,7 @@ Each function in the `functions` array can have the following properties:
 
 | Field | Description | Required | Default |
 |-------|-------------|----------|---------|
-| `fn_name` | The name of the function | Yes | N/A |
+| `name` | The name of the function | Yes | N/A |
 | `existingFunctionID` | ID of an existing function to create a new version | No | N/A |
 | `inferenceUrl` | The entrypoint URL for invoking the container | Yes | N/A |
 | `inferencePort` | The port number for the inference listener | No | 80 |
