@@ -129,7 +129,7 @@ nvcf fn create -f path/to/your/spec.yaml --deploy
 
 ## Notes
 
-1. The `existingFunctionID` field is used to create a new version of an existing function. If provided, the CLI will create a new version for the specified function instead of creating a new function.
+1. The `existingFunctionID` field is used to create a new version of an existing function. If provided, the CLI will create a new version for the specified function instead of creating a new function. You might want to use this if you'd like to deploy the same container on different hardwares or if you want to deploy the same container with different configurations but keep it liked to the original function id. 
 2. The `custom` field replaces the previous `apiBodyFormat` field. If `custom` is true, the API body format is set to CUSTOM; if false, it's set to PREDICT_V2.
 3. The `streaming` field replaces the previous `functionType` field. If `streaming` is true, the function type is set to STREAMING; if false, it's set to DEFAULT.
 4. Resources and secrets are not currently supported in the implementation and thus not included in this specification.
