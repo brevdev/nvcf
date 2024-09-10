@@ -12,9 +12,9 @@ type FunctionDef struct {
 	HealthUri                 string      `yaml:"healthUri,omitempty"`
 	ContainerImage            string      `yaml:"containerImage,omitempty"`
 	ContainerArgs             string      `yaml:"containerArgs,omitempty"`
-	APIBodyFormat             string      `yaml:"apiBodyFormat,omitempty"`
+	Custom                    bool        `yaml:"custom,omitempty"`
 	Description               string      `yaml:"description,omitempty"`
-	FunctionType              string      `yaml:"functionType,omitempty"`
+	Streaming                 bool        `yaml:"streaming,omitempty"`
 	Tags                      []string    `yaml:"tags,omitempty"`
 	Health                    HealthCheck `yaml:"health"`
 	InstBackend               string      `yaml:"inst_backend"`
