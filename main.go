@@ -5,10 +5,9 @@ import (
 	"os"
 
 	"github.com/brevdev/nvcf/cmd"
+	"github.com/brevdev/nvcf/cmd/auth"
+	"github.com/brevdev/nvcf/cmd/function"
 	"github.com/spf13/cobra"
-	"github.com/tmc/nvcf/cmd"
-	"github.com/tmc/nvcf/cmd/auth"
-	"github.com/tmc/nvcf/cmd/function"
 )
 
 func main() {
