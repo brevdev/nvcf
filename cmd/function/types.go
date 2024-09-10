@@ -7,6 +7,7 @@ type FunctionSpec struct {
 
 type FunctionDef struct {
 	FnName                    string      `yaml:"fn_name"`
+	ExistingFunctionID        string      `yaml:"existingFunctionID,omitempty"`
 	InferenceURL              string      `yaml:"inferenceUrl"`
 	InferencePort             int64       `yaml:"inferencePort,omitempty"`
 	HealthUri                 string      `yaml:"healthUri,omitempty"`

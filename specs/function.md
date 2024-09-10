@@ -20,6 +20,7 @@ Each function in the `functions` array can have the following properties:
 | Field | Description | Required | Default |
 |-------|-------------|----------|---------|
 | `fn_name` | The name of the function | Yes | N/A |
+| `existingFunctionID` | ID of an existing function to create a new version | No | N/A |
 | `inferenceUrl` | The entrypoint URL for invoking the container | Yes | N/A |
 | `inferencePort` | The port number for the inference listener | No | 80 |
 | `containerImage` | The container image for this function | No | Value of `fn_image` |
@@ -75,6 +76,7 @@ Each item in the `models` array should have:
 fn_image: nvcr.io/sklmhpjhptei/test-team/brev-tgi:2.2.0
 functions:
   - fn_name: example-function
+    existingFunctionID: "1234567890"
     inferenceUrl: "/v1/chat/completions"
     inferencePort: 80
     healthUri: "/health"
@@ -127,9 +129,10 @@ nvcf fn create -f path/to/your/spec.yaml --deploy
 
 ## Notes
 
-1. The `custom` field replaces the previous `apiBodyFormat` field. If `custom` is true, the API body format is set to CUSTOM; if false, it's set to PREDICT_V2.
-2. The `streaming` field replaces the previous `functionType` field. If `streaming` is true, the function type is set to STREAMING; if false, it's set to DEFAULT.
-3. Resources and secrets are not currently supported in the implementation and thus not included in this specification.
-4. HelmChart and HelmChartServiceName functionality is not currently implemented.
+1. The `existingFunctionID` field is used to create a new version of an existing function. If provided, the CLI will create a new version for the specified function instead of creating a new function.
+2. The `custom` field replaces the previous `apiBodyFormat` field. If `custom` is true, the API body format is set to CUSTOM; if false, it's set to PREDICT_V2.
+3. The `streaming` field replaces the previous `functionType` field. If `streaming` is true, the function type is set to STREAMING; if false, it's set to DEFAULT.
+4. Resources and secrets are not currently supported in the implementation and thus not included in this specification.
+5. HelmChart and HelmChartServiceName functionality is not currently implemented.
 
 This specification provides a way to define and deploy NVIDIA Cloud Functions, allowing for configuration of multiple functions with varying parameters, including environment variables and associated models. It reflects the current implementation capabilities.

@@ -103,8 +103,8 @@ func functionCreateCmd() *cobra.Command {
 			}
 
 			functionType := defaultFunctionType
-			if streaming {
-				functionType = "STREAMING"
+			if !streaming {
+				functionType = "DEFAULT"
 			}
 
 			if existingFunctionID != "" {
@@ -177,13 +177,11 @@ func functionCreateCmd() *cobra.Command {
 					}),
 				}
 				output.Info(cmd, fmt.Sprintf("Creating new function %s...", name))
-				// create function
 				resp, err := client.Functions.New(cmd.Context(), params)
 				if err != nil {
 					return fmt.Errorf("error creating function: %w", err)
 				}
 				output.Success(cmd, fmt.Sprintf("Function %s with id %s and version %s created successfully", name, resp.Function.ID, resp.Function.VersionID))
-				// deploy function if the deploy flag is set
 				if deploy {
 					return deployFunction(cmd, client, resp, gpu, instanceType, backend, maxInstances, minInstances, maxRequestConcurrency)
 				}
@@ -361,25 +359,77 @@ func createFunctionsFromFile(cmd *cobra.Command, client *api.Client, yamlFile st
 	}
 
 	for _, fn := range spec.Functions {
-		params := prepareFunctionParamsFromFile(spec.FnImage, fn)
-		if err := createAndDeployFunctionFromFile(cmd, client, params, deploy, fn.InstGPUType, fn.InstType, fn.InstBackend, fn.InstMax, fn.InstMin, fn.InstMaxRequestConcurrency); err != nil {
-			return err
+		if fn.ExistingFunctionID != "" {
+			params := prepareFunctionVersionParamsFromFile(spec.FnImage, fn)
+			if err := createAndDeployFunctionVersionFromFile(cmd, client, fn.ExistingFunctionID, params, deploy, fn.InstGPUType, fn.InstType, fn.InstBackend, fn.InstMax, fn.InstMin, fn.InstMaxRequestConcurrency); err != nil {
+				return err
+			}
+		} else {
+			params := prepareFunctionParamsFromFile(spec.FnImage, fn)
+			if err := createAndDeployFunctionFromFile(cmd, client, params, deploy, fn.InstGPUType, fn.InstType, fn.InstBackend, fn.InstMax, fn.InstMin, fn.InstMaxRequestConcurrency); err != nil {
+				return err
+			}
 		}
 	}
 
 	return nil
 }
 
+func prepareFunctionVersionParamsFromFile(fnImage string, fn FunctionDef) nvcf.FunctionVersionNewParams {
+	apiBodyFormat := defaultAPIBodyFormat
+	if !fn.Custom {
+		apiBodyFormat = "PREDICT_V2"
+	}
+
+	functionType := defaultFunctionType
+	if !fn.Streaming {
+		functionType = "DEFAULT"
+	}
+
+	return nvcf.FunctionVersionNewParams{
+		Name:           nvcf.String(fn.FnName),
+		InferenceURL:   nvcf.String(fn.InferenceURL),
+		InferencePort:  nvcf.Int(fn.InferencePort),
+		ContainerImage: nvcf.String(fnImage),
+		ContainerArgs:  nvcf.String(fn.ContainerArgs),
+		APIBodyFormat:  nvcf.F(nvcf.FunctionVersionNewParamsAPIBodyFormat(apiBodyFormat)),
+		Description:    nvcf.F(fn.Description),
+		Tags:           nvcf.F(fn.Tags),
+		FunctionType:   nvcf.F(nvcf.FunctionVersionNewParamsFunctionType(functionType)),
+		Health: nvcf.F(nvcf.FunctionVersionNewParamsHealth{
+			Protocol:           nvcf.F(nvcf.FunctionVersionNewParamsHealthProtocol(fn.Health.Protocol)),
+			Port:               nvcf.F(fn.Health.Port),
+			Timeout:            nvcf.F(fn.Health.Timeout),
+			ExpectedStatusCode: nvcf.F(fn.Health.ExpectedStatusCode),
+			Uri:                nvcf.String(fn.Health.Uri),
+		}),
+	}
+}
+
+func createAndDeployFunctionVersionFromFile(cmd *cobra.Command, client *api.Client, existingFunctionID string, params nvcf.FunctionVersionNewParams, deploy bool, gpu, instanceType, backend string, maxInstances, minInstances, maxRequestConcurrency int64) error {
+	resp, err := client.Functions.Versions.New(cmd.Context(), existingFunctionID, params)
+	if err != nil {
+		return fmt.Errorf("error creating function version: %w", err)
+	}
+
+	output.Success(cmd, fmt.Sprintf("Function version %s created successfully for function %s", resp.Function.VersionID, existingFunctionID))
+
+	if deploy {
+		return deployFunction(cmd, client, resp, gpu, instanceType, backend, maxInstances, minInstances, maxRequestConcurrency)
+	}
+
+	return nil
+}
+
 func prepareFunctionParamsFromFile(fnImage string, fn FunctionDef) nvcf.FunctionNewParams {
-	// Use provided values if present, otherwise use defaults
 	var apiBodyFormat string
-	if fn.Custom {
-		apiBodyFormat = defaultAPIBodyFormat
+	if !fn.Custom {
+		apiBodyFormat = "PREDICT_V2"
 	}
 
 	var functionType string
-	if fn.Streaming {
-		functionType = defaultFunctionType
+	if !fn.Streaming {
+		functionType = "DEFAULT"
 	}
 
 	return nvcf.FunctionNewParams{
