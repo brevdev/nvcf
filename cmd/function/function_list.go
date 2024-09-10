@@ -3,11 +3,11 @@ package function
 import (
 	"fmt"
 
+	"github.com/brevdev/nvcf/api"
+	"github.com/brevdev/nvcf/config"
+	"github.com/brevdev/nvcf/output"
 	"github.com/spf13/cobra"
 	"github.com/tmc/nvcf-go"
-	"github.com/tmc/nvcf/api"
-	"github.com/tmc/nvcf/config"
-	"github.com/tmc/nvcf/output"
 )
 
 func functionListCmd() *cobra.Command {
