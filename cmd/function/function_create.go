@@ -20,6 +20,12 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+// default values for function creation
+const (
+	defaultAPIBodyFormat = "CUSTOM"
+	defaultFunctionType  = "STREAMING"
+)
+
 func functionCreateCmd() *cobra.Command {
 	var (
 		// Function creation parameters
