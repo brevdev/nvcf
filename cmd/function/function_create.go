@@ -207,7 +207,7 @@ func functionCreateCmd() *cobra.Command {
 	cmd.Flags().StringSliceVar(&modelVars, "model", []string{}, "Models for the function (can be used multiple times, format: name:uri:version)")
 
 	//optional new version flag
-	cmd.Flags().StringVar(&existingFunctionID, "new-version", "", "Create a new version of an existing function. Requires a valid function id")
+	cmd.Flags().StringVar(&existingFunctionID, "from-version", "", "Create a new version of an existing function. Requires a valid function id")
 
 	// optional health specification flags
 	cmd.Flags().StringVar(&healthProtocol, "health-protocol", "HTTP", "Health check protocol (HTTP or GRPC). Default is HTTP")
