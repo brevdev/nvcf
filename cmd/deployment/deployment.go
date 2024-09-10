@@ -24,6 +24,6 @@ func DeploymentCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(deploymentListCmd())
-
+	cmd.AddCommand(deploymentGetCmd())
 	return cmd
 }
