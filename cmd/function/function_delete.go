@@ -11,7 +11,7 @@ import (
 
 func functionDeleteCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "delete [function-id]",
+		Use:     "delete <function-id>",
 		Short:   "Delete a function. If you want to delete a specific version, use the --version-id flag.",
 		Example: "nvcf function delete fid --version-id vid",
 		Args:    cobra.ExactArgs(1),
