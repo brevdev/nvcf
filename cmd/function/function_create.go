@@ -11,9 +11,11 @@ import (
 	"os"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/brevdev/nvcf/api"
 	"github.com/brevdev/nvcf/config"
+	"github.com/brevdev/nvcf/flagutil"
 	"github.com/brevdev/nvcf/output"
 	"github.com/spf13/cobra"
 	"github.com/tmc/nvcf-go"
@@ -46,7 +48,7 @@ func functionCreateCmd() *cobra.Command {
 		// Health check parameters
 		healthProtocol   string
 		healthPort       int64
-		healthTimeout    string
+		healthTimeout    time.Duration
 		healthStatusCode int64
 
 		// Deployment parameters
@@ -119,7 +121,7 @@ func functionCreateCmd() *cobra.Command {
 				Health: nvcf.F(nvcf.FunctionNewParamsHealth{
 					Protocol:           nvcf.F(nvcf.FunctionNewParamsHealthProtocol(healthProtocol)),
 					Port:               nvcf.F(healthPort),
-					Timeout:            nvcf.F(healthTimeout),
+					Timeout:            nvcf.F(flagutil.DurationToISO8601(healthTimeout)),
 					ExpectedStatusCode: nvcf.F(healthStatusCode),
 					Uri:                nvcf.String(healthUri),
 				}),
@@ -160,7 +162,7 @@ func functionCreateCmd() *cobra.Command {
 	// optional health specification flags
 	cmd.Flags().StringVar(&healthProtocol, "health-protocol", "HTTP", "Health check protocol (HTTP or GRPC). Default is HTTP")
 	cmd.Flags().Int64Var(&healthPort, "health-port", 80, "Health check port. Default is 80")
-	cmd.Flags().StringVar(&healthTimeout, "health-timeout", "PT20S", "Health check timeout. Default is PT20S") //TODO: allow user to specify in s and we convert
+	cmd.Flags().DurationVar(&healthTimeout, "health-timeout", 20*time.Second, "Health check timeout.") //TODO: allow user to specify in s and we convert
 	cmd.Flags().Int64Var(&healthStatusCode, "health-status-code", 200, "Expected health check status code. Default is 200")
 
 	// deployment flags
