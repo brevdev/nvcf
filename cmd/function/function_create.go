@@ -399,7 +399,7 @@ func prepareFunctionVersionParamsFromFile(fnImage string, fn FunctionDef) nvcf.F
 		Health: nvcf.F(nvcf.FunctionVersionNewParamsHealth{
 			Protocol:           nvcf.F(nvcf.FunctionVersionNewParamsHealthProtocol(fn.Health.Protocol)),
 			Port:               nvcf.F(fn.Health.Port),
-			Timeout:            nvcf.F(flagutil.DurationToISO8601(time.Duration(fn.Health.Timeout) * time.Second)),
+			Timeout:            nvcf.F(flagutil.DurationToISO8601(fn.Health.Timeout)),
 			ExpectedStatusCode: nvcf.F(fn.Health.ExpectedStatusCode),
 			Uri:                nvcf.String(fn.Health.Uri),
 		}),
@@ -447,7 +447,7 @@ func prepareFunctionParamsFromFile(fnImage string, fn FunctionDef) nvcf.Function
 		Health: nvcf.F(nvcf.FunctionNewParamsHealth{
 			Protocol:           nvcf.F(nvcf.FunctionNewParamsHealthProtocol(fn.Health.Protocol)),
 			Port:               nvcf.F(fn.Health.Port),
-			Timeout:            nvcf.F(flagutil.DurationToISO8601(time.Duration(fn.Health.Timeout) * time.Second)),
+			Timeout:            nvcf.F(flagutil.DurationToISO8601(fn.Health.Timeout)),
 			ExpectedStatusCode: nvcf.F(fn.Health.ExpectedStatusCode),
 			Uri:                nvcf.String(fn.Health.Uri),
 		}),
