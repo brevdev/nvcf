@@ -12,11 +12,13 @@ import (
 
 func functionListCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "list",
-		Short: "List all functions",
-		Run:   runFunctionList,
+		Use:     "list",
+		Aliases: []string{"ls"},
+		Short:   "List all functions. Use the --visibility flag to filter by visibility.",
+		Example: "nvcf function list --visibility authorized",
+		Run:     runFunctionList,
 	}
-	cmd.Flags().StringSlice("visibility", []string{}, "Filter by visibility (authorized, private, public)")
+	cmd.Flags().StringSlice("visibility", []string{"private"}, "Filter by visibility (authorized, private, public). Defaults to private.")
 	return cmd
 }
 
@@ -48,5 +50,3 @@ func parseVisibilityFlags(cmd *cobra.Command) []nvcf.FunctionListParamsVisibilit
 	}
 	return visibilityParams
 }
-
-// Implement other function subcommands (create, get, update, delete, version) here
