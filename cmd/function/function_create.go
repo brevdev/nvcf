@@ -85,16 +85,16 @@ func functionCreateCmd() *cobra.Command {
 		}, RunE: func(cmd *cobra.Command, args []string) error {
 			client := api.NewClient(config.GetAPIKey())
 
+			if fileSpec != "" {
+				return createFunctionsFromFile(cmd, client, fileSpec, deploy)
+			}
+
 			if existingFunctionID != "" {
 				_, err := client.Functions.Versions.List(cmd.Context(), existingFunctionID)
 				if err != nil {
 					output.Error(cmd, "Error listing function versions", err)
 					return fmt.Errorf("error getting function: %w", err)
 				}
-			}
-
-			if fileSpec != "" {
-				return createFunctionsFromFile(cmd, client, fileSpec, deploy)
 			}
 
 			apiBodyFormat := defaultAPIBodyFormat
@@ -422,15 +422,17 @@ func createAndDeployFunctionVersionFromFile(cmd *cobra.Command, client *api.Clie
 }
 
 func prepareFunctionParamsFromFile(fnImage string, fn FunctionDef) nvcf.FunctionNewParams {
-	var apiBodyFormat string
+	apiBodyFormat := defaultAPIBodyFormat
 	if !fn.Custom {
 		apiBodyFormat = "PREDICT_V2"
 	}
 
-	var functionType string
+	functionType := defaultFunctionType
 	if !fn.Streaming {
 		functionType = "DEFAULT"
 	}
+
+	fmt.Println(apiBodyFormat)
 
 	return nvcf.FunctionNewParams{
 		Name:           nvcf.String(fn.FnName),

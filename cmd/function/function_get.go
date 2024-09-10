@@ -14,7 +14,7 @@ func functionGetCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "get [function-id]",
 		Args:    cobra.ExactArgs(1),
-		Short:   "Get details and versions ofa single function. If you want to get a specific version, use the --version-id flag.",
+		Short:   "Get details and versions of a single function. If you want to get a specific version, use the --version-id flag.",
 		Example: "nvcf function get fid --version-id vid --include-secrets",
 		Run:     runFunctionGet,
 	}
