@@ -131,7 +131,7 @@ func functionCreateCmd() *cobra.Command {
 					Health: nvcf.F(nvcf.FunctionVersionNewParamsHealth{
 						Protocol:           nvcf.F(nvcf.FunctionVersionNewParamsHealthProtocol(healthProtocol)),
 						Port:               nvcf.F(healthPort),
-						Timeout:            nvcf.F(flagutil.DurationToISO8601(healthTimeout)),
+						Timeout:            nvcf.F(flagutil.DurationToISO8601(time.Duration(healthTimeout) * time.Second)),
 						ExpectedStatusCode: nvcf.F(healthStatusCode),
 						Uri:                nvcf.String(healthUri),
 					}),
@@ -171,7 +171,7 @@ func functionCreateCmd() *cobra.Command {
 					Health: nvcf.F(nvcf.FunctionNewParamsHealth{
 						Protocol:           nvcf.F(nvcf.FunctionNewParamsHealthProtocol(healthProtocol)),
 						Port:               nvcf.F(healthPort),
-						Timeout:            nvcf.F(flagutil.DurationToISO8601(healthTimeout)),
+						Timeout:            nvcf.F(flagutil.DurationToISO8601(time.Duration(healthTimeout) * time.Second)),
 						ExpectedStatusCode: nvcf.F(healthStatusCode),
 						Uri:                nvcf.String(healthUri),
 					}),
@@ -399,7 +399,7 @@ func prepareFunctionVersionParamsFromFile(fnImage string, fn FunctionDef) nvcf.F
 		Health: nvcf.F(nvcf.FunctionVersionNewParamsHealth{
 			Protocol:           nvcf.F(nvcf.FunctionVersionNewParamsHealthProtocol(fn.Health.Protocol)),
 			Port:               nvcf.F(fn.Health.Port),
-			Timeout:            nvcf.F(fn.Health.Timeout),
+			Timeout:            nvcf.F(flagutil.DurationToISO8601(time.Duration(fn.Health.Timeout) * time.Second)),
 			ExpectedStatusCode: nvcf.F(fn.Health.ExpectedStatusCode),
 			Uri:                nvcf.String(fn.Health.Uri),
 		}),
@@ -447,7 +447,7 @@ func prepareFunctionParamsFromFile(fnImage string, fn FunctionDef) nvcf.Function
 		Health: nvcf.F(nvcf.FunctionNewParamsHealth{
 			Protocol:           nvcf.F(nvcf.FunctionNewParamsHealthProtocol(fn.Health.Protocol)),
 			Port:               nvcf.F(fn.Health.Port),
-			Timeout:            nvcf.F(fn.Health.Timeout),
+			Timeout:            nvcf.F(flagutil.DurationToISO8601(time.Duration(fn.Health.Timeout) * time.Second)),
 			ExpectedStatusCode: nvcf.F(fn.Health.ExpectedStatusCode),
 			Uri:                nvcf.String(fn.Health.Uri),
 		}),

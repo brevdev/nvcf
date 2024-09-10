@@ -31,7 +31,7 @@ type FunctionDef struct {
 type HealthCheck struct {
 	Protocol           string `yaml:"protocol,omitempty"`
 	Port               int64  `yaml:"port,omitempty"`
-	Timeout            string `yaml:"timeout,omitempty"`
+	Timeout            int64  `yaml:"timeout,omitempty"`
 	ExpectedStatusCode int64  `yaml:"expectedStatusCode,omitempty"`
 	Uri                string `yaml:"uri,omitempty"`
 }
