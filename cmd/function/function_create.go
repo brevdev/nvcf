@@ -70,7 +70,7 @@ func functionCreateCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create",
 		Short: "Create a new function",
-		Long:  `Create a new NVIDIA Cloud Function with the specified parameters. If you specify `,
+		Long:  `Create a new NVIDIA Cloud Function with the specified parameters. If you specify --new-version, we will create a new version of an existing function.`,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			fileSpec, _ := cmd.Flags().GetString("file")
 			if fileSpec == "" {
