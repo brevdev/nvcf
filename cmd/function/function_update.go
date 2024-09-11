@@ -25,7 +25,7 @@ func functionUpdateCmd() *cobra.Command {
 		Use:     "update <function-id>",
 		Short:   "Update a function",
 		Long:    "If a version-id is not provided, we look for versions that are actively deployed. If a single function is deployed, we update that version. If multiple functions are deployed, we prompt for the version-id to update.",
-		Example: "nvcf function update fid --version-id vid --gpu A100 --instance-type g4dn.xlarge --min-instances 1 --max-instances 5 --max-request-concurrency 100",
+		Example: "nvcf function update fid --version-id vid --gpu A100 --instance-type g5.4xlarge --min-instances 1 --max-instances 5 --max-request-concurrency 100",
 		Args:    cobra.ExactArgs(1),
 		Run:     runFunctionUpdate,
 	}
