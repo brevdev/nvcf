@@ -7,83 +7,50 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os/exec"
 	"time"
-
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/client"
-	"github.com/docker/go-connections/nat"
 )
 
 type ContainerSmokeTest struct {
 	DefaultPort    int
 	WaitIterations int
-	DockerClient   *client.Client
 	ContainerID    string
 	HostPort       string
 }
 
 func NewContainerSmokeTest() (*ContainerSmokeTest, error) {
-	cli, err := client.NewClientWithOpts(client.FromEnv)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create Docker client: %v", err)
-	}
-
 	return &ContainerSmokeTest{
 		DefaultPort:    18080,
 		WaitIterations: 100,
-		DockerClient:   cli,
 	}, nil
 }
 
 func (cst *ContainerSmokeTest) LaunchContainer(imageName, containerPort string) error {
 	ctx := context.Background()
-	resp, err := cst.DockerClient.ContainerCreate(ctx,
-		&container.Config{
-			Image: imageName,
-			ExposedPorts: nat.PortSet{
-				nat.Port(containerPort): struct{}{},
-			},
-		},
-		&container.HostConfig{
-			PortBindings: nat.PortMap{
-				nat.Port(containerPort): []nat.PortBinding{
-					{
-						HostIP:   "127.0.0.1",
-						HostPort: fmt.Sprintf("%d", cst.DefaultPort),
-					},
-				},
-			},
-		}, nil, nil, "")
+	cmd := exec.CommandContext(ctx, "docker", "run", "-d", "-p", fmt.Sprintf("%d:%s", cst.DefaultPort, containerPort), imageName)
+	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("failed to create container: %v", err)
+		return fmt.Errorf("failed to start container: %v, output: %s", err, output)
 	}
 
-	cst.ContainerID = resp.ID
+	cst.ContainerID = string(bytes.TrimSpace(output))
 	cst.HostPort = fmt.Sprintf("%d", cst.DefaultPort)
-
-	if err := cst.DockerClient.ContainerStart(ctx, cst.ContainerID, container.StartOptions{}); err != nil {
-		return fmt.Errorf("failed to start container: %v", err)
-	}
 
 	// Check if the container is still running after a short delay
 	time.Sleep(2 * time.Second)
 
-	containerInfo, err := cst.DockerClient.ContainerInspect(ctx, cst.ContainerID)
+	cmd = exec.CommandContext(ctx, "docker", "inspect", "-f", "{{.State.Running}}", cst.ContainerID)
+	output, err = cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("failed to inspect container: %v", err)
+		return fmt.Errorf("failed to inspect container: %v, output: %s", err, output)
 	}
 
-	if !containerInfo.State.Running {
+	if string(bytes.TrimSpace(output)) != "true" {
 		// Container exited, fetch and display logs
-		out, err := cst.DockerClient.ContainerLogs(ctx, cst.ContainerID, container.LogsOptions{ShowStdout: true, ShowStderr: true})
+		cmd = exec.CommandContext(ctx, "docker", "logs", cst.ContainerID)
+		logs, err := cmd.CombinedOutput()
 		if err != nil {
 			return fmt.Errorf("container exited and failed to fetch logs: %v", err)
-		}
-		defer out.Close()
-
-		logs, err := io.ReadAll(out)
-		if err != nil {
-			return fmt.Errorf("failed to read container logs: %v", err)
 		}
 
 		return fmt.Errorf("container exited unexpectedly. Logs:\n%s", string(logs))
@@ -135,30 +102,35 @@ func (cst *ContainerSmokeTest) TestHTTPInference(inferenceEndpoint string, paylo
 }
 
 func (cst *ContainerSmokeTest) Cleanup() error {
-	ctx := context.Background()
-	return cst.DockerClient.ContainerRemove(ctx, cst.ContainerID, container.RemoveOptions{Force: true})
+	cmd := exec.Command("docker", "rm", "-f", cst.ContainerID)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("failed to remove container: %v, output: %s", err, output)
+	}
+	return nil
 }
 
-// ForceCleanup stops and removes all containers created from the specified image
 func (cst *ContainerSmokeTest) ForceCleanup(imageName string) error {
-	ctx := context.Background()
-	containers, err := cst.DockerClient.ContainerList(ctx, container.ListOptions{All: true})
+	cmd := exec.Command("docker", "ps", "-a", "-q", "--filter", fmt.Sprintf("ancestor=%s", imageName))
+	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return fmt.Errorf("failed to list containers: %v", err)
+		return fmt.Errorf("failed to list containers: %v, output: %s", err, output)
 	}
 
-	stopOpts := container.StopOptions{}
-	removeOpts := container.RemoveOptions{Force: true}
-	for _, container := range containers {
-		if container.Image == imageName {
-			fmt.Printf("Stopping and removing container %s...\n", container.ID[:12])
-			if err := cst.DockerClient.ContainerStop(ctx, container.ID, stopOpts); err != nil {
-				fmt.Printf("Warning: Failed to stop container %s: %v\n", container.ID[:12], err)
-			}
-			if err := cst.DockerClient.ContainerRemove(ctx, container.ID, removeOpts); err != nil {
-				fmt.Printf("Warning: Failed to remove container %s: %v\n", container.ID[:12], err)
-			}
+	containerIDs := bytes.Fields(output)
+	for _, containerID := range containerIDs {
+		stopCmd := exec.Command("docker", "stop", string(containerID))
+		_, err := stopCmd.CombinedOutput()
+		if err != nil {
+			fmt.Printf("Warning: Failed to stop container %s: %v\n", containerID, err)
+		}
+
+		rmCmd := exec.Command("docker", "rm", "-f", string(containerID))
+		_, err = rmCmd.CombinedOutput()
+		if err != nil {
+			fmt.Printf("Warning: Failed to remove container %s: %v\n", containerID, err)
 		}
 	}
+
 	return nil
 }
