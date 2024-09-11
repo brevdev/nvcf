@@ -15,7 +15,8 @@ import (
 func deploymentGetCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get <function-id>",
-		Short: "Get a NVIDIA Cloud Deployment. If a version-id is not provided and there are multiple associated with a function, we will look for all deployments and prompt for a version-id.",
+		Short: "Get a NVCF Deployment",
+		Long:  "Get a NVCF Deployment. If a version-id is not provided and there are multiple associated with a function, we will look for all deployments and prompt for a version-id.",
 		Args:  cobra.ExactArgs(1),
 		Run:   runDeploymentGet,
 	}

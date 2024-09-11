@@ -12,8 +12,8 @@ func DeploymentCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "deployment",
 		Aliases: []string{"deploy", "d"},
-		Short:   "Manage NVIDIA Cloud Deployments",
-		Long:    `Create, list, update, call, deploy, and delete NVIDIA Cloud Deployments`,
+		Short:   "Manage NVCF Deployments",
+		Long:    `Create, list, update, call, deploy, and delete NVCF Deployments`,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			config.Init()
 			if cmd.Name() != "auth" && !config.IsAuthenticated() {
@@ -25,5 +25,6 @@ func DeploymentCmd() *cobra.Command {
 
 	cmd.AddCommand(deploymentListCmd())
 	cmd.AddCommand(deploymentGetCmd())
+	// cmd.AddCommand(deploymentUpdateCmd())
 	return cmd
 }
