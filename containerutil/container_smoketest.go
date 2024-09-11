@@ -1,6 +1,7 @@
 package containerutil
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -77,30 +78,6 @@ func (cst *ContainerSmokeTest) CheckHTTPHealthEndpoint(healthEndpoint string, se
 	return fmt.Errorf("health check did not complete successfully in time")
 }
 
-func (cst *ContainerSmokeTest) TestHTTPInference(inferenceEndpoint string, payload interface{}) error {
-	inferenceURL := fmt.Sprintf("http://localhost:%s%s", cst.HostPort, inferenceEndpoint)
-	fmt.Printf("Sending payload to %s...\n", inferenceURL)
-
-	payloadBytes, err := json.Marshal(payload)
-	if err != nil {
-		return fmt.Errorf("failed to marshal payload: %v", err)
-	}
-
-	resp, err := http.Post(inferenceURL, "application/json", bytes.NewBuffer(payloadBytes))
-	if err != nil {
-		return fmt.Errorf("failed to send inference request: %v", err)
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("failed to read response body: %v", err)
-	}
-
-	fmt.Printf("Server's response: %s\n", string(body))
-	return nil
-}
-
 func (cst *ContainerSmokeTest) Cleanup() error {
 	cmd := exec.Command("docker", "rm", "-f", cst.ContainerID)
 	output, err := cmd.CombinedOutput()
@@ -129,6 +106,50 @@ func (cst *ContainerSmokeTest) ForceCleanup(imageName string) error {
 		_, err = rmCmd.CombinedOutput()
 		if err != nil {
 			fmt.Printf("Warning: Failed to remove container %s: %v\n", containerID, err)
+		}
+	}
+
+	return nil
+}
+
+func (cst *ContainerSmokeTest) TestHTTPInference(inferenceEndpoint string, payload interface{}) error {
+	inferenceURL := fmt.Sprintf("http://localhost:%s%s", cst.HostPort, inferenceEndpoint)
+	fmt.Printf("Sending payload to %s...\n", inferenceURL)
+
+	payloadBytes, err := json.Marshal(payload)
+	if err != nil {
+		return fmt.Errorf("failed to marshal payload: %v", err)
+	}
+
+	resp, err := http.Post(inferenceURL, "application/json", bytes.NewBuffer(payloadBytes))
+	if err != nil {
+		return fmt.Errorf("failed to send inference request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	fmt.Printf("Server's response status: %s\n", resp.Status)
+	fmt.Printf("Server's response headers: %v\n", resp.Header)
+
+	if resp.Header.Get("Content-Type") == "text/event-stream" {
+		fmt.Println("Received a streaming response:")
+		scanner := bufio.NewScanner(resp.Body)
+		for scanner.Scan() {
+			fmt.Println(scanner.Text())
+		}
+		if err := scanner.Err(); err != nil {
+			return fmt.Errorf("error reading stream: %v", err)
+		}
+	} else {
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return fmt.Errorf("failed to read response body: %v", err)
+		}
+		fmt.Printf("Server's response body: %s\n", string(body))
+
+		var result interface{}
+		if err := json.Unmarshal(body, &result); err == nil {
+			prettyJSON, _ := json.MarshalIndent(result, "", "  ")
+			fmt.Printf("Parsed JSON response:\n%s\n", string(prettyJSON))
 		}
 	}
 

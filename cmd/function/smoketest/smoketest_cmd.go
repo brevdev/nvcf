@@ -21,6 +21,8 @@ var (
 	grpcServiceName         string
 	grpcMethodName          string
 	grpcInputData           string
+	httpInferenceEndpoint   string
+	httpPayload             string
 )
 
 // NewSmokeTestCmd returns a new smoketest command for verifying container compatibility with NVCF.
@@ -47,6 +49,8 @@ and performs basic connectivity tests to ensure it meets NVCF requirements.`,
 	cmd.Flags().StringVar(&grpcServiceName, "grpc-service-name", "", "gRPC service name (required for gRPC)")
 	cmd.Flags().StringVar(&grpcMethodName, "grpc-method-name", "", "gRPC method name (required for gRPC)")
 	cmd.Flags().StringVar(&grpcInputData, "grpc-input-data", "{}", "JSON string representing input data for gRPC method")
+	cmd.Flags().StringVar(&httpInferenceEndpoint, "http-inference-endpoint", "/", "HTTP inference endpoint")
+	cmd.Flags().StringVar(&httpPayload, "http-payload", "{}", "JSON string representing input data for HTTP inference")
 	return cmd
 }
 
@@ -102,20 +106,35 @@ func runLocalDeploymentTest(cmd *cobra.Command, args []string) {
 
 	fmt.Println("Health Check succeeded!")
 
-	if protocol == "grpc" {
-		var inputData map[string]interface{}
-		err := json.Unmarshal([]byte(grpcInputData), &inputData)
+	if protocol == "http" {
+		var payload interface{}
+		err := json.Unmarshal([]byte(httpPayload), &payload)
 		if err != nil {
-			fmt.Printf("Error parsing gRPC input data: %v\n", err)
+			fmt.Printf("Error parsing HTTP payload: %v\n", err)
 			os.Exit(1)
 		}
 
-		err = cst.TestGRPCInference(grpcServiceName, grpcMethodName, inputData, false)
+		err = cst.TestHTTPInference(httpInferenceEndpoint, payload)
 		if err != nil {
-			fmt.Printf("Error testing gRPC inference: %v\n", err)
-			os.Exit(1)
+			if err != nil {
+				fmt.Printf("Error testing HTTP inference: %v\n", err)
+				fmt.Println("HTTP inference test failed. Please check your application's endpoints and try again.")
+				os.Exit(1)
+			}
+			fmt.Println("HTTP inference test succeeded!")
+		} else if protocol == "grpc" {
+			var inputData map[string]interface{}
+			err := json.Unmarshal([]byte(grpcInputData), &inputData)
+			if err != nil {
+				fmt.Printf("Error parsing gRPC input data: %v\n", err)
+				os.Exit(1)
+			}
+
+			err = cst.TestGRPCInference(grpcServiceName, grpcMethodName, inputData, false)
+			if err != nil {
+				fmt.Printf("Error testing gRPC inference: %v\n", err)
+				os.Exit(1)
+			}
 		}
-	} else {
-		fmt.Println("HTTP inference testing not implemented in this version.")
 	}
 }
