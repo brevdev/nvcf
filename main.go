@@ -6,7 +6,6 @@ import (
 
 	"github.com/brevdev/nvcf/cmd"
 	"github.com/brevdev/nvcf/cmd/auth"
-	"github.com/brevdev/nvcf/cmd/deployment"
 	"github.com/brevdev/nvcf/cmd/function"
 	"github.com/spf13/cobra"
 )
@@ -26,7 +25,6 @@ func main() {
 
 	// Add commands
 	rootCmd.AddCommand(function.FunctionCmd())
-	rootCmd.AddCommand(deployment.DeploymentCmd())
 	// rootCmd.AddCommand(cmd.InvokeCmd())
 	// rootCmd.AddCommand(cmd.AssetCmd())
 	rootCmd.AddCommand(auth.AuthCmd())
