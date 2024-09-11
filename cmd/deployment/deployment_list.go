@@ -14,7 +14,8 @@ func deploymentListCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "list",
 		Aliases: []string{"ls", "l"},
-		Short:   "List NVIDIA Cloud Deployments. Defaults to listing all ACTIVE deployments. Filter by status using the --status flag.",
+		Short:   "List NVCF Deployments",
+		Long:    "List NVIDIA Cloud Deployments. Defaults to listing all ACTIVE deployments. Filter by status using the --status flag",
 		Run:     runDeploymentList,
 	}
 

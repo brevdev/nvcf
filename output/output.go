@@ -67,10 +67,10 @@ func Functions(cmd *cobra.Command, functions []nvcf.ListFunctionsResponseFunctio
 }
 func printFunctionsTable(cmd *cobra.Command, functions []nvcf.ListFunctionsResponseFunction) {
 	table := tablewriter.NewWriter(cmd.OutOrStdout())
-	table.SetHeader([]string{"Name", "ID", "Status"})
+	table.SetHeader([]string{"Name", "Version ID", "Status"})
 	table.SetBorder(false)
 	for _, f := range functions {
-		table.Append([]string{f.Name, f.ID, string(f.Status)})
+		table.Append([]string{f.Name, f.VersionID, string(f.Status)})
 	}
 	table.Render()
 }
