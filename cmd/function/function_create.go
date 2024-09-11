@@ -6,10 +6,8 @@
 package function
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
-	"reflect"
 	"strings"
 	"time"
 
@@ -328,18 +326,18 @@ func deployFunction(cmd *cobra.Command, client *api.Client, resp *nvcf.CreateFun
 	return nil
 }
 
-// jsonMarshalUnmarshal marshals the src to JSON and then unmarshals it into dest
-func jsonMarshalUnmarshal(dest any, src any) error {
-	// Validate dest is a pointer
-	if reflect.ValueOf(dest).Kind() != reflect.Ptr {
-		return fmt.Errorf("destination must be a pointer")
-	}
-	jsonData, err := json.Marshal(src)
-	if err != nil {
-		return err
-	}
-	return json.Unmarshal(jsonData, dest)
-}
+// // jsonMarshalUnmarshal marshals the src to JSON and then unmarshals it into dest
+// func jsonMarshalUnmarshal(dest any, src any) error {
+// 	// Validate dest is a pointer
+// 	if reflect.ValueOf(dest).Kind() != reflect.Ptr {
+// 		return fmt.Errorf("destination must be a pointer")
+// 	}
+// 	jsonData, err := json.Marshal(src)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	return json.Unmarshal(jsonData, dest)
+// }
 
 func createFunctionsFromFile(cmd *cobra.Command, client *api.Client, yamlFile string, deploy bool) error {
 	data, err := os.ReadFile(yamlFile)
