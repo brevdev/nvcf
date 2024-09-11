@@ -1,4 +1,4 @@
-package localdeploymenttest
+package smoketest
 
 import (
 	"encoding/json"
@@ -23,26 +23,29 @@ var (
 	grpcInputData           string
 )
 
-// LocalDeploymentTestCmd represents the local-deployment-test command
-var LocalDeploymentTestCmd = &cobra.Command{
-	Use:   "local-deployment-test",
-	Short: "Run local deployment test",
-	Long:  `Run local deployment test to verify container compatibility with NVCF`,
-	Run:   runLocalDeploymentTest,
-}
-
-func init() {
-	LocalDeploymentTestCmd.Flags().StringVar(&imageName, "image-name", "", "Name of the Docker image")
-	LocalDeploymentTestCmd.Flags().StringVar(&containerPort, "container-port", "8000", "Port that the server is listening on")
-	LocalDeploymentTestCmd.Flags().StringVar(&protocol, "protocol", "http", "Protocol that the server is running (http or grpc)")
-	LocalDeploymentTestCmd.Flags().StringVar(&healthEndpoint, "health-endpoint", "/v2/health/ready", "Health endpoint exposed by the server (for HTTP)")
-	LocalDeploymentTestCmd.Flags().IntVar(&secondsToWaitForHealthy, "seconds-to-wait-for-healthy", 600, "How long to wait for the health endpoint to be ready")
-	LocalDeploymentTestCmd.Flags().BoolVar(&forceCleanup, "force-cleanup", false, "Force cleanup of existing containers before starting")
-	LocalDeploymentTestCmd.Flags().StringVar(&grpcServiceName, "grpc-service-name", "", "gRPC service name (required for gRPC)")
-	LocalDeploymentTestCmd.Flags().StringVar(&grpcMethodName, "grpc-method-name", "", "gRPC method name (required for gRPC)")
-	LocalDeploymentTestCmd.Flags().StringVar(&grpcInputData, "grpc-input-data", "{}", "JSON string representing input data for gRPC method")
-
-	LocalDeploymentTestCmd.MarkFlagRequired("image-name")
+// NewSmokeTestCmd returns a new smoketest command for verifying container compatibility with NVCF.
+// This command runs a local deployment test to ensure the specified Docker image
+// can be successfully deployed and accessed.
+func NewSmokeTestCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "smoketest",
+		Short: "Run local deployment test for NVCF compatibility",
+		Long: `Run a local deployment test to verify container compatibility with NVCF.
+This command deploys the specified Docker image locally, checks its health,
+and performs basic connectivity tests to ensure it meets NVCF requirements.`,
+		Run: runLocalDeploymentTest,
+	}
+	cmd.Flags().StringVar(&imageName, "image-name", "", "Name of the Docker image to test")
+	cmd.Flags().StringVar(&containerPort, "container-port", "8000", "Port that the server is listening on")
+	cmd.Flags().StringVar(&protocol, "protocol", "http", "Protocol that the server is running (http or grpc)")
+	cmd.Flags().StringVar(&healthEndpoint, "health-endpoint", "/v2/health/ready", "Health endpoint exposed by the server (for HTTP)")
+	cmd.Flags().IntVar(&secondsToWaitForHealthy, "seconds-to-wait-for-healthy", 600, "Maximum time to wait for the health endpoint to be ready (in seconds)")
+	cmd.Flags().BoolVar(&forceCleanup, "force-cleanup", false, "Force cleanup of existing containers before starting the test")
+	cmd.Flags().StringVar(&grpcServiceName, "grpc-service-name", "", "gRPC service name (required for gRPC)")
+	cmd.Flags().StringVar(&grpcMethodName, "grpc-method-name", "", "gRPC method name (required for gRPC)")
+	cmd.Flags().StringVar(&grpcInputData, "grpc-input-data", "{}", "JSON string representing input data for gRPC method")
+	cmd.MarkFlagRequired("image-name")
+	return cmd
 }
 
 func runLocalDeploymentTest(cmd *cobra.Command, args []string) {

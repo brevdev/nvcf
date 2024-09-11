@@ -8,13 +8,19 @@ import (
 	"github.com/brevdev/nvcf/cmd/auth"
 	"github.com/brevdev/nvcf/cmd/function"
 	"github.com/brevdev/nvcf/cmd/gpu"
-	"github.com/brevdev/nvcf/cmd/localdeploymenttest"
 	"github.com/brevdev/nvcf/cmd/test"
 	"github.com/brevdev/nvcf/output"
 	"github.com/spf13/cobra"
 )
 
 func main() {
+	if err := run(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+
+func run() error {
 	rootCmd := &cobra.Command{
 		Use:           "nvcf",
 		Short:         "NVIDIA Cloud Functions CLI",
@@ -45,13 +51,9 @@ func main() {
 	rootCmd.AddCommand(cmd.DocsCmd())
 	rootCmd.AddCommand(test.TestCmd())
 
-	rootCmd.AddCommand(localdeploymenttest.LocalDeploymentTestCmd)
 	// // Enable command auto-completion
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
 	rootCmd.AddCommand(cmd.CompletionCmd())
 
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+	return rootCmd.Execute()
 }
