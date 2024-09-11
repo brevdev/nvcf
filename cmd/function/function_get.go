@@ -36,9 +36,7 @@ func runFunctionGet(cmd *cobra.Command, args []string) {
 			output.Error(cmd, "Error listing function versions", err)
 			return
 		}
-		for _, version := range versions.Functions {
-			output.MultiFunction(cmd, version)
-		}
+		output.Functions(cmd, versions.Functions)
 	} else {
 		output.Info(cmd, fmt.Sprintf("Getting version %s of function %s", versionID, functionID))
 		query := nvcf.FunctionVersionGetParams{

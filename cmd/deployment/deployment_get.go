@@ -27,7 +27,6 @@ func deploymentGetCmd() *cobra.Command {
 func runDeploymentGet(cmd *cobra.Command, args []string) {
 	client := api.NewClient(config.GetAPIKey())
 	versionID, _ := cmd.Flags().GetString("version-id")
-	// version id was provided
 	if versionID != "" {
 		deployment, err := client.FunctionDeployment.Functions.Versions.GetDeployment(cmd.Context(), args[0], versionID)
 		if err != nil {
@@ -35,28 +34,25 @@ func runDeploymentGet(cmd *cobra.Command, args []string) {
 			return
 		}
 		fmt.Println(deployment)
-		// output.Deployment(cmd, deployment)
+		return
 	}
 
-	// version id was not provided - lets look for the function deployment
 	versions, err := client.Functions.Versions.List(cmd.Context(), args[0])
 	if err != nil {
 		output.Error(cmd, "Error listing function versions", err)
 		return
 	}
-	// there is only 1 version which is the one that was deployed
 	if len(versions.Functions) == 1 {
 		deployment, err := client.FunctionDeployment.Functions.Versions.GetDeployment(cmd.Context(), args[0], versions.Functions[0].ID)
 		if err != nil {
 			output.Error(cmd, "Error getting deployment", err)
 			return
 		}
-		fmt.Println(deployment)
-		// output.SingleFunction(cmd, deployment)
+		output.SingleDeployment(cmd, *deployment)
 	} else {
 		output.Info(cmd, "Multiple versions found. Please specify a version-id")
 		for _, version := range versions.Functions {
-			// skip functions that have a status of INACTIVE
+			// skip functions that have a status of INACTIVE. Those are not considered deployments
 			if version.Status == "INACTIVE" {
 				continue
 			}
@@ -71,7 +67,6 @@ func runDeploymentGet(cmd *cobra.Command, args []string) {
 			output.Error(cmd, "Error getting deployment", err)
 			return
 		}
-		fmt.Println(deployment)
-		// output.Deployment(cmd, deployment)
+		output.SingleDeployment(cmd, *deployment)
 	}
 }

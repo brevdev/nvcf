@@ -325,12 +325,6 @@ func deployFunction(cmd *cobra.Command, client *api.Client, resp *nvcf.CreateFun
 
 	output.Success(cmd, fmt.Sprintf("Function with FunctionID %s and VersionID %s deployed successfully", resp.Function.ID, resp.Function.VersionID))
 
-	var fn nvcf.ListFunctionsResponseFunction
-	if err := jsonMarshalUnmarshal(&fn, resp.Function); err != nil {
-		return fmt.Errorf("issue marshaling+unmarshaling: %w", err)
-	}
-	output.MultiFunction(cmd, fn)
-
 	return nil
 }
 
