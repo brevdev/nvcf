@@ -23,7 +23,6 @@ func DeploymentCmd() *cobra.Command {
 		},
 	}
 
-	cmd.AddCommand(deploymentListCmd())
 	cmd.AddCommand(deploymentGetCmd())
 	// cmd.AddCommand(deploymentUpdateCmd())
 	return cmd
