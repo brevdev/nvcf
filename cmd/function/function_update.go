@@ -27,7 +27,7 @@ func functionUpdateCmd() *cobra.Command {
 		Long:    "If a version-id is not provided, we look for versions that are actively deployed. If a single function is deployed, we update that version. If multiple functions are deployed, we prompt for the version-id to update.",
 		Example: "nvcf function update fid --version-id vid --gpu A100 --instance-type g5.4xlarge --min-instances 1 --max-instances 5 --max-request-concurrency 100",
 		Args:    cobra.ExactArgs(1),
-		Run:     runFunctionUpdate,
+		RunE:    runFunctionUpdate,
 	}
 	cmd.Flags().String("version-id", "", "The ID of the version")
 	cmd.Flags().StringVar(&gpu, "gpu", "", "GPU name from the cluster")
@@ -38,42 +38,40 @@ func functionUpdateCmd() *cobra.Command {
 	return cmd
 }
 
-func runFunctionUpdate(cmd *cobra.Command, args []string) {
+func runFunctionUpdate(cmd *cobra.Command, args []string) error {
 	client := api.NewClient(config.GetAPIKey())
 	functionID := args[0]
 	versionID, _ := cmd.Flags().GetString("version-id")
 
 	versions, err := client.Functions.Versions.List(cmd.Context(), functionID)
 	if err != nil {
-		output.Error(cmd, "Error listing function versions", err)
-		return
+		return output.Error(cmd, "Error listing function versions", err)
 	}
 
 	var fnDeployment *nvcf.DeploymentResponse
 	// Select the version to update
 	if versionID == "" {
-		vid := selectVersionToUpdate(cmd, versions.Functions)
+		vid, err := selectVersionToUpdate(cmd, versions.Functions)
+		if err != nil {
+			return err
+		}
 		fnDeployment, err = client.FunctionDeployment.Functions.Versions.GetDeployment(cmd.Context(), functionID, vid)
 		if err != nil {
-			output.Error(cmd, "Error getting function version", err)
-			return
+			return output.Error(cmd, "Error getting function version", err)
 		}
 	} else {
 		statusCheck, err := client.Functions.Versions.Get(cmd.Context(), functionID, versionID, nvcf.FunctionVersionGetParams{
 			IncludeSecrets: nvcf.Bool(false),
 		})
 		if err != nil {
-			output.Error(cmd, "Error getting function version", err)
-			return
+			return output.Error(cmd, "Error getting function version", err)
 		}
 		if statusCheck.Function.Status == "INACTIVE" {
-			output.Error(cmd, "You can only update a deployed version. This version is inactive.", nil)
-			return
+			return output.Error(cmd, "You can only update a deployed version. This version is inactive.", nil)
 		}
 		fnDeployment, err = client.FunctionDeployment.Functions.Versions.GetDeployment(cmd.Context(), functionID, versionID)
 		if err != nil {
-			output.Error(cmd, "Error getting function version", err)
-			return
+			return output.Error(cmd, "Error getting function version", err)
 		}
 	}
 
@@ -132,21 +130,20 @@ func runFunctionUpdate(cmd *cobra.Command, args []string) {
 	// Perform the update
 	updatedFunction, err := client.FunctionDeployment.Functions.Versions.UpdateDeployment(cmd.Context(), functionID, versionID, updateParams)
 	if err != nil {
-		output.Error(cmd, "Error updating function deployment", err)
-		return
+		return output.Error(cmd, "Error updating function deployment", err)
 	}
 
 	output.Info(cmd, fmt.Sprintf("Successfully updated function deployment %s, version %s", functionID, versionID))
 	output.SingleDeployment(cmd, *updatedFunction)
+	return nil
 }
 
-func selectVersionToUpdate(cmd *cobra.Command, versions []nvcf.ListFunctionsResponseFunction) string {
+func selectVersionToUpdate(cmd *cobra.Command, versions []nvcf.ListFunctionsResponseFunction) (string, error) {
 	if len(versions) == 1 {
 		if versions[0].Status == "INACTIVE" {
-			output.Error(cmd, "You can only update a deployed version. This version is inactive.", nil)
-			os.Exit(1)
+			return "", output.Error(cmd, "You can only update a deployed version. This version is inactive.", nil)
 		}
-		return versions[0].VersionID
+		return versions[0].VersionID, nil
 	}
 
 	output.Info(cmd, "Multiple deployed versions found. Please select a version to update:")
@@ -158,5 +155,5 @@ func selectVersionToUpdate(cmd *cobra.Command, versions []nvcf.ListFunctionsResp
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Enter version-id to update: ")
 	versionID, _ := reader.ReadString('\n')
-	return strings.TrimSpace(versionID)
+	return strings.TrimSpace(versionID), nil
 }

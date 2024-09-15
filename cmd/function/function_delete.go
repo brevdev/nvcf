@@ -19,14 +19,14 @@ func functionDeleteCmd() *cobra.Command {
 		Long:    "Delete a function. If there is only 1 version, we will delete the function. If there are multiple versions, we will prompt you to specify which version to delete. The --all flag will delete all versions of the function.",
 		Example: "nvcf function delete fid --version-id vid",
 		Args:    cobra.ExactArgs(1),
-		Run:     runFunctionDelete,
+		RunE:    runFunctionDelete,
 	}
 	cmd.Flags().String("version-id", "", "The ID of the version")
 	cmd.Flags().Bool("all", false, "Delete all versions of the function")
 	return cmd
 }
 
-func runFunctionDelete(cmd *cobra.Command, args []string) {
+func runFunctionDelete(cmd *cobra.Command, args []string) error {
 	client := api.NewClient(config.GetAPIKey())
 
 	functionId := args[0]
@@ -36,26 +36,28 @@ func runFunctionDelete(cmd *cobra.Command, args []string) {
 	if versionId == "" {
 		versions, err := client.Functions.Versions.List(cmd.Context(), functionId)
 		if err != nil {
-			output.Error(cmd, "Error listing function versions", err)
-			return
+			return output.Error(cmd, "Error listing function versions", err)
 		}
 		if len(versions.Functions) == 1 {
 			versionId = versions.Functions[0].VersionID
 			output.Info(cmd, fmt.Sprintf("Deleting function %s", functionId))
 			err := client.Functions.Versions.Delete(cmd.Context(), functionId, versionId)
 			if err != nil {
-				output.Error(cmd, "Error deleting function", err)
+				return output.Error(cmd, "Error deleting function", err)
 			}
-			return
+			output.Success(cmd, fmt.Sprintf("Function %s version %s deleted successfully", functionId, versionId))
+			return nil
 		} else {
 			if all {
 				for _, version := range versions.Functions {
 					output.Info(cmd, fmt.Sprintf("Deleting version %s of function %s", version.VersionID, functionId))
 					err := client.Functions.Versions.Delete(cmd.Context(), functionId, version.VersionID)
 					if err != nil {
-						output.Error(cmd, "Error deleting function version", err)
+						return output.Error(cmd, "Error deleting function version", err)
 					}
 				}
+				output.Success(cmd, fmt.Sprintf("All versions of function %s deleted successfully", functionId))
+				return nil
 			} else {
 				output.Info(cmd, "Multiple versions found. Please specify a version-id")
 				for _, version := range versions.Functions {
@@ -67,10 +69,11 @@ func runFunctionDelete(cmd *cobra.Command, args []string) {
 				versionId = strings.TrimSpace(versionId)
 				err := client.Functions.Versions.Delete(cmd.Context(), functionId, versionId)
 				if err != nil {
-					output.Error(cmd, "Error deleting function", err)
+					return output.Error(cmd, "Error deleting function", err)
 				}
 				output.Success(cmd, fmt.Sprintf("Function %s version %s deleted successfully", functionId, versionId))
 			}
 		}
 	}
+	return nil
 }
