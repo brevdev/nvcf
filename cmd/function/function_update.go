@@ -23,7 +23,7 @@ func functionUpdateCmd() *cobra.Command {
 	)
 	cmd := &cobra.Command{
 		Use:     "update <function-id>",
-		Short:   "Update a function",
+		Short:   "Update a deployed function",
 		Long:    "If a version-id is not provided, we look for versions that are actively deployed. If a single function is deployed, we update that version. If multiple functions are deployed, we prompt for the version-id to update.",
 		Example: "nvcf function update fid --version-id vid --gpu A100 --instance-type g5.4xlarge --min-instances 1 --max-instances 5 --max-request-concurrency 100",
 		Args:    cobra.ExactArgs(1),
@@ -43,76 +43,87 @@ func runFunctionUpdate(cmd *cobra.Command, args []string) {
 	functionID := args[0]
 	versionID, _ := cmd.Flags().GetString("version-id")
 
-	if versionID != "" {
-		version, err := client.Functions.Versions.Get(cmd.Context(), functionID, versionID, nvcf.FunctionVersionGetParams{
-			IncludeSecrets: nvcf.Bool(false),
-		})
-		if err != nil {
-			output.Error(cmd, "Error getting function version", err)
-			return
-		}
-		if version.Function.Status == "INACTIVE" {
-			output.Error(cmd, "You can only update a deployed version. This version is inactive.", nil)
-			return
-		}
-	}
-
-	// Prepare update parameters
-	var deploymentSpec nvcf.FunctionDeploymentFunctionVersionUpdateDeploymentParamsDeploymentSpecification
-
-	if gpu, _ := cmd.Flags().GetString("gpu"); gpu != "" {
-		deploymentSpec.GPU = nvcf.F(gpu)
-	}
-	if instanceType, _ := cmd.Flags().GetString("instance-type"); instanceType != "" {
-		deploymentSpec.InstanceType = nvcf.F(instanceType)
-	}
-	if minInstances, _ := cmd.Flags().GetInt64("min-instances"); minInstances != 0 {
-		deploymentSpec.MinInstances = nvcf.F(minInstances)
-	}
-	if maxInstances, _ := cmd.Flags().GetInt64("max-instances"); maxInstances != 0 {
-		deploymentSpec.MaxInstances = nvcf.F(maxInstances)
-	}
-	if maxRequestConcurrency, _ := cmd.Flags().GetInt64("max-request-concurrency"); maxRequestConcurrency != 0 {
-		deploymentSpec.MaxRequestConcurrency = nvcf.F(maxRequestConcurrency)
-	}
-
-	// Get all versions of the function
 	versions, err := client.Functions.Versions.List(cmd.Context(), functionID)
 	if err != nil {
 		output.Error(cmd, "Error listing function versions", err)
 		return
 	}
 
-	if len(versions.Functions) == 1 {
-		versionID = versions.Functions[0].VersionID
-		// make sure status is not inactive
-		if versions.Functions[0].Status == "INACTIVE" {
+	var fnDeployment *nvcf.DeploymentResponse
+	// Select the version to update
+	if versionID == "" {
+		vid := selectVersionToUpdate(cmd, versions.Functions)
+		fnDeployment, err = client.FunctionDeployment.Functions.Versions.GetDeployment(cmd.Context(), functionID, vid)
+		if err != nil {
+			output.Error(cmd, "Error getting function version", err)
+			return
+		}
+	} else {
+		statusCheck, err := client.Functions.Versions.Get(cmd.Context(), functionID, versionID, nvcf.FunctionVersionGetParams{
+			IncludeSecrets: nvcf.Bool(false),
+		})
+		if err != nil {
+			output.Error(cmd, "Error getting function version", err)
+			return
+		}
+		if statusCheck.Function.Status == "INACTIVE" {
 			output.Error(cmd, "You can only update a deployed version. This version is inactive.", nil)
 			return
 		}
-		updateParams := nvcf.FunctionDeploymentFunctionVersionUpdateDeploymentParams{
-			DeploymentSpecifications: nvcf.F([]nvcf.FunctionDeploymentFunctionVersionUpdateDeploymentParamsDeploymentSpecification{deploymentSpec}),
-		}
-
-		_, err := client.FunctionDeployment.Functions.Versions.UpdateDeployment(cmd.Context(), functionID, versionID, updateParams)
+		fnDeployment, err = client.FunctionDeployment.Functions.Versions.GetDeployment(cmd.Context(), functionID, versionID)
 		if err != nil {
-			output.Error(cmd, "Error updating function deployment", err)
+			output.Error(cmd, "Error getting function version", err)
 			return
 		}
+	}
 
-		output.Info(cmd, fmt.Sprintf("Successfully updated function deployment %s, version %s", functionID, versionID))
-		return
-	} else {
-		output.Info(cmd, "Multiple deployed versions found. Please select a version to update:")
-		for _, functions := range versions.Functions {
-			if functions.Status != "INACTIVE" {
-				output.Info(cmd, fmt.Sprintf("Version ID: %s || Status: %s", functions.VersionID, functions.Status))
-			}
+	var targetDeployment nvcf.DeploymentResponseDeploymentDeploymentSpecification
+	// there can be multiple deployments for a version - prompt and check similar to how we do the version check
+	if len(fnDeployment.Deployment.DeploymentSpecifications) > 1 {
+		output.Info(cmd, "Multiple deployment specifications found. Please select one to update:")
+		for i, spec := range fnDeployment.Deployment.DeploymentSpecifications {
+			output.Info(cmd, fmt.Sprintf("[%d] GPU: %s, Instance Type: %s, Min Instances: %d, Max Instances: %d, Max Request Concurrency: %d",
+				i+1, spec.GPU, spec.InstanceType, spec.MinInstances, spec.MaxInstances, spec.MaxRequestConcurrency))
 		}
-		reader := bufio.NewReader(os.Stdin)
-		fmt.Print("Enter version-id to update: ")
-		versionID, _ = reader.ReadString('\n')
-		versionID = strings.TrimSpace(versionID)
+
+		var selectedIndex int
+		for {
+			fmt.Print("Enter the number of the deployment specification to update: ")
+			_, err := fmt.Scanf("%d", &selectedIndex)
+			if err == nil && selectedIndex > 0 && selectedIndex <= len(fnDeployment.Deployment.DeploymentSpecifications) {
+				break
+			}
+			output.Info(cmd, "Invalid selection. Please try again.")
+		}
+
+		targetDeployment = fnDeployment.Deployment.DeploymentSpecifications[selectedIndex-1]
+	} else {
+		targetDeployment = fnDeployment.Deployment.DeploymentSpecifications[0]
+	}
+
+	// build deployment spec with values from the targetDeployment
+	deploymentSpec := nvcf.FunctionDeploymentFunctionVersionUpdateDeploymentParamsDeploymentSpecification{
+		GPU:                   nvcf.String(targetDeployment.GPU),
+		InstanceType:          nvcf.String(targetDeployment.InstanceType),
+		MinInstances:          nvcf.Int(targetDeployment.MinInstances),
+		MaxInstances:          nvcf.Int(targetDeployment.MaxInstances),
+		MaxRequestConcurrency: nvcf.Int(targetDeployment.MaxRequestConcurrency),
+	}
+
+	if gpu, _ := cmd.Flags().GetString("gpu"); gpu != "" {
+		deploymentSpec.GPU = nvcf.String(gpu)
+	}
+	if instanceType, _ := cmd.Flags().GetString("instance-type"); instanceType != "" {
+		deploymentSpec.InstanceType = nvcf.String(instanceType)
+	}
+	if minInstances, _ := cmd.Flags().GetInt64("min-instances"); minInstances != 0 {
+		deploymentSpec.MinInstances = nvcf.Int(minInstances)
+	}
+	if maxInstances, _ := cmd.Flags().GetInt64("max-instances"); maxInstances != 0 {
+		deploymentSpec.MaxInstances = nvcf.Int(maxInstances)
+	}
+	if maxRequestConcurrency, _ := cmd.Flags().GetInt64("max-request-concurrency"); maxRequestConcurrency != 0 {
+		deploymentSpec.MaxRequestConcurrency = nvcf.Int(maxRequestConcurrency)
 	}
 
 	updateParams := nvcf.FunctionDeploymentFunctionVersionUpdateDeploymentParams{
@@ -127,4 +138,25 @@ func runFunctionUpdate(cmd *cobra.Command, args []string) {
 
 	output.Info(cmd, fmt.Sprintf("Successfully updated function deployment %s, version %s", functionID, versionID))
 	output.SingleDeployment(cmd, *updatedFunction)
+}
+
+func selectVersionToUpdate(cmd *cobra.Command, versions []nvcf.ListFunctionsResponseFunction) string {
+	if len(versions) == 1 {
+		if versions[0].Status == "INACTIVE" {
+			output.Error(cmd, "You can only update a deployed version. This version is inactive.", nil)
+			os.Exit(1)
+		}
+		return versions[0].VersionID
+	}
+
+	output.Info(cmd, "Multiple deployed versions found. Please select a version to update:")
+	for _, function := range versions {
+		if function.Status != "INACTIVE" {
+			output.Info(cmd, fmt.Sprintf("Version ID: %s || Status: %s", function.VersionID, function.Status))
+		}
+	}
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print("Enter version-id to update: ")
+	versionID, _ := reader.ReadString('\n')
+	return strings.TrimSpace(versionID)
 }

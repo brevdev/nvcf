@@ -63,5 +63,4 @@ func runFunctionGet(cmd *cobra.Command, args []string) {
 		return
 	}
 	output.SingleFunction(cmd, getFunctionResponse.Function)
-
 }
