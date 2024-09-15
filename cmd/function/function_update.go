@@ -128,7 +128,7 @@ func runFunctionUpdate(cmd *cobra.Command, args []string) error {
 		DeploymentSpecifications: nvcf.F([]nvcf.FunctionDeploymentFunctionVersionUpdateDeploymentParamsDeploymentSpecification{deploymentSpec}),
 	}
 	// Perform the update
-	updatedFunction, err := client.FunctionDeployment.Functions.Versions.UpdateDeployment(cmd.Context(), functionID, versionID, updateParams)
+	updatedFunction, err := client.FunctionDeployment.Functions.Versions.UpdateDeployment(cmd.Context(), functionID, fnDeployment.Deployment.FunctionVersionID, updateParams)
 	if err != nil {
 		return output.Error(cmd, "Error updating function deployment", err)
 	}
