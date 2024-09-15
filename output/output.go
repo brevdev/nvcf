@@ -10,10 +10,12 @@ import (
 	"github.com/tmc/nvcf-go"
 )
 
-func Error(cmd *cobra.Command, message string, err error) {
+func Error(cmd *cobra.Command, message string, err error) error {
+	formattedError := fmt.Errorf("%s: %v", message, err)
 	if !isQuiet(cmd) {
-		color.Red(fmt.Sprintf("%s: %v", message, err))
+		color.Red(formattedError.Error())
 	}
+	return formattedError
 }
 
 func Success(cmd *cobra.Command, message string) {
