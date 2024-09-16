@@ -25,7 +25,6 @@ func main() {
 
 	// Add commands
 	rootCmd.AddCommand(function.FunctionCmd())
-	// rootCmd.AddCommand(cmd.DeploymentCmd())
 	// rootCmd.AddCommand(cmd.InvokeCmd())
 	// rootCmd.AddCommand(cmd.AssetCmd())
 	rootCmd.AddCommand(auth.AuthCmd())

@@ -10,10 +10,12 @@ import (
 	"github.com/tmc/nvcf-go"
 )
 
-func Error(cmd *cobra.Command, message string, err error) {
+func Error(cmd *cobra.Command, message string, err error) error {
+	formattedError := fmt.Errorf("%s: %v", message, err)
 	if !isQuiet(cmd) {
-		color.Red(fmt.Sprintf("%s: %v", message, err))
+		color.Red(formattedError.Error())
 	}
+	return formattedError
 }
 
 func Success(cmd *cobra.Command, message string) {
@@ -67,26 +69,11 @@ func Functions(cmd *cobra.Command, functions []nvcf.ListFunctionsResponseFunctio
 }
 func printFunctionsTable(cmd *cobra.Command, functions []nvcf.ListFunctionsResponseFunction) {
 	table := tablewriter.NewWriter(cmd.OutOrStdout())
-	table.SetHeader([]string{"Name", "ID", "Status"})
+	table.SetHeader([]string{"Name", "Version ID", "Status"})
 	table.SetBorder(false)
 	for _, f := range functions {
-		table.Append([]string{f.Name, f.ID, string(f.Status)})
+		table.Append([]string{f.Name, f.VersionID, string(f.Status)})
 	}
-	table.Render()
-}
-
-func MultiFunction(cmd *cobra.Command, fn nvcf.ListFunctionsResponseFunction) {
-	if isJSON(cmd) {
-		printJSON(cmd, fn)
-	} else {
-		printMultiFunctionTable(cmd, fn)
-	}
-}
-func printMultiFunctionTable(cmd *cobra.Command, fn nvcf.ListFunctionsResponseFunction) {
-	table := tablewriter.NewWriter(cmd.OutOrStdout())
-	table.SetHeader([]string{"Name", "ID", "Status"})
-	table.SetBorder(false)
-	table.Append([]string{fn.Name, fn.ID, string(fn.Status)})
 	table.Render()
 }
 
@@ -100,8 +87,42 @@ func SingleFunction(cmd *cobra.Command, fn nvcf.FunctionResponseFunction) {
 
 func printSingleFunctionTable(cmd *cobra.Command, fn nvcf.FunctionResponseFunction) {
 	table := tablewriter.NewWriter(cmd.OutOrStdout())
-	table.SetHeader([]string{"Name", "ID", "Status"})
+	table.SetHeader([]string{"Name", "Version ID", "Status"})
 	table.SetBorder(false)
-	table.Append([]string{fn.Name, fn.ID, string(fn.Status)})
+	table.Append([]string{fn.Name, fn.VersionID, string(fn.Status)})
+	table.Render()
+}
+
+func Deployments(cmd *cobra.Command, deployments []nvcf.DeploymentResponse) {
+	if isJSON(cmd) {
+		printJSON(cmd, deployments)
+	} else {
+		printDeploymentsTable(cmd, deployments)
+	}
+}
+
+func printDeploymentsTable(cmd *cobra.Command, deployments []nvcf.DeploymentResponse) {
+	table := tablewriter.NewWriter(cmd.OutOrStdout())
+	table.SetHeader([]string{"Function ID", "Function Version ID", "Status"})
+	table.SetBorder(false)
+	for _, deployment := range deployments {
+		table.Append([]string{deployment.Deployment.FunctionID, deployment.Deployment.FunctionVersionID, string(deployment.Deployment.FunctionStatus)})
+	}
+	table.Render()
+}
+
+func SingleDeployment(cmd *cobra.Command, deployment nvcf.DeploymentResponse) {
+	if isJSON(cmd) {
+		printJSON(cmd, deployment)
+	} else {
+		printSingleDeploymentTable(cmd, deployment)
+	}
+}
+
+func printSingleDeploymentTable(cmd *cobra.Command, deployment nvcf.DeploymentResponse) {
+	table := tablewriter.NewWriter(cmd.OutOrStdout())
+	table.SetHeader([]string{"Name", "Version ID", "Status"})
+	table.SetBorder(false)
+	table.Append([]string{deployment.Deployment.FunctionID, deployment.Deployment.FunctionVersionID, string(deployment.Deployment.FunctionStatus)})
 	table.Render()
 }
