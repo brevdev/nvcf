@@ -58,7 +58,6 @@ func runFunctionStop(cmd *cobra.Command, args []string) error {
 				output.Success(cmd, fmt.Sprintf("Function %s version %s stopped successfully", functionId, version))
 			}
 		} else {
-			fmt.Println("versionId", versionId)
 			client.FunctionDeployment.Functions.Versions.DeleteDeployment(cmd.Context(), functionId, deployedVersionsToStop[0], nvcf.FunctionDeploymentFunctionVersionDeleteDeploymentParams{
 				Graceful: nvcf.Bool(force),
 			})
