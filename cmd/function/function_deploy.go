@@ -46,7 +46,8 @@ func runFunctionDeploy(cmd *cobra.Command, args []string) error {
 	if versionId == "" {
 		versions, err := client.Functions.Versions.List(cmd.Context(), functionId)
 		if err != nil {
-			return output.Error(cmd, "Error listing function versions", err)
+			output.Error(cmd, "Error listing function versions", err)
+			return nil
 		}
 
 		if len(versions.Functions) == 1 {
@@ -88,7 +89,8 @@ func runFunctionDeploy(cmd *cobra.Command, args []string) error {
 		deploymentParams,
 	)
 	if err != nil {
-		return output.Error(cmd, "Error deploying function", err)
+		output.Error(cmd, "Error deploying function", err)
+		return nil
 	}
 
 	output.Success(cmd, fmt.Sprintf("Function %s version %s deployed successfully", functionId, versionId))

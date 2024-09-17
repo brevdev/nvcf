@@ -36,15 +36,16 @@ func runFunctionStop(cmd *cobra.Command, args []string) error {
 	if versionId == "" {
 		versions, err := client.Functions.Versions.List(cmd.Context(), functionId)
 		if err != nil {
-			return output.Error(cmd, "Error listing function versions", err)
+			output.Error(cmd, "Error listing function versions", err)
+			return nil
 		}
 		deployedVersionsToStop := []string{}
 		for _, version := range versions.Functions {
-			// todo: wb the error ones
 			if version.Status == "ACTIVE" {
 				deployedVersionsToStop = append(deployedVersionsToStop, version.VersionID)
 			}
 		}
+		fmt.Println("deployedVersionsToStop", deployedVersionsToStop)
 		if len(deployedVersionsToStop) == 0 {
 			output.Error(cmd, "No functions are currently deployed", nil)
 			return nil
@@ -57,7 +58,8 @@ func runFunctionStop(cmd *cobra.Command, args []string) error {
 				output.Success(cmd, fmt.Sprintf("Function %s version %s stopped successfully", functionId, version))
 			}
 		} else {
-			client.FunctionDeployment.Functions.Versions.DeleteDeployment(cmd.Context(), functionId, versionId, nvcf.FunctionDeploymentFunctionVersionDeleteDeploymentParams{
+			fmt.Println("versionId", versionId)
+			client.FunctionDeployment.Functions.Versions.DeleteDeployment(cmd.Context(), functionId, deployedVersionsToStop[0], nvcf.FunctionDeploymentFunctionVersionDeleteDeploymentParams{
 				Graceful: nvcf.Bool(force),
 			})
 			output.Success(cmd, fmt.Sprintf("Function %s version %s stopped successfully", functionId, versionId))

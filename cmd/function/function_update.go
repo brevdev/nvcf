@@ -45,7 +45,8 @@ func runFunctionUpdate(cmd *cobra.Command, args []string) error {
 
 	versions, err := client.Functions.Versions.List(cmd.Context(), functionID)
 	if err != nil {
-		return output.Error(cmd, "Error listing function versions", err)
+		output.Error(cmd, "Error listing function versions", err)
+		return nil
 	}
 
 	var fnDeployment *nvcf.DeploymentResponse
@@ -57,21 +58,25 @@ func runFunctionUpdate(cmd *cobra.Command, args []string) error {
 		}
 		fnDeployment, err = client.FunctionDeployment.Functions.Versions.GetDeployment(cmd.Context(), functionID, vid)
 		if err != nil {
-			return output.Error(cmd, "Error getting function version", err)
+			output.Error(cmd, "Error getting function version", err)
+			return nil
 		}
 	} else {
 		statusCheck, err := client.Functions.Versions.Get(cmd.Context(), functionID, versionID, nvcf.FunctionVersionGetParams{
 			IncludeSecrets: nvcf.Bool(false),
 		})
 		if err != nil {
-			return output.Error(cmd, "Error getting function version", err)
+			output.Error(cmd, "Error getting function version", err)
+			return nil
 		}
 		if statusCheck.Function.Status == "INACTIVE" {
-			return output.Error(cmd, "You can only update a deployed version. This version is inactive.", nil)
+			output.Error(cmd, "You can only update a deployed version. This version is inactive.", nil)
+			return nil
 		}
 		fnDeployment, err = client.FunctionDeployment.Functions.Versions.GetDeployment(cmd.Context(), functionID, versionID)
 		if err != nil {
-			return output.Error(cmd, "Error getting function version", err)
+			output.Error(cmd, "Error getting function version", err)
+			return nil
 		}
 	}
 
@@ -130,7 +135,8 @@ func runFunctionUpdate(cmd *cobra.Command, args []string) error {
 	// Perform the update
 	updatedFunction, err := client.FunctionDeployment.Functions.Versions.UpdateDeployment(cmd.Context(), functionID, fnDeployment.Deployment.FunctionVersionID, updateParams)
 	if err != nil {
-		return output.Error(cmd, "Error updating function deployment", err)
+		output.Error(cmd, "Error updating function deployment", err)
+		return nil
 	}
 
 	output.Info(cmd, fmt.Sprintf("Successfully updated function deployment %s, version %s", functionID, versionID))

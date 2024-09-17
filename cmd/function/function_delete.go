@@ -37,14 +37,16 @@ func runFunctionDelete(cmd *cobra.Command, args []string) error {
 	if versionId == "" {
 		versions, err := client.Functions.Versions.List(cmd.Context(), functionId)
 		if err != nil {
-			return output.Error(cmd, "Error listing function versions", err)
+			output.Error(cmd, "Error listing function versions", err)
+			return nil
 		}
 		if len(versions.Functions) == 1 {
 			versionId = versions.Functions[0].VersionID
 			output.Info(cmd, fmt.Sprintf("Deleting function %s", functionId))
 			err := client.Functions.Versions.Delete(cmd.Context(), functionId, versionId)
 			if err != nil {
-				return output.Error(cmd, "Error deleting function", err)
+				output.Error(cmd, "Error deleting function", err)
+				return nil
 			}
 			output.Success(cmd, fmt.Sprintf("Function %s version %s deleted successfully", functionId, versionId))
 			return nil
@@ -54,7 +56,8 @@ func runFunctionDelete(cmd *cobra.Command, args []string) error {
 					output.Info(cmd, fmt.Sprintf("Deleting version %s of function %s", version.VersionID, functionId))
 					err := client.Functions.Versions.Delete(cmd.Context(), functionId, version.VersionID)
 					if err != nil {
-						return output.Error(cmd, "Error deleting function version", err)
+						output.Error(cmd, "Error deleting function version", err)
+						return nil
 					}
 				}
 				output.Success(cmd, fmt.Sprintf("All versions of function %s deleted successfully", functionId))
@@ -70,7 +73,8 @@ func runFunctionDelete(cmd *cobra.Command, args []string) error {
 				versionId = strings.TrimSpace(versionId)
 				err := client.Functions.Versions.Delete(cmd.Context(), functionId, versionId)
 				if err != nil {
-					return output.Error(cmd, "Error deleting function", err)
+					output.Error(cmd, "Error deleting function", err)
+					return nil
 				}
 				output.Success(cmd, fmt.Sprintf("Function %s version %s deleted successfully", functionId, versionId))
 			}
@@ -79,7 +83,8 @@ func runFunctionDelete(cmd *cobra.Command, args []string) error {
 		output.Info(cmd, fmt.Sprintf("Deleting function %s version %s", functionId, versionId))
 		err := client.Functions.Versions.Delete(cmd.Context(), functionId, versionId)
 		if err != nil {
-			return output.Error(cmd, "Error deleting function", err)
+			output.Error(cmd, "Error deleting function", err)
+			return nil
 		}
 		output.Success(cmd, fmt.Sprintf("Function %s version %s deleted successfully", functionId, versionId))
 	}

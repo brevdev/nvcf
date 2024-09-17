@@ -90,7 +90,8 @@ func functionCreateCmd() *cobra.Command {
 			if existingFunctionID != "" {
 				_, err := client.Functions.Versions.List(cmd.Context(), existingFunctionID)
 				if err != nil {
-					return output.Error(cmd, "Error listing function versions", err)
+					output.Error(cmd, "Error listing function versions", err)
+					return nil
 				}
 			}
 
@@ -107,11 +108,13 @@ func functionCreateCmd() *cobra.Command {
 			if existingFunctionID != "" {
 				containerEnv, err := parseEnvVarsNewVersion(cmd, envVars)
 				if err != nil {
-					return output.Error(cmd, "error parsing environment variables", err)
+					output.Error(cmd, "error parsing environment variables", err)
+					return nil
 				}
 				models, err := parseModelsNewVersion(cmd, modelVars)
 				if err != nil {
-					return output.Error(cmd, "error parsing models", err)
+					output.Error(cmd, "error parsing models", err)
+					return nil
 				}
 				params := nvcf.FunctionVersionNewParams{
 					Name:                 nvcf.String(name),
@@ -137,7 +140,8 @@ func functionCreateCmd() *cobra.Command {
 				// create function
 				resp, err := client.Functions.Versions.New(cmd.Context(), existingFunctionID, params)
 				if err != nil {
-					return fmt.Errorf("error creating function: %w", err)
+					output.Error(cmd, "error creating function", err)
+					return nil
 				}
 				output.Success(cmd, fmt.Sprintf("Function version %s created successfully", resp.Function.VersionID))
 				// deploy function if the deploy flag is set
@@ -147,11 +151,13 @@ func functionCreateCmd() *cobra.Command {
 			} else {
 				containerEnv, err := parseEnvVars(cmd, envVars)
 				if err != nil {
-					return fmt.Errorf("error parsing environment variables: %w", err)
+					output.Error(cmd, "error parsing environment variables", err)
+					return nil
 				}
 				models, err := parseModels(cmd, modelVars)
 				if err != nil {
-					return fmt.Errorf("error parsing models: %w", err)
+					output.Error(cmd, "error parsing models", err)
+					return nil
 				}
 				params := nvcf.FunctionNewParams{
 					Name:                 nvcf.String(name),
@@ -176,7 +182,8 @@ func functionCreateCmd() *cobra.Command {
 				output.Info(cmd, fmt.Sprintf("Creating new function %s...", name))
 				resp, err := client.Functions.New(cmd.Context(), params)
 				if err != nil {
-					return fmt.Errorf("error creating function: %w", err)
+					output.Error(cmd, "error creating function", err)
+					return nil
 				}
 				output.Success(cmd, fmt.Sprintf("Function %s with id %s and version %s created successfully", name, resp.Function.ID, resp.Function.VersionID))
 				if deploy {
@@ -317,7 +324,8 @@ func deployFunction(cmd *cobra.Command, client *api.Client, resp *nvcf.CreateFun
 		deploymentParams,
 	)
 	if err != nil {
-		return output.Error(cmd, "error deploying function", err)
+		output.Error(cmd, "error deploying function", err)
+		return nil
 	}
 
 	output.Success(cmd, fmt.Sprintf("Function with FunctionID %s and VersionID %s deployed successfully", resp.Function.ID, resp.Function.VersionID))
@@ -328,12 +336,14 @@ func deployFunction(cmd *cobra.Command, client *api.Client, resp *nvcf.CreateFun
 func createFunctionsFromFile(cmd *cobra.Command, client *api.Client, yamlFile string, deploy bool) error {
 	data, err := os.ReadFile(yamlFile)
 	if err != nil {
-		return output.Error(cmd, "error reading YAML file", err)
+		output.Error(cmd, "error reading YAML file", err)
+		return nil
 	}
 
 	var spec FunctionSpec
 	if err := yaml.Unmarshal(data, &spec); err != nil {
-		return output.Error(cmd, "error parsing YAML file", err)
+		output.Error(cmd, "error parsing YAML file", err)
+		return nil
 	}
 
 	for _, fn := range spec.Functions {
@@ -387,7 +397,8 @@ func prepareFunctionVersionParamsFromFile(fnImage string, fn FunctionDef) nvcf.F
 func createAndDeployFunctionVersionFromFile(cmd *cobra.Command, client *api.Client, existingFunctionID string, params nvcf.FunctionVersionNewParams, deploy bool, gpu, instanceType, backend string, maxInstances, minInstances, maxRequestConcurrency int64) error {
 	resp, err := client.Functions.Versions.New(cmd.Context(), existingFunctionID, params)
 	if err != nil {
-		return output.Error(cmd, "error creating function version", err)
+		output.Error(cmd, "error creating function version", err)
+		return nil
 	}
 
 	output.Success(cmd, fmt.Sprintf("Function version %s created successfully for function %s", resp.Function.VersionID, existingFunctionID))
@@ -409,8 +420,6 @@ func prepareFunctionParamsFromFile(fnImage string, fn FunctionDef) nvcf.Function
 	if !fn.Streaming {
 		functionType = "DEFAULT"
 	}
-
-	fmt.Println(apiBodyFormat)
 
 	return nvcf.FunctionNewParams{
 		Name:           nvcf.String(fn.FnName),
@@ -435,7 +444,8 @@ func prepareFunctionParamsFromFile(fnImage string, fn FunctionDef) nvcf.Function
 func createAndDeployFunctionFromFile(cmd *cobra.Command, client *api.Client, params nvcf.FunctionNewParams, deploy bool, gpu, instanceType, backend string, maxInstances, minInstances, maxRequestConcurrency int64) error {
 	resp, err := client.Functions.New(cmd.Context(), params)
 	if err != nil {
-		return output.Error(cmd, "error creating function", err)
+		output.Error(cmd, "error creating function", err)
+		return nil
 	}
 
 	if deploy {
