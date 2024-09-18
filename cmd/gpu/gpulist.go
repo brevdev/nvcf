@@ -12,6 +12,7 @@ func gpuListCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List available GPUs",
+		Long:  "List available GPUs in NVCF. Note this is still in beta and lists all available GPUs ",
 		RunE:  runGpuList,
 	}
 
