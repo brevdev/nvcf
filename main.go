@@ -8,6 +8,7 @@ import (
 	"github.com/brevdev/nvcf/cmd/auth"
 	"github.com/brevdev/nvcf/cmd/function"
 	"github.com/brevdev/nvcf/cmd/gpu"
+	"github.com/brevdev/nvcf/cmd/test"
 	"github.com/spf13/cobra"
 )
 
@@ -36,10 +37,12 @@ func main() {
 	// rootCmd.AddCommand(cmd.ClusterGroupCmd())
 	// rootCmd.AddCommand(cmd.ConfigCmd())
 	rootCmd.AddCommand(cmd.DocsCmd())
+	rootCmd.AddCommand(test.TestCmd())
 
 	// // Enable command auto-completion
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
 	rootCmd.AddCommand(cmd.CompletionCmd())
+	
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
