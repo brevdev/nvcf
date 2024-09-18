@@ -11,9 +11,12 @@ import (
 )
 
 func Error(cmd *cobra.Command, message string, err error) error {
-	formattedError := fmt.Errorf("%s: %v", message, err)
-	if !isQuiet(cmd) {
-		color.Red(formattedError.Error())
+	verbose, _ := cmd.Flags().GetBool("verbose")
+	var formattedError error
+	if verbose {
+		formattedError = fmt.Errorf("%s: %v", message, err)
+	} else {
+		formattedError = fmt.Errorf("%s", message)
 	}
 	return formattedError
 }

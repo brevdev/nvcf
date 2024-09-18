@@ -12,9 +12,11 @@ import (
 
 func main() {
 	rootCmd := &cobra.Command{
-		Use:   "nvcf",
-		Short: "NVIDIA Cloud Functions CLI",
-		Long:  `A command-line interface for managing and interacting with NVIDIA Cloud Functions.`,
+		Use:           "nvcf",
+		Short:         "NVIDIA Cloud Functions CLI",
+		Long:          `A command-line interface for managing and interacting with NVIDIA Cloud Functions.`,
+		SilenceUsage:  true,
+		SilenceErrors: true,
 	}
 
 	// Add global flags

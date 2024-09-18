@@ -58,7 +58,8 @@ func runFunctionGet(cmd *cobra.Command, args []string) error {
 	}
 	getFunctionResponse, err := client.Functions.Versions.Get(cmd.Context(), functionID, versionID, query)
 	if err != nil {
-		return output.Error(cmd, "Error getting function", err)
+		output.Error(cmd, "Error getting function", err)
+		return nil
 	}
 	output.SingleFunction(cmd, getFunctionResponse.Function)
 	return nil
