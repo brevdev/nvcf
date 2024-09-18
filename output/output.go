@@ -129,3 +129,31 @@ func printSingleDeploymentTable(cmd *cobra.Command, deployment nvcf.DeploymentRe
 	table.Append([]string{deployment.Deployment.FunctionID, deployment.Deployment.FunctionVersionID, string(deployment.Deployment.FunctionStatus)})
 	table.Render()
 }
+
+func GPUs(cmd *cobra.Command, clusterGroups []nvcf.ClusterGroupsResponseClusterGroup) {
+	if isJSON(cmd) {
+		printJSON(cmd, clusterGroups)
+	} else {
+		printGPUsTable(cmd, clusterGroups)
+	}
+}
+
+func printGPUsTable(cmd *cobra.Command, clusterGroups []nvcf.ClusterGroupsResponseClusterGroup) {
+	table := tablewriter.NewWriter(cmd.OutOrStdout())
+	table.SetHeader([]string{"inst_backend", "inst_gpu_type", "inst_type"})
+	table.SetBorder(false)
+
+	for _, clusterGroup := range clusterGroups {
+		for _, gpu := range clusterGroup.GPUs {
+			for _, instanceType := range gpu.InstanceTypes {
+				table.Append([]string{
+					clusterGroup.Name, // inst_backend
+					gpu.Name,          // inst_gpu_type
+					instanceType.Name, // inst_type
+				})
+			}
+		}
+	}
+
+	table.Render()
+}
