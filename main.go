@@ -7,6 +7,7 @@ import (
 	"github.com/brevdev/nvcf/cmd"
 	"github.com/brevdev/nvcf/cmd/auth"
 	"github.com/brevdev/nvcf/cmd/function"
+	"github.com/brevdev/nvcf/cmd/gpu"
 	"github.com/spf13/cobra"
 )
 
@@ -27,13 +28,13 @@ func main() {
 
 	// Add commands
 	rootCmd.AddCommand(function.FunctionCmd())
+	rootCmd.AddCommand(gpu.GpuCmd())
 	// rootCmd.AddCommand(cmd.InvokeCmd())
 	// rootCmd.AddCommand(cmd.AssetCmd())
 	rootCmd.AddCommand(auth.AuthCmd())
 	// rootCmd.AddCommand(cmd.QueueCmd())
 	// rootCmd.AddCommand(cmd.ClusterGroupCmd())
 	// rootCmd.AddCommand(cmd.ConfigCmd())
-	// rootCmd.AddCommand(cmd.VersionCmd())
 	rootCmd.AddCommand(cmd.DocsCmd())
 
 	// // Enable command auto-completion
