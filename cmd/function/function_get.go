@@ -36,8 +36,7 @@ func runFunctionGet(cmd *cobra.Command, args []string) error {
 	if versionID == "" {
 		versions, err := client.Functions.Versions.List(cmd.Context(), functionID)
 		if err != nil {
-			output.Error(cmd, "Error listing function versions", err)
-			return nil
+			return output.Error(cmd, "Error listing function versions", err)
 		}
 
 		if len(versions.Functions) == 1 {

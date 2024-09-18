@@ -40,8 +40,7 @@ func runFunctionList(cmd *cobra.Command, args []string) error {
 		Visibility: nvcf.F(visibilityParams),
 	})
 	if err != nil {
-		output.Error(cmd, "Error listing functions", err)
-		return nil
+		return output.Error(cmd, "Error listing functions", err)
 	}
 
 	// Filter functions by status params

@@ -36,8 +36,7 @@ func runFunctionStop(cmd *cobra.Command, args []string) error {
 	if versionId == "" {
 		versions, err := client.Functions.Versions.List(cmd.Context(), functionId)
 		if err != nil {
-			output.Error(cmd, "Error listing function versions", err)
-			return nil
+			return output.Error(cmd, "Error listing function versions", err)
 		}
 		deployedVersionsToStop := []string{}
 		for _, version := range versions.Functions {
@@ -45,10 +44,8 @@ func runFunctionStop(cmd *cobra.Command, args []string) error {
 				deployedVersionsToStop = append(deployedVersionsToStop, version.VersionID)
 			}
 		}
-		fmt.Println("deployedVersionsToStop", deployedVersionsToStop)
 		if len(deployedVersionsToStop) == 0 {
-			output.Error(cmd, "No functions are currently deployed", nil)
-			return nil
+			return output.Error(cmd, "No functions are currently deployed", nil)
 		}
 		if all {
 			for _, version := range deployedVersionsToStop {
