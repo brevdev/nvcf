@@ -450,7 +450,7 @@ func createAndDeployFunctionFromFile(cmd *cobra.Command, client *api.Client, par
 }
 
 func WaitForDeployment(cmd *cobra.Command, client *api.Client, functionID, versionID string) error {
-	spinner := output.NewSpinner(fmt.Sprintf("Waiting for deployment of function %s with version %s to complete...", functionID, versionID))
+	spinner := output.NewSpinner("Waiting for deployment to complete...")
 	output.StartSpinner(spinner)
 	defer output.StopSpinner(spinner)
 

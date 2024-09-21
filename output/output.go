@@ -56,7 +56,7 @@ func Prompt(message string, isSecret bool) string {
 // NewSpinner creates and returns a new spinner
 func NewSpinner(suffix string) *spinner.Spinner {
 	s := spinner.New(spinner.CharSets[4], 100*time.Millisecond)
-	s.Suffix = suffix
+	s.Suffix = fmt.Sprintf("  %s", suffix)
 	return s
 }
 
