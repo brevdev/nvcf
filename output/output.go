@@ -3,7 +3,9 @@ package output
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
+	"github.com/briandowns/spinner"
 	"github.com/fatih/color"
 	"github.com/olekukonko/tablewriter"
 	"github.com/spf13/cobra"
@@ -62,6 +64,23 @@ func Prompt(message string, isSecret bool) string {
 	return input
 }
 
+// NewSpinner creates and returns a new spinner
+func NewSpinner(suffix string) *spinner.Spinner {
+	s := spinner.New(spinner.CharSets[4], 100*time.Millisecond)
+	s.Suffix = suffix
+	return s
+}
+
+// StartSpinner starts the spinner
+func StartSpinner(s *spinner.Spinner) {
+	s.Start()
+}
+
+// StopSpinner stops the spinner
+func StopSpinner(s *spinner.Spinner) {
+	s.Stop()
+}
+
 // Implement other output functions (Function, Deployment, InvocationResult, etc.) here
 func Functions(cmd *cobra.Command, functions []nvcf.ListFunctionsResponseFunction) {
 	if isJSON(cmd) {
@@ -70,6 +89,7 @@ func Functions(cmd *cobra.Command, functions []nvcf.ListFunctionsResponseFunctio
 		printFunctionsTable(cmd, functions)
 	}
 }
+
 func printFunctionsTable(cmd *cobra.Command, functions []nvcf.ListFunctionsResponseFunction) {
 	table := tablewriter.NewWriter(cmd.OutOrStdout())
 	table.SetHeader([]string{"Name", "Version ID", "Status"})
