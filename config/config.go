@@ -8,6 +8,7 @@ import (
 
 type Config struct {
 	APIKey string `json:"api_key"`
+	OrgID  string `json:"org_id"`
 }
 
 var cfg Config
@@ -37,8 +38,17 @@ func GetAPIKey() string {
 	return cfg.APIKey
 }
 
+func GetOrgID() string {
+	return cfg.OrgID
+}
+
 func SetAPIKey(apiKey string) error {
 	cfg.APIKey = apiKey
+	return saveConfig()
+}
+
+func SetOrgID(orgID string) error {
+	cfg.OrgID = orgID
 	return saveConfig()
 }
 
@@ -47,8 +57,13 @@ func ClearAPIKey() error {
 	return saveConfig()
 }
 
+func ClearOrgID() error {
+	cfg.OrgID = ""
+	return saveConfig()
+}
+
 func IsAuthenticated() bool {
-	return cfg.APIKey != ""
+	return cfg.APIKey != "" && cfg.OrgID != ""
 }
 
 // save to ~/.nvcf/config.json
