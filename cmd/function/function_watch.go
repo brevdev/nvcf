@@ -3,7 +3,6 @@
 package function
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/brevdev/nvcf/api"
@@ -113,7 +112,7 @@ func runFunctionWatch(cmd *cobra.Command, args []string) error {
 	}()
 
 	if err := app.SetRoot(table, true).EnableMouse(true).Run(); err != nil {
-		return fmt.Errorf("error running UI: %w", err)
+		return output.Error(cmd, "error running UI", err)
 	}
 
 	return nil
