@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // the logic used to filter available clusters comes from the NGC frontend for NVCF
 package gpu
 
@@ -7,6 +8,12 @@ import (
 
 	"github.com/brevdev/nvcf/api"
 	"github.com/brevdev/nvcf/collections"
+=======
+package gpu
+
+import (
+	"github.com/brevdev/nvcf/api"
+>>>>>>> main
 	"github.com/brevdev/nvcf/config"
 	"github.com/brevdev/nvcf/output"
 	"github.com/spf13/cobra"
@@ -17,7 +24,11 @@ func gpuListCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List available GPUs",
+<<<<<<< HEAD
 		Long:  "List available GPUs in NVCF. Note this is still in beta and lists all available GPUs",
+=======
+		Long:  "List available GPUs in NVCF. Note this is still in beta and lists all available GPUs ",
+>>>>>>> main
 		RunE:  runGpuList,
 	}
 
@@ -28,6 +39,7 @@ func gpuListCmd() *cobra.Command {
 }
 
 func runGpuList(cmd *cobra.Command, args []string) error {
+<<<<<<< HEAD
 	backend, _ := cmd.Flags().GetString("backend")
 	gpuType, _ := cmd.Flags().GetString("gpu")
 
@@ -39,6 +51,21 @@ func runGpuList(cmd *cobra.Command, args []string) error {
 	filteredClusterGroups := filterClusterGroups(availableInstanceTypes, backend, gpuType)
 
 	output.GPUs(cmd, filteredClusterGroups)
+=======
+	client := api.NewClient(config.GetAPIKey())
+
+	gpus, err := client.ClusterGroups.List(cmd.Context())
+	if err != nil {
+		return output.Error(cmd, "Error listing cluster groups", err)
+	}
+
+	backend, _ := cmd.Flags().GetString("backend")
+	gpuType, _ := cmd.Flags().GetString("gpu")
+
+	filteredGroups := filterClusterGroups(gpus.ClusterGroups, backend, gpuType)
+
+	output.GPUs(cmd, filteredGroups)
+>>>>>>> main
 
 	return nil
 }
@@ -68,6 +95,7 @@ func filterClusterGroups(groups []nvcf.ClusterGroupsResponseClusterGroup, backen
 
 	return filtered
 }
+<<<<<<< HEAD
 
 func buildNVCFOrgInformationURL(orgID string) string {
 	return fmt.Sprintf("/v3/orgs/%s/nvcf", orgID)
@@ -150,3 +178,5 @@ func GetAvailableInstanceTypes(ctx context.Context, backend, gpuType string) ([]
 
 	return filteredGroups, nil
 }
+=======
+>>>>>>> main
