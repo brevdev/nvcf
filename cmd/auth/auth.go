@@ -41,9 +41,15 @@ func authLoginCmd() *cobra.Command {
 		Short: "Authenticate with NVIDIA Cloud",
 		Run: func(cmd *cobra.Command, args []string) {
 			apiKey := output.Prompt("Enter your NVIDIA Cloud API key: ", true)
+			orgID := output.Prompt("Enter your NVIDIA Cloud Org ID: ", true)
 			err := config.SetAPIKey(apiKey)
 			if err != nil {
 				output.Error(cmd, "Error saving API key", err)
+				return
+			}
+			err = config.SetOrgID(orgID)
+			if err != nil {
+				output.Error(cmd, "Error saving Org ID", err)
 				return
 			}
 			output.Success(cmd, "Authentication successful")
