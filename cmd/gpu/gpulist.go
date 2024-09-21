@@ -17,7 +17,7 @@ func gpuListCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List available GPUs",
-		Long:  "List available GPUs in NVCF. Note this is still in beta and lists all available GPUs",
+		Long:  "List available GPUs in NVCF in your org",
 		RunE:  runGpuList,
 	}
 
@@ -84,7 +84,7 @@ func getNVCFOrgInformation(orgID string) (OrgClusterGroupsResponse, error) {
 	return res, nil
 }
 
-func GetNVCFClusterGroups(ctx context.Context) (*nvcf.ClusterGroupsResponse, error) {
+func getNVCFClusterGroups(ctx context.Context) (*nvcf.ClusterGroupsResponse, error) {
 	client := api.NewClient(config.GetAPIKey())
 	availableCluster, err := client.ClusterGroups.List(ctx)
 	if err != nil {
@@ -93,30 +93,12 @@ func GetNVCFClusterGroups(ctx context.Context) (*nvcf.ClusterGroupsResponse, err
 	return availableCluster, nil
 }
 
-type OrgClusterGroupsResponse struct {
-	BillingAccountID string        `json:"billingAccountId"`
-	Clusters         []Cluster     `json:"clusters"`
-	RequestStatus    RequestStatus `json:"requestStatus"`
-}
-
-type Cluster struct {
-	Cluster          string `json:"cluster"`
-	GpuType          string `json:"gpuType"`
-	InstanceType     string `json:"instanceType"`
-	MaxInstances     int    `json:"maxInstances"`
-	CurrentInstances int    `json:"currentInstances"`
-}
-
-type RequestStatus struct {
-	StatusCode string `json:"statusCode"`
-}
-
 func GetAvailableInstanceTypes(ctx context.Context, backend, gpuType string) ([]nvcf.ClusterGroupsResponseClusterGroup, error) {
 	orgInfo, err := getNVCFOrgInformation(config.GetOrgID())
 	if err != nil {
 		return nil, err
 	}
-	clusterGroups, err := GetNVCFClusterGroups(ctx)
+	clusterGroups, err := getNVCFClusterGroups(ctx)
 	if err != nil {
 		return nil, err
 	}
