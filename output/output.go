@@ -181,9 +181,10 @@ func printGPUsTable(cmd *cobra.Command, clusterGroups []nvcf.ClusterGroupsRespon
 
 func PrintASCIIArt(cmd *cobra.Command) {
 	asciiArt := NVIDIA_LOGO_2
-	fmt.Fprintln(cmd.OutOrStdout(), asciiArt)
+	customGreen := color.New(color.FgHiGreen)
+	customGreenAsciiArt := customGreen.Sprint(asciiArt)
+	fmt.Fprintln(cmd.OutOrStdout(), customGreenAsciiArt)
 }
-
 
 var NVIDIA_LOGO_1 = `
                             @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@                    
