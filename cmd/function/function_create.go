@@ -5,6 +5,7 @@
 package function
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -14,6 +15,7 @@ import (
 	"github.com/brevdev/nvcf/config"
 	"github.com/brevdev/nvcf/flagutil"
 	"github.com/brevdev/nvcf/output"
+	"github.com/brevdev/nvcf/timeout"
 	"github.com/spf13/cobra"
 	"github.com/tmc/nvcf-go"
 	"gopkg.in/yaml.v3"
@@ -57,11 +59,10 @@ func functionCreateCmd() *cobra.Command {
 		backend               string
 		maxRequestConcurrency int64
 		deploy                bool
+		detatched             bool
 
 		// Optional function specification file
 		fileSpec string
-
-		// Optional new version flag
 	)
 
 	cmd := &cobra.Command{
@@ -220,7 +221,7 @@ func functionCreateCmd() *cobra.Command {
 	cmd.Flags().Int64Var(&maxRequestConcurrency, "max-request-concurrency", 1, "Maximum number of concurrent requests. Default is 1")
 	cmd.Flags().BoolVar(&deploy, "deploy", false, "Create and deploy the function in one step. Default is false")
 	cmd.Flags().StringVarP(&fileSpec, "file", "f", "", "Path to a YAML file containing function specifications")
-
+	cmd.Flags().BoolVarP(&detatched, "detatched", "d", false, "Deploy the function in the background. Default is false")
 	return cmd
 }
 
@@ -309,19 +310,22 @@ func deployFunction(cmd *cobra.Command, client *api.Client, resp *nvcf.CreateFun
 		}}),
 	}
 
-	_, err := client.FunctionDeployment.Functions.Versions.InitiateDeployment(
+	deployResp, err := client.FunctionDeployment.Functions.Versions.InitiateDeployment(
 		cmd.Context(),
 		resp.Function.ID,
 		resp.Function.VersionID,
 		deploymentParams,
 	)
 	if err != nil {
-		output.Error(cmd, "error deploying function", err)
-		return nil
+		return output.Error(cmd, "error deploying function", err)
 	}
 
 	output.Success(cmd, fmt.Sprintf("Function with FunctionID %s and VersionID %s deployed successfully", resp.Function.ID, resp.Function.VersionID))
 
+	detatched, _ := cmd.Flags().GetBool("detatched")
+	if !detatched {
+		return WaitForDeployment(cmd, client, deployResp.Deployment.FunctionID, deployResp.Deployment.FunctionVersionID)
+	}
 	return nil
 }
 
@@ -442,5 +446,39 @@ func createAndDeployFunctionFromFile(cmd *cobra.Command, client *api.Client, par
 	}
 
 	output.Success(cmd, fmt.Sprintf("Function %s with id %s and version %s created successfully", params.Name, resp.Function.ID, resp.Function.VersionID))
+	return nil
+}
+
+func WaitForDeployment(cmd *cobra.Command, client *api.Client, functionID, versionID string) error {
+	spinner := output.NewSpinner(fmt.Sprintf("Waiting for deployment of function %s with version %s to complete...", functionID, versionID))
+	output.StartSpinner(spinner)
+	defer output.StopSpinner(spinner)
+
+	err := timeout.DoWithTimeout(func(ctx context.Context) error {
+		for ctx.Err() == nil {
+			deploymentStatus, err := client.FunctionDeployment.Functions.Versions.GetDeployment(
+				ctx,
+				functionID,
+				versionID,
+			)
+			if err != nil {
+				return err
+			}
+			if deploymentStatus.Deployment.FunctionStatus == nvcf.DeploymentResponseDeploymentFunctionStatusActive {
+				return nil
+			}
+			if deploymentStatus.Deployment.FunctionStatus == nvcf.DeploymentResponseDeploymentFunctionStatusError {
+				return fmt.Errorf("deployment failed. please try again")
+			}
+			time.Sleep(time.Second * 5)
+		}
+		return nil
+	}, 30*time.Minute) // GFN can take a while
+
+	if err != nil {
+		return output.Error(cmd, "Error waiting for deployment", err)
+	}
+
+	output.Success(cmd, fmt.Sprintf("Function with FunctionID %s and VersionID %s deployed successfully", functionID, versionID))
 	return nil
 }
