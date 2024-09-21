@@ -19,7 +19,6 @@ func AuthCmd() *cobra.Command {
 		Long:  `Authenticate with NVIDIA Cloud and configure the CLI to use your API key.`,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			config.Init()
-			// Allow all 'auth' subcommands to run without authentication
 			if cmd.Parent().Name() != "auth" && !config.IsAuthenticated() {
 				fmt.Println("You are not authenticated. Please run 'nvcf auth login' first.")
 				os.Exit(1)
@@ -52,6 +51,7 @@ func authLoginCmd() *cobra.Command {
 				output.Error(cmd, "Error saving Org ID", err)
 				return
 			}
+			output.PrintASCIIArt(cmd)
 			output.Success(cmd, "Authentication successful")
 		},
 	}

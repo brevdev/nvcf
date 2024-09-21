@@ -30,6 +30,7 @@ func functionDeployCmd() *cobra.Command {
 	cmd.Flags().Int64("min-instances", 0, "Minimum number of instances")
 	cmd.Flags().Int64("max-instances", 1, "Maximum number of instances")
 	cmd.Flags().Int64("max-request-concurrency", 1, "Maximum number of concurrent requests")
+	cmd.Flags().BoolP("detached", "d", false, "Detach from the deployment and return to the prompt")
 
 	cmd.MarkFlagRequired("gpu")
 	cmd.MarkFlagRequired("instance-type")
@@ -69,6 +70,7 @@ func runFunctionDeploy(cmd *cobra.Command, args []string) error {
 	minInstances, _ := cmd.Flags().GetInt64("min-instances")
 	maxInstances, _ := cmd.Flags().GetInt64("max-instances")
 	maxRequestConcurrency, _ := cmd.Flags().GetInt64("max-request-concurrency")
+	detached, _ := cmd.Flags().GetBool("detached")
 
 	deploymentParams := nvcf.FunctionDeploymentFunctionVersionInitiateDeploymentParams{
 		DeploymentSpecifications: nvcf.F([]nvcf.FunctionDeploymentFunctionVersionInitiateDeploymentParamsDeploymentSpecification{{
@@ -92,5 +94,9 @@ func runFunctionDeploy(cmd *cobra.Command, args []string) error {
 	}
 
 	output.Success(cmd, fmt.Sprintf("Function %s version %s deployed successfully", functionId, versionId))
+	if !detached {
+		return WaitForDeployment(cmd, client, functionId, versionId)
+	}
+
 	return nil
 }

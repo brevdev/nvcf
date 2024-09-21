@@ -8,6 +8,8 @@ import (
 	"github.com/brevdev/nvcf/cmd/auth"
 	"github.com/brevdev/nvcf/cmd/function"
 	"github.com/brevdev/nvcf/cmd/gpu"
+	"github.com/brevdev/nvcf/cmd/test"
+	"github.com/brevdev/nvcf/output"
 	"github.com/spf13/cobra"
 )
 
@@ -18,6 +20,10 @@ func main() {
 		Long:          `A command-line interface for managing and interacting with NVIDIA Cloud Functions.`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
+		Run: func(cmd *cobra.Command, args []string) {
+			output.PrintASCIIArt(cmd)
+			cmd.Usage()
+		},
 	}
 
 	// Add global flags
@@ -36,10 +42,12 @@ func main() {
 	// rootCmd.AddCommand(cmd.ClusterGroupCmd())
 	// rootCmd.AddCommand(cmd.ConfigCmd())
 	rootCmd.AddCommand(cmd.DocsCmd())
+	rootCmd.AddCommand(test.TestCmd())
 
 	// // Enable command auto-completion
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
 	rootCmd.AddCommand(cmd.CompletionCmd())
+	
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Println(err)
