@@ -94,6 +94,7 @@ func runFunctionDeploy(cmd *cobra.Command, args []string) error {
 	}
 
 	output.Success(cmd, fmt.Sprintf("Function %s version %s deployed successfully", functionId, versionId))
+	output.Success(cmd, fmt.Sprintf("You can use 'nvcf function watch %s' to monitor the deployment", functionId))
 	if !detached {
 		return WaitForDeployment(cmd, client, functionId, versionId)
 	}
