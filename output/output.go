@@ -3,6 +3,9 @@ package output
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"os"
+	"sync"
 	"time"
 
 	"github.com/briandowns/spinner"
@@ -23,17 +26,17 @@ func Error(cmd *cobra.Command, message string, err error) error {
 	return formattedError
 }
 
-func Success(cmd *cobra.Command, message string) {
-	if !isQuiet(cmd) {
-		color.Green(message)
-	}
-}
+// func Success(cmd *cobra.Command, message string) {
+// 	if !isQuiet(cmd) {
+// 		color.Green(message)
+// 	}
+// }
 
-func Info(cmd *cobra.Command, message string) {
-	if !isQuiet(cmd) {
-		color.Blue(message)
-	}
-}
+// func Info(cmd *cobra.Command, message string) {
+// 	if !isQuiet(cmd) {
+// 		color.Blue(message)
+// 	}
+// }
 
 func isJSON(cmd *cobra.Command) bool {
 	json, _ := cmd.Flags().GetBool("json")
@@ -55,7 +58,7 @@ func printJSON(cmd *cobra.Command, data interface{}) {
 }
 
 func Prompt(message string, isSecret bool) string {
-	fmt.Print(message)
+	Type(message)
 	if isSecret {
 		// Implement secure input for secrets
 	}
@@ -293,3 +296,110 @@ var NVIDIA_LOGO_3 = `
 @@@@@@       @@@@@@     @@@@@@@@@@      @@@@@@  @@@@@@@@@@@@@@@@@   @@@@@@  @@@@@@        @@@@@@@ @@@@@
 @@@@@@       @@@@@@     @@@@@@@@@       @@@@@@  @@@@@@@@@@@@@@      @@@@@@  @@@@@          @@@@@@ @@@@@
 `
+
+type TypeOptions struct {
+	Speed       time.Duration
+	Skippable   bool
+	Writer      io.Writer
+	StopChannel chan struct{}
+}
+
+var defaultOptions = TypeOptions{
+	Speed:       27 * time.Millisecond,
+	Skippable:   true,
+	Writer:      os.Stdout,
+	StopChannel: nil,
+}
+
+func Type(s string, opts ...TypeOptions) {
+	options := mergeOptions(defaultOptions, opts...)
+	var wg sync.WaitGroup
+	wg.Add(1)
+
+	go func() {
+		defer wg.Done()
+		typeText(s, options)
+	}()
+
+	if options.Skippable {
+		go func() {
+			fmt.Scanln() // Wait for Enter key
+			if options.StopChannel != nil {
+				close(options.StopChannel)
+			}
+		}()
+	}
+
+	wg.Wait()
+}
+
+func mergeOptions(defaultOpts TypeOptions, opts ...TypeOptions) TypeOptions {
+	if len(opts) == 0 {
+		return defaultOpts
+	}
+	userOpts := opts[0]
+	if userOpts.Speed == 0 {
+		userOpts.Speed = defaultOpts.Speed
+	}
+	if userOpts.Writer == nil {
+		userOpts.Writer = defaultOpts.Writer
+	}
+	if userOpts.StopChannel == nil {
+		userOpts.StopChannel = defaultOpts.StopChannel
+	}
+	return userOpts
+}
+
+func typeText(s string, options TypeOptions) {
+	for _, char := range s {
+		select {
+		case <-options.StopChannel:
+			fmt.Fprint(options.Writer, s[len(s)-len(string(char)):])
+			return
+		default:
+			fmt.Fprintf(options.Writer, "%c", char)
+			time.Sleep(options.Speed)
+		}
+	}
+}
+
+// TypeWithColor types text with the specified color
+func TypeWithColor(s string, c *color.Color, opts ...TypeOptions) {
+	options := mergeOptions(defaultOptions, opts...)
+	coloredString := c.SprintFunc()(s)
+	Type(coloredString, options)
+}
+
+// Update existing output functions to use Type
+func Success(cmd *cobra.Command, message string) {
+	if !isQuiet(cmd) {
+		TypeWithColor(message+"\n", color.New(color.FgGreen))
+	}
+}
+
+func Info(cmd *cobra.Command, message string) {
+	if !isQuiet(cmd) {
+		TypeWithColor(message+"\n", color.New(color.FgBlue))
+	}
+}
+
+
+// Example usage:
+func ExampleTyping() {
+	// Basic usage
+	Type("Hello, World! Messages can go here.\n")
+
+	// Custom options
+	Type("This types at default speed and can't be skipped\n", TypeOptions{
+		Skippable: false,
+	})
+
+	// With color
+	TypeWithColor("This is a green message\n", color.New(color.FgGreen))
+
+	// With stop channel
+	stopChan := make(chan struct{})
+	Type("Press Enter to skip this message...\n", TypeOptions{
+		StopChannel: stopChan,
+	})
+}
