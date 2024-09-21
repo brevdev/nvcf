@@ -52,6 +52,7 @@ func authLoginCmd() *cobra.Command {
 				output.Error(cmd, "Error saving Org ID", err)
 				return
 			}
+			output.PrintASCIIArt(cmd)
 			output.Success(cmd, "Authentication successful")
 		},
 	}

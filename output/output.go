@@ -26,18 +26,6 @@ func Error(cmd *cobra.Command, message string, err error) error {
 	return formattedError
 }
 
-// func Success(cmd *cobra.Command, message string) {
-// 	if !isQuiet(cmd) {
-// 		color.Green(message)
-// 	}
-// }
-
-// func Info(cmd *cobra.Command, message string) {
-// 	if !isQuiet(cmd) {
-// 		color.Blue(message)
-// 	}
-// }
-
 func isJSON(cmd *cobra.Command) bool {
 	json, _ := cmd.Flags().GetBool("json")
 	return json
@@ -57,11 +45,9 @@ func printJSON(cmd *cobra.Command, data interface{}) {
 	fmt.Println(string(json))
 }
 
+// TODO: Implement secure input for secrets
 func Prompt(message string, isSecret bool) string {
 	Type(message)
-	if isSecret {
-		// Implement secure input for secrets
-	}
 	var input string
 	fmt.Scanln(&input)
 	return input
@@ -84,7 +70,6 @@ func StopSpinner(s *spinner.Spinner) {
 	s.Stop()
 }
 
-// Implement other output functions (Function, Deployment, InvocationResult, etc.) here
 func Functions(cmd *cobra.Command, functions []nvcf.ListFunctionsResponseFunction) {
 	if isJSON(cmd) {
 		printJSON(cmd, functions)
@@ -180,7 +165,6 @@ func printGPUsTable(cmd *cobra.Command, clusterGroups []nvcf.ClusterGroupsRespon
 
 	table.Render()
 }
-
 
 func PrintASCIIArt(cmd *cobra.Command) {
 	asciiArt := NVIDIA_LOGO_2
@@ -382,7 +366,6 @@ func Info(cmd *cobra.Command, message string) {
 		TypeWithColor(message+"\n", color.New(color.FgBlue))
 	}
 }
-
 
 // Example usage:
 func ExampleTyping() {
