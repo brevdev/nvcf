@@ -50,7 +50,7 @@ func runFunctionWatch(cmd *cobra.Command, args []string) error {
 
 	table.SetSelectedStyle(
 		tcell.StyleDefault.
-			Background(tcell.ColorDarkBlue).
+			Background(tcell.ColorGreen).
 			Foreground(tcell.ColorWhite),
 	)
 
