@@ -2,7 +2,6 @@
 // - Implement HelmChart and HelmChartServiceName functionality
 // - Implement Resources array functionality
 // - Add support for Secrets array
-// - We cannot programatically get backends just yet. A user has to go to NGC to find their backend and gpu allocation
 package function
 
 import (
@@ -29,19 +28,20 @@ const (
 func functionCreateCmd() *cobra.Command {
 	var (
 		// Function creation parameters
-		name           string
-		inferenceURL   string
-		inferencePort  int64
-		healthUri      string
-		containerImage string
-		containerArgs  string
-		description    string
-		tags           []string
-		custom         bool //if false this sets apiBodyFormat to PREDICT_V2
-		streaming      bool //if false this sets functionType to DEFAULT
-		functionType   string
-		envVars        []string
-		modelVars      []string
+		name               string
+		inferenceURL       string
+		inferencePort      int64
+		healthUri          string
+		containerImage     string
+		containerArgs      string
+		description        string
+		tags               []string
+		custom             bool //if false this sets apiBodyFormat to PREDICT_V2
+		streaming          bool //if false this sets functionType to DEFAULT
+		functionType       string
+		envVars            []string
+		modelVars          []string
+		existingFunctionID string
 
 		// Health check parameters
 		healthProtocol   string
@@ -62,7 +62,6 @@ func functionCreateCmd() *cobra.Command {
 		fileSpec string
 
 		// Optional new version flag
-		existingFunctionID string
 	)
 
 	cmd := &cobra.Command{
