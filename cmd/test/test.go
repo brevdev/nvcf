@@ -13,6 +13,8 @@ func TestCmd() *cobra.Command {
 		Short: "A simple test command",
 		Long:  `This command simply returns "Hello, World!" when executed.`,
 		Run: func(cmd *cobra.Command, args []string) {
+			output.PrintASCIIArt(cmd)
+			time.Sleep(1 * time.Second)
 			s := output.NewSpinner(" Hello, World!")
 			output.StartSpinner(s)
 			time.Sleep(4 * time.Second)
