@@ -321,6 +321,7 @@ func deployFunction(cmd *cobra.Command, client *api.Client, resp *nvcf.CreateFun
 	}
 
 	output.Success(cmd, fmt.Sprintf("Function with FunctionID %s and VersionID %s deployed successfully", resp.Function.ID, resp.Function.VersionID))
+	output.Success(cmd, fmt.Sprintf("You can use 'nvcf function watch %s' to monitor the deployment", resp.Function.ID))
 
 	detatched, _ := cmd.Flags().GetBool("detatched")
 	if !detatched {

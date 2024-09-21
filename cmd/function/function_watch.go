@@ -18,7 +18,7 @@ import (
 func functionWatchCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "watch",
-		Short: "Watch functions in real-time",
+		Short: "Watch functions status in real-time",
 		Long:  `Display a real-time view of NVCF functions.`,
 		Args:  cobra.MaximumNArgs(1),
 		RunE:  runFunctionWatch,
@@ -46,7 +46,7 @@ func runFunctionWatch(cmd *cobra.Command, args []string) error {
 
 	table := tview.NewTable().
 		SetBorders(true).
-		SetSelectable(true, false)
+		SetSelectable(false, false) // set to (true, false) to scroll through rows
 
 	table.SetSelectedStyle(
 		tcell.StyleDefault.
