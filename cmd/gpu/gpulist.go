@@ -121,7 +121,6 @@ func GetAvailableInstanceTypes(ctx context.Context, backend, gpuType string) ([]
 		return nil, err
 	}
 
-	// Create a map of cluster names to their GPU configurations
 	gpuConfigs := make(map[string]bool)
 	for _, cluster := range orgInfo.Clusters {
 		gpuConfigs[cluster.Cluster] = true
