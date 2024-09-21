@@ -9,6 +9,7 @@ import (
 	"github.com/brevdev/nvcf/cmd/function"
 	"github.com/brevdev/nvcf/cmd/gpu"
 	"github.com/brevdev/nvcf/cmd/test"
+	"github.com/brevdev/nvcf/output"
 	"github.com/spf13/cobra"
 )
 
@@ -19,6 +20,10 @@ func main() {
 		Long:          `A command-line interface for managing and interacting with NVIDIA Cloud Functions.`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
+		Run: func(cmd *cobra.Command, args []string) {
+			output.PrintASCIIArt(cmd)
+			cmd.Usage()
+		},
 	}
 
 	// Add global flags
