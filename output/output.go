@@ -80,10 +80,10 @@ func Functions(cmd *cobra.Command, functions []nvcf.ListFunctionsResponseFunctio
 
 func printFunctionsTable(cmd *cobra.Command, functions []nvcf.ListFunctionsResponseFunction) {
 	table := tablewriter.NewWriter(cmd.OutOrStdout())
-	table.SetHeader([]string{"Name", "Version ID", "Status"})
+	table.SetHeader([]string{"Name", "ID", "Status"})
 	table.SetBorder(false)
 	for _, f := range functions {
-		table.Append([]string{f.Name, f.VersionID, string(f.Status)})
+		table.Append([]string{f.Name, f.ID, string(f.Status)})
 	}
 	table.Render()
 }
@@ -98,9 +98,9 @@ func SingleFunction(cmd *cobra.Command, fn nvcf.FunctionResponseFunction) {
 
 func printSingleFunctionTable(cmd *cobra.Command, fn nvcf.FunctionResponseFunction) {
 	table := tablewriter.NewWriter(cmd.OutOrStdout())
-	table.SetHeader([]string{"Name", "Version ID", "Status"})
+	table.SetHeader([]string{"Name", "ID", "Status"})
 	table.SetBorder(false)
-	table.Append([]string{fn.Name, fn.VersionID, string(fn.Status)})
+	table.Append([]string{fn.Name, fn.ID, string(fn.Status)})
 	table.Render()
 }
 
