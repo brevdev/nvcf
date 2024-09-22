@@ -1,4 +1,5 @@
 // this logic is based on the ui call
+// TODO: allow arbitrary start and end times
 package function
 
 import (
@@ -26,11 +27,8 @@ func functionLogsCmd() *cobra.Command {
 		RunE:    runFunctionLogs,
 	}
 
-	const timeFormat = "2006-01-02 15:04:05"
-
 	cmd.Flags().String("version-id", "", "The ID of the version")
-	cmd.Flags().String("start", time.Now().Add(-24*time.Hour).Format(timeFormat), "Start time for logs (format: YYYY-MM-DD HH:MM:SS)")
-	cmd.Flags().String("end", time.Now().Format(timeFormat), "End time for logs (format: YYYY-MM-DD HH:MM:SS)")
+	cmd.Flags().StringP("duration", "d", "30", "The duration of the logs to fetch (minutes)")
 
 	return cmd
 }
@@ -60,15 +58,20 @@ func runFunctionLogs(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	// Parse start and end times
-	startTime, _ := cmd.Flags().GetString("start")
-	endTime, _ := cmd.Flags().GetString("end")
+	// Parse duration flag
+	var duration time.Duration
+	var err error
+	durationStr, _ := cmd.Flags().GetString("duration")
+	if durationStr == "" {
+		duration = 30 * time.Minute
+	} else {
+		duration, err = time.ParseDuration(durationStr + "m")
+		if err != nil {
+			return output.Error(cmd, "Invalid duration format", err)
+		}
+	}
 
-	// Call getDeploymentLogs with the parsed arguments
-	logs, err := getDeploymentLogs(cmd.Context(), client, functionID, versionID, startTime, endTime)
-		StartTime: startTime,
-		EndTime:   endTime,
-	})
+	logs, err := getDeploymentLogs(cmd.Context(), client, functionID, versionID, duration)
 	if err != nil {
 		return output.Error(cmd, "Error getting function logs", err)
 	}
@@ -83,7 +86,9 @@ func runFunctionLogs(cmd *cobra.Command, args []string) error {
 }
 
 // note: this is not a spec method - im building this based on the ui call
-func getDeploymentLogs(ctx context.Context, client *api.Client, functionID, versionID string, startTime, endTime time.Time) ([]DeploymentLog, error) {
+func getDeploymentLogs(ctx context.Context, client *api.Client, functionID, versionID string, duration time.Duration) ([]DeploymentLog, error) {
+	startTime := time.Now().Add(-duration)
+	endTime := time.Now()
 	url := buildLogsURL(functionID, versionID)
 	payload := buildLogsPayload(startTime, endTime)
 	var logsResponse NVCFLogsResponse
@@ -100,7 +105,7 @@ func getDeploymentLogs(ctx context.Context, client *api.Client, functionID, vers
 }
 
 func buildLogsURL(funcID string, versionID string) string {
-	return fmt.Sprintf("/v2/orgs/%s/nvcf/logs/functions/%s/versions/%s", n.OrgID, funcID, versionID)
+	return fmt.Sprintf("/v2/orgs/%s/nvcf/logs/functions/%s/versions/%s", config.GetOrgID(), funcID, versionID)
 }
 
 func buildLogsPayload(startTime time.Time, endTime time.Time) LogsPayload {
