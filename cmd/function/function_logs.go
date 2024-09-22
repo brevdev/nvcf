@@ -65,8 +65,7 @@ func runFunctionLogs(cmd *cobra.Command, args []string) error {
 	endTime, _ := cmd.Flags().GetString("end")
 
 	// Call getDeploymentLogs with the parsed arguments
-	logs, err := getDeploymentLogs(cmd.Context(), provider.GetDeploymentLogArgs{
-		ID:        fmt.Sprintf("%s:%s", functionID, versionID),
+	logs, err := getDeploymentLogs(cmd.Context(), client, functionID, versionID, startTime, endTime)
 		StartTime: startTime,
 		EndTime:   endTime,
 	})
