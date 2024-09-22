@@ -30,6 +30,7 @@ func FunctionCmd() *cobra.Command {
 	cmd.AddCommand(functionUpdateCmd())
 	cmd.AddCommand(functionDeployCmd())
 	cmd.AddCommand(functionStopCmd())
+	cmd.AddCommand(functionWatchCmd())
 
 	return cmd
 }
