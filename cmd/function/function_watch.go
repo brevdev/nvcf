@@ -205,8 +205,3 @@ func getStatusColor(status nvcf.ListFunctionsResponseFunctionsStatus) tcell.Colo
 		return tcell.ColorWhite
 	}
 }
-
-// Assuming these functions are defined elsewhere in your package:
-// func parseStatusFlags(cmd *cobra.Command) ([]nvcf.DeploymentResponseDeploymentFunctionStatus, error)
-// func parseVisibilityFlags(cmd *cobra.Command) ([]nvcf.FunctionListParamsVisibility, error)
-// func containsStatus(statuses []nvcf.DeploymentResponseDeploymentFunctionStatus, status nvcf.ListFunctionsResponseFunctionsStatus) bool
