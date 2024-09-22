@@ -45,7 +45,7 @@ func runFunctionWatch(cmd *cobra.Command, args []string) error {
 
 	table := tview.NewTable().
 		SetBorders(true).
-		SetSelectable(false, false) // set to (true, false) to scroll through rows
+		SetSelectable(true, false) // set to (true, false) to scroll through rows
 
 	table.SetSelectedStyle(
 		tcell.StyleDefault.
