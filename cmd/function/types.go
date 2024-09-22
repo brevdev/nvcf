@@ -70,3 +70,33 @@ func (h *HealthCheck) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 	return nil
 }
+
+type LogParameter struct {
+	Name  string `json:"name"`
+	Value string `json:"value"`
+}
+
+type LogsPayload struct {
+	Parameters []LogParameter `json:"parameters"`
+}
+
+type NVCFLogsResponse struct {
+	JobID    string    `json:"jobId"`
+	Data     []NVCFLog `json:"data"`
+	Metadata struct {
+		TotalPages int `json:"totalPages"`
+		Page       int `json:"page"`
+	} `json:"metadata"`
+}
+
+type NVCFLog struct {
+	Timestamp string `json:"timestamp"`
+	Level     string `json:"level"`
+	Message   string `json:"message"`
+}
+
+type DeploymentLog struct {
+	Level     string
+	Timestamp string
+	Message   string
+}
