@@ -49,25 +49,6 @@ For a full list of commands and options, use the `--help` flag:
 nvcf --help
 ```
 
-## Project Structure
-
-The project is organized as follows:
-
-- `cmd/`: Contains the implementation of CLI commands
-- `api/`: Implements the API client for interacting with NVIDIA Cloud Functions
-- `config/`: Handles configuration management
-- `output/`: Manages output formatting and display
-- `main.go`: Entry point of the CLI application
-
-## Dependencies
-
-The project uses the following main dependencies:
-
-- `github.com/spf13/cobra`: For building the CLI command structure
-- `github.com/brevdev/nvcf-go`: NVIDIA Cloud Functions Go SDK
-- `github.com/fatih/color`: For color-coded output
-- `github.com/olekukonko/tablewriter`: For table-formatted output
-
 ## Contributing
 
 Contributions to the NVCF CLI are welcome. Please follow these steps to contribute:
@@ -95,72 +76,3 @@ For issues, feature requests, or questions, please open an issue on the [GitHub 
 
 For more information about NVIDIA Cloud Functions, visit the [official documentation](https://docs.nvidia.com/cloud-functions/)
 
-## Smoke Testing
-
-The NVCF CLI includes a smoke testing feature that allows you to verify the compatibility of your container with NVCF. This includes both HTTP and gRPC inference testing.
-
-### HTTP Inference Testing
-
-To run an HTTP inference test, use the following command:
-
-```bash
-nvcf function smoketest your-image:tag --protocol http --http-inference-endpoint /v2/models/infer --http-payload '{"input": "Hello, World!"}'
-```
-
-This will:
-1. Launch your container
-2. Check the health endpoint
-3. Send an HTTP POST request to the specified inference endpoint with the provided payload
-4. Display the response from the server
-
-You can customize the inference endpoint and payload as needed for your specific model.
-
-## Smoke Testing
-
-The NVCF CLI includes a smoke testing feature that allows you to verify the compatibility of your container with NVCF. This includes both HTTP and gRPC inference testing.
-
-### HTTP Inference Testing
-
-To run an HTTP inference test, use the following command:
-
-```bash
-nvcf function smoketest your-image:tag --protocol http --http-inference-endpoint /v2/models/infer --http-payload '{"input": "Hello, World!"}'
-```
-
-This will:
-1. Launch your container
-2. Check the health endpoint
-3. Send an HTTP POST request to the specified inference endpoint with the provided payload
-4. Display the response from the server
-
-You can customize the inference endpoint and payload as needed for your specific model.
-
-## Smoke Testing
-
-The NVCF CLI includes a smoke testing feature that allows you to verify the compatibility of your container with NVCF. This includes both HTTP and gRPC inference testing.
-
-### HTTP Inference Testing
-
-To run an HTTP inference test, use the following command:
-
-```bash
-nvcf function smoketest your-image:tag --protocol http --http-inference-endpoint /v2/models/infer --http-payload '{"input": "Hello, World!"}'
-```
-
-This will:
-1. Launch your container
-2. Check the health endpoint
-3. Send an HTTP POST request to the specified inference endpoint with the provided payload
-4. Display the response from the server
-
-You can customize the inference endpoint and payload as needed for your specific model.
-
-### HTTP Inference Testing
-
-To run an HTTP inference test, use the following command:
-
-```bash
-nvcf function smoketest your-image:tag --protocol http --http-inference-endpoint /your/inference/endpoint --http-payload '{"input": "Hello, World!"}'
-```
-
-Make sure to specify the correct inference endpoint for your application. If you're unsure, you can try using the root path ("/") or check your FastAPI application for the correct endpoint.
