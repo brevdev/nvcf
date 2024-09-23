@@ -1,10 +1,6 @@
 package function
 
 import (
-	"fmt"
-	"strings"
-
-	"github.com/brevdev/nvcf/config"
 	"github.com/spf13/cobra"
 )
 
@@ -35,16 +31,4 @@ on your serverless functions.`,
 	cmd.AddCommand(functionWatchCmd())
 
 	return cmd
-}
-
-func authCheck(cmd *cobra.Command, args []string) error {
-	config.Init()
-	if !config.IsAuthenticated() {
-		return fmt.Errorf("you are not authenticated. Please run 'nvcf auth login' first")
-	}
-	return nil
-}
-
-func shouldApplyAuthCheck(cmd *cobra.Command) bool {
-	return cmd.Name() != "smoketest" && !strings.HasPrefix(cmd.Name(), "auth")
 }

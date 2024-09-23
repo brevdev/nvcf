@@ -9,6 +9,7 @@ import (
 	"github.com/brevdev/nvcf/cmd/function"
 	"github.com/brevdev/nvcf/cmd/gpu"
 	"github.com/brevdev/nvcf/cmd/preflight"
+	"github.com/brevdev/nvcf/config"
 	"github.com/brevdev/nvcf/output"
 	"github.com/spf13/cobra"
 )
@@ -22,10 +23,11 @@ func main() {
 
 func run() error {
 	rootCmd := &cobra.Command{
-		Use:           "nvcf",
-		Short:         "NVIDIA Cloud Functions CLI",
-		Long:          `A command-line interface for managing and interacting with NVIDIA Cloud Functions.`,
-		SilenceErrors: true,
+		Use:               "nvcf",
+		Short:             "NVIDIA Cloud Functions CLI",
+		Long:              `A command-line interface for managing and interacting with NVIDIA Cloud Functions.`,
+		SilenceErrors:     true,
+		PersistentPreRunE: preRunAuthCheck,
 		Run: func(cmd *cobra.Command, args []string) {
 			output.PrintASCIIArt(cmd)
 			cmd.Usage()
@@ -40,7 +42,6 @@ func run() error {
 
 	// Add commands
 	rootCmd.AddCommand(function.FunctionCmd())
-	rootCmd.AddCommand(preflight.PreflightCmd())
 	rootCmd.AddCommand(gpu.GpuCmd())
 	// rootCmd.AddCommand(cmd.InvokeCmd())
 	// rootCmd.AddCommand(cmd.AssetCmd())
@@ -48,6 +49,7 @@ func run() error {
 	// rootCmd.AddCommand(cmd.QueueCmd())
 	// rootCmd.AddCommand(cmd.ClusterGroupCmd())
 	// rootCmd.AddCommand(cmd.ConfigCmd())
+	rootCmd.AddCommand(preflight.PreflightCmd())
 	rootCmd.AddCommand(cmd.DocsCmd())
 
 	// // Enable command auto-completion
@@ -55,4 +57,31 @@ func run() error {
 	rootCmd.AddCommand(cmd.CompletionCmd())
 
 	return rootCmd.Execute()
+}
+
+var shouldApplyAuthCheck = map[string]bool{
+	"function": true,
+	"gpu":      true,
+}
+
+func preRunAuthCheck(cmd *cobra.Command, args []string) error {
+	config.Init()
+	topLevelCmd := getTopLevelCmd(cmd)
+	if shouldApplyAuthCheck[topLevelCmd.Name()] {
+		if !config.IsAuthenticated() {
+			return fmt.Errorf("you are not authenticated. Please run 'nvcf auth login' first")
+		}
+	}
+	return nil
+}
+
+func getTopLevelCmd(cmd *cobra.Command) *cobra.Command {
+	if cmd == nil || cmd.Parent() == nil {
+		return cmd
+	}
+	parent := cmd.Parent()
+	if parent.Parent() == nil {
+		return cmd
+	}
+	return getTopLevelCmd(parent)
 }
