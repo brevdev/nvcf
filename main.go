@@ -26,7 +26,6 @@ func run() error {
 		Use:           "nvcf",
 		Short:         "NVIDIA Cloud Functions CLI",
 		Long:          `A command-line interface for managing and interacting with NVIDIA Cloud Functions.`,
-		SilenceUsage:  true,
 		SilenceErrors: true,
 		Run: func(cmd *cobra.Command, args []string) {
 			output.PrintASCIIArt(cmd)
