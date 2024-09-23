@@ -49,25 +49,6 @@ For a full list of commands and options, use the `--help` flag:
 nvcf --help
 ```
 
-## Project Structure
-
-The project is organized as follows:
-
-- `cmd/`: Contains the implementation of CLI commands
-- `api/`: Implements the API client for interacting with NVIDIA Cloud Functions
-- `config/`: Handles configuration management
-- `output/`: Manages output formatting and display
-- `main.go`: Entry point of the CLI application
-
-## Dependencies
-
-The project uses the following main dependencies:
-
-- `github.com/spf13/cobra`: For building the CLI command structure
-- `github.com/brevdev/nvcf-go`: NVIDIA Cloud Functions Go SDK
-- `github.com/fatih/color`: For color-coded output
-- `github.com/olekukonko/tablewriter`: For table-formatted output
-
 ## Contributing
 
 Contributions to the NVCF CLI are welcome. Please follow these steps to contribute:
@@ -94,3 +75,4 @@ This project is licensed under the [MIT License](LICENSE).
 For issues, feature requests, or questions, please open an issue on the [GitHub repository](https://github.com/brevdev/nvcf/issues).
 
 For more information about NVIDIA Cloud Functions, visit the [official documentation](https://docs.nvidia.com/cloud-functions/)
+
