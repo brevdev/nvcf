@@ -2,6 +2,7 @@ package preflight
 
 import (
 	"github.com/brevdev/nvcf/cmd/preflight/check"
+	"github.com/brevdev/nvcf/cmd/preflight/debug"
 	"github.com/spf13/cobra"
 )
 
@@ -13,6 +14,6 @@ func PreflightCmd() *cobra.Command {
 	}
 
 	cmd.AddCommand(check.NewCheckCmd())
-
+	cmd.AddCommand(debug.DebugCmd())
 	return cmd
 }
