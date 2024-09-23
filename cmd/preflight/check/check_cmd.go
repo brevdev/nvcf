@@ -1,4 +1,4 @@
-package smoketest
+package check
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/brevdev/nvcf/containerutil"
+	"github.com/brevdev/nvcf/preflight/containerutil"
 	"github.com/spf13/cobra"
 )
 
@@ -25,12 +25,12 @@ var (
 	httpPayload             string
 )
 
-// NewSmokeTestCmd returns a new smoketest command for verifying container compatibility with NVCF.
+// NewCheckCmd returns a new check command for verifying container compatibility with NVCF.
 // This command runs a local deployment test to ensure the specified Docker image
 // can be successfully deployed and accessed.
-func NewSmokeTestCmd() *cobra.Command {
+func NewCheckCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "smoketest <image-name>",
+		Use:   "check <image-name>",
 		Short: "Run local deployment test for NVCF compatibility",
 		Long: `Run a local deployment test to verify container compatibility with NVCF.
 This command deploys the specified Docker image locally, checks its health,

@@ -8,6 +8,7 @@ import (
 	"github.com/brevdev/nvcf/cmd/auth"
 	"github.com/brevdev/nvcf/cmd/function"
 	"github.com/brevdev/nvcf/cmd/gpu"
+	"github.com/brevdev/nvcf/cmd/preflight"
 	"github.com/brevdev/nvcf/cmd/test"
 	"github.com/brevdev/nvcf/output"
 	"github.com/spf13/cobra"
@@ -41,6 +42,7 @@ func run() error {
 
 	// Add commands
 	rootCmd.AddCommand(function.FunctionCmd())
+	rootCmd.AddCommand(preflight.PreflightCmd())
 	rootCmd.AddCommand(gpu.GpuCmd())
 	// rootCmd.AddCommand(cmd.InvokeCmd())
 	// rootCmd.AddCommand(cmd.AssetCmd())
