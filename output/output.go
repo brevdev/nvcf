@@ -283,14 +283,12 @@ var NVIDIA_LOGO_3 = `
 
 type TypeOptions struct {
 	Speed       time.Duration
-	Skippable   bool
 	Writer      io.Writer
 	StopChannel chan struct{}
 }
 
 var defaultOptions = TypeOptions{
-	Speed:       27 * time.Millisecond,
-	Skippable:   true,
+	Speed:       17 * time.Millisecond,
 	Writer:      os.Stdout,
 	StopChannel: nil,
 }
@@ -304,15 +302,6 @@ func Type(s string, opts ...TypeOptions) {
 		defer wg.Done()
 		typeText(s, options)
 	}()
-
-	if options.Skippable {
-		go func() {
-			fmt.Scanln() // Wait for Enter key
-			if options.StopChannel != nil {
-				close(options.StopChannel)
-			}
-		}()
-	}
 
 	wg.Wait()
 }
@@ -373,9 +362,7 @@ func ExampleTyping() {
 	Type("Hello, World! Messages can go here.\n")
 
 	// Custom options
-	Type("This types at default speed and can't be skipped\n", TypeOptions{
-		Skippable: false,
-	})
+	Type("This types at default speed and can't be skipped\n")
 
 	// With color
 	TypeWithColor("This is a green message\n", color.New(color.FgGreen))
