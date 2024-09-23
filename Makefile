@@ -1,53 +1,70 @@
 # Makefile for NVCF CLI
+BINARY_NAME := nvcf
 
-# Go parameters
-GOCMD=go
-GOBUILD=$(GOCMD) build
-GOCLEAN=$(GOCMD) clean
-GOTEST=$(GOCMD) test
-GOVET=$(GOCMD) vet
-BINARY_NAME=nvcf
-GOFILES=$(shell find . -name '*.go' -not -path "./vendor/*")
+## Default target: build the project
+all: check install
 
-# Linting
-GOLINT=golangci-lint
+## Install the binary
+install:
+	go install
 
-.PHONY: all build clean test vet lint fmt q
-
-all: build
-
+## Build the binary
 build:
-	$(GOBUILD) -o $(BINARY_NAME)
+	go build -o $(BINARY_NAME)
 
+## Clean up build artifacts
 clean:
-	$(GOCLEAN)
+	go clean
 	rm -f $(BINARY_NAME)
 
+## Run tests
 test:
-	$(GOTEST) ./...
+	go test ./...
 
-vet:
-	$(GOVET) ./...
-
-lint:
-	$(GOLINT) run
-
-fmt:
-	gofmt -s -w $(GOFILES)
-
-# Installs golangci-lint
-install-lint:
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.54.2
-
-# Runs all checks
+## Run all checks: fmt, vet, lint, and test
 check: fmt vet lint test
 
-# Builds for multiple platforms
-build-all:
-	GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BINARY_NAME)-linux-amd64
-	GOOS=darwin GOARCH=amd64 $(GOBUILD) -o $(BINARY_NAME)-darwin-amd64
-	GOOS=windows GOARCH=amd64 $(GOBUILD) -o $(BINARY_NAME)-windows-amd64.exe
+## Format the code
+fmt:
+	gofmt -s -w .
 
-q:
-	make clean
-	make build
+## Run go vet
+vet:
+	go vet ./...
+
+## Run linter
+lint: deps-lint
+	golangci-lint run
+
+## Quick rebuild: clean and build
+q: clean build
+
+## Install linter dependency
+deps-lint:
+	@command -v golangci-lint > /dev/null || (go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.61.0)
+
+## Show this help message
+help:
+	@echo "Usage: make [target]"
+	@echo ""
+	@echo "Targets:"
+	@awk '/^[a-zA-Z\-\_0-9]+:/ { \
+		helpMessage = match(lastLine, /^## (.*)/); \
+		if (helpMessage) { \
+			helpCommand = substr($$1, 0, index($$1, ":")-1); \
+			helpMessage = substr(lastLine, RSTART + 3, RLENGTH); \
+			printf "  %-20s %s\n", helpCommand, helpMessage; \
+		} \
+	} \
+	{ lastLine = $$0 }' $(MAKEFILE_LIST)
+
+## Build docs
+docs:
+	go run . docs
+
+## Clean up docs dir
+cleandocs:
+	rm -rf ./docs
+
+.PHONY: all build clean test check fmt vet lint q deps-lint help
+
