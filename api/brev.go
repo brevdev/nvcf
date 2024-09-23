@@ -41,3 +41,19 @@ func (c *BrevClient) IsLoggedIn() (bool, error) {
 	}
 	return true, nil
 }
+
+const (
+	instanceType = "n1-standard-8:nvidia-tesla-t4:1"
+)
+
+func (c *BrevClient) CreateInstance(instanceName string) (string, error) {
+	cmd := exec.Command("brev", "create", instanceName, "-g", instanceType)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	if err != nil {
+		return "", fmt.Errorf("failed to create instance: %w", err)
+	}
+	return instanceName, nil
+}
