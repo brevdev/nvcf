@@ -32,8 +32,17 @@ func CheckCmd() *cobra.Command {
 		Use:   "check <image-name>",
 		Short: "Run local deployment test for NVCF compatibility",
 		Long: `Run a local deployment test to verify container compatibility with NVCF.
+
 This command deploys the specified Docker image locally, checks its health,
-and performs basic connectivity tests to ensure it meets NVCF requirements.`,
+and performs basic connectivity tests to ensure it meets NVCF requirements.
+
+Key features:
+- Supports both HTTP and gRPC protocols
+- Customizable health check and inference endpoints
+- Configurable wait times for container readiness
+- Option to force cleanup of existing containers
+
+Use this command to validate your NVCF function before deployment.`,
 		Args: cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			imageName = args[0]

@@ -19,9 +19,17 @@ func debugStartCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "start <function-id>",
 		Short: "Start a debug environment",
-		Long:  `Create and start a debug environment for an NVCF function`,
-		Args:  cobra.ExactArgs(1),
-		RunE:  runDebugStart,
+		Long: `Create and start a debug environment for an NVCF function.
+
+This command sets up a GPU-powered VM using Brev CLI, pulls the function's
+container image, and runs it in a debugging session. It allows you to:
+- Debug functions with ERROR status
+- Specify a particular version for debugging
+- Access the debug environment via SSH for hands-on troubleshooting
+
+Use this command when you need to investigate issues with your NVCF function in a live environment.`,
+		Args: cobra.ExactArgs(1),
+		RunE: runDebugStart,
 	}
 
 	cmd.Flags().String("version-id", "", "The ID of the version")
