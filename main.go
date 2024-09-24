@@ -32,6 +32,7 @@ func run() error {
 			output.PrintASCIIArt(cmd)
 			cmd.Usage()
 		},
+		DisableAutoGenTag: true,
 	}
 
 	// Add global flags
