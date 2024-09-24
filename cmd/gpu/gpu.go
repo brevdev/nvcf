@@ -11,7 +11,7 @@ import (
 func GpuCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:     "gpu",
-		Aliases: []string{"gpus", "acc", "accelerators"},
+		Aliases: []string{"gpus", "acc", "accelerators", "accelerator-types"},
 		Short:   "Manage cluster groups and available GPUs",
 		Long:    `List available GPUs, cluster groups, and other GPU related information`,
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
