@@ -103,7 +103,7 @@ func runDebugStart(cmd *cobra.Command, args []string) error {
 	}
 	fmt.Println("Setting up a GPU powered VM for debugging")
 
-	instanceName := fmt.Sprintf("%s-debug5", functionId)
+	instanceName := fmt.Sprintf("%s-debug6", functionId)
 
 	if instanceName == "" {
 		return fmt.Errorf("instance name is required. Please provide an instance name")

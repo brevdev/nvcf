@@ -149,14 +149,29 @@ func runSSHExeco(sshAlias string, args []string, fireAndForget bool) error {
 
 func generateDebuggingScript(image string, imageArgs string) string {
 	return fmt.Sprintf(`
-#!/bin/bash
+set -x
 
 # Start the debugging session
 echo "Starting debugging session"
 
+docker ps || true
+
+sleep 1
+
+docker ps || true 
+
+sleep 1
+
+docker ps || true 
+
+sleep 1
+
+docker ps || true 
+
 # Install dependencies
 echo "Logging into nvcr.io using API credentials"
-echo %s | docker login nvcr.io --username '$oauthtoken' --password-stdin
+echo %s | docker login nvcr.io --username '$oauthtoken' --password-stdin || true
+echo %s | sudo docker login nvcr.io --username '$oauthtoken' --password-stdin || true
 
 # Pull the container image
 docker pull %s
@@ -165,5 +180,5 @@ docker pull %s
 docker run -it --gpus all %s
 
 echo "Debugging session complete"
-`, config.GetAPIKey(), image, imageArgs)
+`, config.GetAPIKey(), config.GetAPIKey(), image, imageArgs)
 }
