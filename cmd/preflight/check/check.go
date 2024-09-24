@@ -25,10 +25,9 @@ var (
 	httpPayload             string
 )
 
-// NewCheckCmd returns a new check command for verifying container compatibility with NVCF.
 // This command runs a local deployment test to ensure the specified Docker image
 // can be successfully deployed and accessed.
-func NewCheckCmd() *cobra.Command {
+func CheckCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "check <image-name>",
 		Short: "Run local deployment test for NVCF compatibility",

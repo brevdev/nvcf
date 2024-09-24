@@ -18,7 +18,7 @@ func PreflightCmd() *cobra.Command {
 		},
 	}
 
-	cmd.AddCommand(check.NewCheckCmd())
+	cmd.AddCommand(check.CheckCmd())
 	cmd.AddCommand(debug.DebugCmd())
 	return cmd
 }
