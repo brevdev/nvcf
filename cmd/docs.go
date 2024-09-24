@@ -49,7 +49,12 @@ func generateDocs(cmd *cobra.Command, genMarkdown, genReST bool) error {
 	}
 	// Generate reStructuredText documentation
 	if genReST {
-		if err := doc.GenReSTTree(root, outputDir); err != nil {
+		emptyStr := func(s string) string { return "" }
+		linkHandler := func(name, ref string) string {
+			//sphinx-style refs.
+			return fmt.Sprintf(":ref:`%s <%s>`", name, ref)
+		}
+		if err := doc.GenReSTTreeCustom(root, outputDir, emptyStr, linkHandler); err != nil {
 			return fmt.Errorf("failed to generate reStructuredText documentation: %w", err)
 		}
 		fmt.Println("reStructuredText documentation generated")
