@@ -6,9 +6,10 @@ import (
 
 func DebugCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "debug",
-		Short: "Debug NVCF functions",
-		Long:  `Create and manage debug environments for NVCF functions`,
+		Aliases: []string{"d", "dbg"},
+		Use:     "debug",
+		Short:   "Debug NVCF functions",
+		Long:    `Create and manage debug environments for NVCF functions`,
 	}
 
 	cmd.AddCommand(debugStartCmd())
