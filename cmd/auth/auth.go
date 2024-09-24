@@ -49,7 +49,6 @@ func authLoginCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			apiKey := output.Prompt("Enter your NVIDIA Cloud API key: ", true)
 
-			// Save the API key first
 			err := config.SetAPIKey(apiKey)
 			if err != nil {
 				output.Error(cmd, "Error saving API key", err)
@@ -83,7 +82,6 @@ func authLoginCmd() *cobra.Command {
 				return
 			}
 
-			// Save the org ID
 			err = config.SetOrgID(orgID)
 			if err != nil {
 				output.Error(cmd, "Error saving Org ID", err)
@@ -138,27 +136,23 @@ func authStatusCmd() *cobra.Command {
 
 			client := api.NewClient(config.GetAPIKey())
 
-			// Fetch user information
 			userInfo := map[string]interface{}{}
 			err := client.Get(cmd.Context(), "/v2/users/me", nil, &userInfo)
 			if err != nil {
 				return output.Error(cmd, "Failed to fetch user information", err)
 			}
 
-			// Fetch organization information
 			orgsInfo := map[string]interface{}{}
 			err = client.Get(cmd.Context(), "/v2/orgs", nil, &orgsInfo)
 			if err != nil {
 				return output.Error(cmd, "Failed to fetch organization information", err)
 			}
 
-			// Extract relevant information
 			user, _ := userInfo["user"].(map[string]interface{})
 			email, _ := user["email"].(string)
 			name, _ := user["name"].(string)
 			currentOrgID := config.GetOrgID()
 
-			// Print status information
 			output.Success(cmd, "Authenticated")
 			fmt.Printf("User: %s (%s)\n", name, email)
 			fmt.Printf("Current Organization ID: %s\n", currentOrgID)
