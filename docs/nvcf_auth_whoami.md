@@ -1,15 +1,15 @@
-## nvcf auth status
+## nvcf auth whoami
 
-Check the authentication status
+Display information about the authenticated user
 
 ```
-nvcf auth status [flags]
+nvcf auth whoami [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for status
+  -h, --help   help for whoami
 ```
 
 ### Options inherited from parent commands

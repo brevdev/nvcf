@@ -1,15 +1,15 @@
-## nvcf auth status
+## nvcf auth org-id
 
-Check the authentication status
+Display the name of the first organization
 
 ```
-nvcf auth status [flags]
+nvcf auth org-id [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for status
+  -h, --help   help for org-id
 ```
 
 ### Options inherited from parent commands

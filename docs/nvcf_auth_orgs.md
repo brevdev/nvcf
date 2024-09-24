@@ -1,15 +1,16 @@
-## nvcf auth status
+## nvcf auth orgs
 
-Check the authentication status
+Display organization and team information for the authenticated user
 
 ```
-nvcf auth status [flags]
+nvcf auth orgs [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for status
+  -h, --help   help for orgs
+  -o, --wide   Display wide output including org roles
 ```
 
 ### Options inherited from parent commands
