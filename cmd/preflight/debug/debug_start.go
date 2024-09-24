@@ -103,12 +103,8 @@ func runDebugStart(cmd *cobra.Command, args []string) error {
 	}
 	fmt.Println("Setting up a GPU powered VM for debugging")
 
-<<<<<<< HEAD
 	instanceName := fmt.Sprintf("nvcf-%s-debug", functionId)
-=======
-	instanceName := fmt.Sprintf("%s-debug", deployment.Function.ID)
 
->>>>>>> 1ab8276 (sudo for docker and changing outputs)
 	if instanceName == "" {
 		return fmt.Errorf("instance name is required. Please provide an instance name")
 	}
