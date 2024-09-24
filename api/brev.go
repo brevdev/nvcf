@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/brevdev/nvcf/config"
 )
@@ -64,19 +65,27 @@ func (c *BrevClient) RunDebuggingScript(instanceName string, image string, image
 	debuggingScript := generateDebuggingScript(image, imageArgs)
 
 	// Escape single quotes in the script
-	escapedScript := strings.ReplaceAll(debuggingScript, "'", "'\\''")
+	// escapedScript := strings.ReplaceAll(debuggingScript, "'", "'\\''")
 
 	cmd := exec.Command("brev", "refresh")
 	cmd.Run()
 
 	sshAlias := instanceName
 	sshCmd := []string{
-		"bash",
-		"-c",
-		escapedScript,
+		debuggingScript,
 	}
 
-	err := runSSHExec(sshAlias, sshCmd, false)
+	// Retry SSH connection
+	var err error
+	maxRetries := 5
+	for i := 0; i < maxRetries; i++ {
+		err = runSSHExec(sshAlias, sshCmd, false)
+		if err == nil {
+			return nil
+		}
+		fmt.Printf("SSH connection attempt %d failed: %v. Retrying...\n", i+1, err)
+		time.Sleep(10 * time.Second)
+	}
 	if err != nil {
 		return fmt.Errorf("failed to run debugging script: %w", err)
 	}
@@ -96,12 +105,32 @@ func (c *BrevClient) DeleteInstance(instanceName string) error {
 }
 
 func runSSHExec(sshAlias string, args []string, fireAndForget bool) error {
+	// cmd := fmt.Sprintf("ssh %s -- %s", sshAlias, strings.Join(args, " "))
+	// cmd = fmt.Sprintf("%s && %s", sshAgentEval, cmd)
+	// sshCmd := exec.Command("bash", "-x", cmd) //nolint:gosec //cmd is user input
+	sshCmd := exec.Command("ssh", sshAlias)
+	si, err := sshCmd.StdinPipe()
+	if err != nil {
+		return fmt.Errorf("error getting stdin pipe: %w", err)
+	}
+	for _, arg := range args {
+		si.Write([]byte(arg + "\n"))
+	}
+	si.Close()
+	//fmt.Printf("cmd: %s\n", sshCmd.String())
+	sshCmd.Stderr = os.Stderr
+	sshCmd.Stdout = os.Stdout
+	if err := sshCmd.Run(); err != nil {
+		return fmt.Errorf("error running SSH command: %w", err)
+	}
+	return nil
+}
+func runSSHExeco(sshAlias string, args []string, fireAndForget bool) error {
 	sshAgentEval := "eval $(ssh-agent -s)"
 	cmd := fmt.Sprintf("ssh %s -- %s", sshAlias, strings.Join(args, " "))
-	fmt.Printf("cmd1: %s\n", cmd)
 	cmd = fmt.Sprintf("%s && %s", sshAgentEval, cmd)
-	fmt.Printf("cmd2: %s\n", cmd)
-	sshCmd := exec.Command("bash", "-c", cmd) //nolint:gosec //cmd is user input
+	sshCmd := exec.Command("bash", "-x", cmd) //nolint:gosec //cmd is user input
+	fmt.Printf("cmd: %s\n", sshCmd.String())
 
 	if fireAndForget {
 		if err := sshCmd.Start(); err != nil {
@@ -127,13 +156,13 @@ echo "Starting debugging session"
 
 # Install dependencies
 echo "Logging into nvcr.io using API credentials"
-echo %s | docker login nvcr.io --username $oauthtoken --password-stdin
+echo %s | docker login nvcr.io --username '$oauthtoken' --password-stdin
 
 # Pull the container image
 docker pull %s
 
 # Run the container image
-docker run -it %s
+docker run -it --gpus all %s
 
 echo "Debugging session complete"
 `, config.GetAPIKey(), image, imageArgs)
