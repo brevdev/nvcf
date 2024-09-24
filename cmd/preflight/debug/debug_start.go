@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/brevdev/nvcf/api"
+	"github.com/brevdev/nvcf/cmd/preflight/brev"
 	"github.com/brevdev/nvcf/config"
 	"github.com/brevdev/nvcf/output"
 	"github.com/spf13/cobra"
@@ -28,8 +29,7 @@ func debugStartCmd() *cobra.Command {
 
 func runDebugStart(cmd *cobra.Command, args []string) error {
 	nvcfClient := api.NewClient(config.GetAPIKey())
-	fmt.Printf("api key %s\n", config.GetAPIKey())
-	brevClient := api.NewBrevClient()
+	brevClient := brev.NewBrevClient()
 
 	functionId := args[0]
 	versionId, _ := cmd.Flags().GetString("version-id")
@@ -103,7 +103,7 @@ func runDebugStart(cmd *cobra.Command, args []string) error {
 	}
 	fmt.Println("Setting up a GPU powered VM for debugging")
 
-	instanceName := fmt.Sprintf("%s-debug6", functionId)
+	instanceName := fmt.Sprintf("%s-debug", functionId)
 
 	if instanceName == "" {
 		return fmt.Errorf("instance name is required. Please provide an instance name")
@@ -117,6 +117,8 @@ func runDebugStart(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return output.Error(cmd, "Error running debugging script", err)
 	}
+
+	fmt.Printf("You can ssh into this instance using ssh %s\n", instanceName)
 
 	return nil
 }

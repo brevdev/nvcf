@@ -3,7 +3,7 @@ package debug
 import (
 	"fmt"
 
-	"github.com/brevdev/nvcf/api"
+	"github.com/brevdev/nvcf/cmd/preflight/brev"
 	"github.com/spf13/cobra"
 )
 
@@ -17,7 +17,7 @@ func debugStopCmd() *cobra.Command {
 }
 
 func runDebugStop(cmd *cobra.Command, args []string) error {
-	brevClient := api.NewBrevClient()
+	brevClient := brev.NewBrevClient()
 
 	if !brevClient.IsBrevCLIInstalled() {
 		return fmt.Errorf("brev CLI is not installed. Please install it first")

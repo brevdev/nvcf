@@ -1,4 +1,4 @@
-package api
+package brev
 
 import (
 	"fmt"
@@ -46,7 +46,7 @@ func (c *BrevClient) IsLoggedIn() (bool, error) {
 }
 
 const (
-	instanceType = "n1-standard-8:nvidia-tesla-t4:1"
+	instanceType = "n1-standard-8:nvidia-tesla-t4:1" // gcp t4
 )
 
 func (c *BrevClient) CreateInstance(instanceName string) error {
@@ -64,9 +64,6 @@ func (c *BrevClient) CreateInstance(instanceName string) error {
 func (c *BrevClient) RunDebuggingScript(instanceName string, image string, imageArgs string) error {
 	debuggingScript := generateDebuggingScript(image, imageArgs)
 
-	// Escape single quotes in the script
-	// escapedScript := strings.ReplaceAll(debuggingScript, "'", "'\\''")
-
 	cmd := exec.Command("brev", "refresh")
 	cmd.Run()
 
@@ -79,7 +76,7 @@ func (c *BrevClient) RunDebuggingScript(instanceName string, image string, image
 	var err error
 	maxRetries := 5
 	for i := 0; i < maxRetries; i++ {
-		err = runSSHExec(sshAlias, sshCmd, false)
+		err = runSSHExec(sshAlias, sshCmd)
 		if err == nil {
 			return nil
 		}
@@ -104,10 +101,7 @@ func (c *BrevClient) DeleteInstance(instanceName string) error {
 	return nil
 }
 
-func runSSHExec(sshAlias string, args []string, fireAndForget bool) error {
-	// cmd := fmt.Sprintf("ssh %s -- %s", sshAlias, strings.Join(args, " "))
-	// cmd = fmt.Sprintf("%s && %s", sshAgentEval, cmd)
-	// sshCmd := exec.Command("bash", "-x", cmd) //nolint:gosec //cmd is user input
+func runSSHExec(sshAlias string, args []string) error {
 	sshCmd := exec.Command("ssh", sshAlias)
 	si, err := sshCmd.StdinPipe()
 	if err != nil {
@@ -117,30 +111,9 @@ func runSSHExec(sshAlias string, args []string, fireAndForget bool) error {
 		si.Write([]byte(arg + "\n"))
 	}
 	si.Close()
-	//fmt.Printf("cmd: %s\n", sshCmd.String())
-	sshCmd.Stderr = os.Stderr
-	sshCmd.Stdout = os.Stdout
-	if err := sshCmd.Run(); err != nil {
-		return fmt.Errorf("error running SSH command: %w", err)
-	}
-	return nil
-}
-func runSSHExeco(sshAlias string, args []string, fireAndForget bool) error {
-	sshAgentEval := "eval $(ssh-agent -s)"
-	cmd := fmt.Sprintf("ssh %s -- %s", sshAlias, strings.Join(args, " "))
-	cmd = fmt.Sprintf("%s && %s", sshAgentEval, cmd)
-	sshCmd := exec.Command("bash", "-x", cmd) //nolint:gosec //cmd is user input
-	fmt.Printf("cmd: %s\n", sshCmd.String())
 
-	if fireAndForget {
-		if err := sshCmd.Start(); err != nil {
-			return fmt.Errorf("error starting SSH command: %w", err)
-		}
-		return nil
-	}
 	sshCmd.Stderr = os.Stderr
 	sshCmd.Stdout = os.Stdout
-	sshCmd.Stdin = os.Stdin
 	if err := sshCmd.Run(); err != nil {
 		return fmt.Errorf("error running SSH command: %w", err)
 	}
