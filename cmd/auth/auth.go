@@ -131,10 +131,9 @@ func authStatusCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "status",
 		Short: "Check the authentication status",
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			if !config.IsAuthenticated() {
-				output.Error(cmd, "Not authenticated", errors.New("No API key found"))
-				return
+				return output.Error(cmd, "Not authenticated", errors.New("no API key found"))
 			}
 
 			client := api.NewClient(config.GetAPIKey())
@@ -143,16 +142,14 @@ func authStatusCmd() *cobra.Command {
 			userInfo := map[string]interface{}{}
 			err := client.Get(cmd.Context(), "/v2/users/me", nil, &userInfo)
 			if err != nil {
-				output.Error(cmd, "Failed to fetch user information", err)
-				return
+				return output.Error(cmd, "Failed to fetch user information", err)
 			}
 
 			// Fetch organization information
 			orgsInfo := map[string]interface{}{}
 			err = client.Get(cmd.Context(), "/v2/orgs", nil, &orgsInfo)
 			if err != nil {
-				output.Error(cmd, "Failed to fetch organization information", err)
-				return
+				return output.Error(cmd, "Failed to fetch organization information", err)
 			}
 
 			// Extract relevant information
@@ -165,6 +162,7 @@ func authStatusCmd() *cobra.Command {
 			output.Success(cmd, "Authenticated")
 			fmt.Printf("User: %s (%s)\n", name, email)
 			fmt.Printf("Current Organization ID: %s\n", currentOrgID)
+			return nil
 		},
 	}
 }
