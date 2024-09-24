@@ -48,19 +48,48 @@ func authLoginCmd() *cobra.Command {
 		Short: "Authenticate with NVIDIA Cloud",
 		Run: func(cmd *cobra.Command, args []string) {
 			apiKey := output.Prompt("Enter your NVIDIA Cloud API key: ", true)
-			orgID := output.Prompt("Enter your NVIDIA Cloud Org ID: ", true)
+
 			err := config.SetAPIKey(apiKey)
 			if err != nil {
 				output.Error(cmd, "Error saving API key", err)
 				return
 			}
+
+			// Use the API key to get the first org
+			client := api.NewClient(apiKey)
+			orgsInfo := map[string]interface{}{}
+			err = client.Get(cmd.Context(), "/v2/orgs", nil, &orgsInfo)
+			if err != nil {
+				output.Error(cmd, "Failed to fetch organization information", err)
+				return
+			}
+
+			organizations, ok := orgsInfo["organizations"].([]interface{})
+			if !ok || len(organizations) == 0 {
+				output.Error(cmd, "No organizations found", nil)
+				return
+			}
+
+			firstOrg, ok := organizations[0].(map[string]interface{})
+			if !ok {
+				output.Error(cmd, "Failed to parse organization information", nil)
+				return
+			}
+
+			orgID, ok := firstOrg["name"].(string)
+			if !ok {
+				output.Error(cmd, "Organization ID not found", nil)
+				return
+			}
+
 			err = config.SetOrgID(orgID)
 			if err != nil {
 				output.Error(cmd, "Error saving Org ID", err)
 				return
 			}
+
 			output.PrintASCIIArt(cmd)
-			output.Success(cmd, "Authentication successful")
+			output.Success(cmd, fmt.Sprintf("Authentication successful. You are now authenticated with organization ID: %s", orgID))
 		},
 	}
 }
@@ -100,12 +129,34 @@ func authStatusCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "status",
 		Short: "Check the authentication status",
-		Run: func(cmd *cobra.Command, args []string) {
-			if config.IsAuthenticated() {
-				output.Success(cmd, "Authenticated")
-			} else {
-				output.Error(cmd, "Not authenticated", errors.New(":("))
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if !config.IsAuthenticated() {
+				return output.Error(cmd, "Not authenticated", errors.New("no API key found"))
 			}
+
+			client := api.NewClient(config.GetAPIKey())
+
+			userInfo := map[string]interface{}{}
+			err := client.Get(cmd.Context(), "/v2/users/me", nil, &userInfo)
+			if err != nil {
+				return output.Error(cmd, "Failed to fetch user information", err)
+			}
+
+			orgsInfo := map[string]interface{}{}
+			err = client.Get(cmd.Context(), "/v2/orgs", nil, &orgsInfo)
+			if err != nil {
+				return output.Error(cmd, "Failed to fetch organization information", err)
+			}
+
+			user, _ := userInfo["user"].(map[string]interface{})
+			email, _ := user["email"].(string)
+			name, _ := user["name"].(string)
+			currentOrgID := config.GetOrgID()
+
+			output.Success(cmd, "Authenticated")
+			fmt.Printf("User: %s (%s)\n", name, email)
+			fmt.Printf("Current Organization ID: %s\n", currentOrgID)
+			return nil
 		},
 	}
 }

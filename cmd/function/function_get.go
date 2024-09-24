@@ -1,10 +1,7 @@
 package function
 
 import (
-	"bufio"
 	"fmt"
-	"os"
-	"strings"
 
 	"github.com/brevdev/nvcf/api"
 	"github.com/brevdev/nvcf/config"
@@ -15,52 +12,76 @@ import (
 
 func functionGetCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:     "get <function-id>",
-		Args:    cobra.ExactArgs(1),
+		Use:     "get [identifier]",
+		Args:    cobra.MaximumNArgs(1),
 		Short:   "Get details about a single function and its versions",
-		Long:    "Get details about a single function and its versions or deployments. If a version-id is not provided and there are multiple versions associated with a function, we will look for all versions and prompt for a version-id.",
-		Example: "nvcf function get fid --version-id vid --include-secrets",
+		Long:    "Get details about a single function and its versions or deployments. The identifier can be a function name, function ID, or version ID. If no identifier is provided, all functions will be listed.",
+		Example: "nvcf function get myFunction\nnvcf function get fid123\nnvcf function get --name myFunction\nnvcf function get --function-id fid123 --version-id vid456",
 		RunE:    runFunctionGet,
 	}
-	cmd.Flags().String("version-id", "", "The ID of the version")
+	cmd.Flags().String("name", "", "Filter by function name")
+	cmd.Flags().String("function-id", "", "Filter by function ID")
+	cmd.Flags().String("version-id", "", "Filter by version ID")
 	cmd.Flags().Bool("include-secrets", false, "Include secrets in the response")
 	return cmd
 }
 
 func runFunctionGet(cmd *cobra.Command, args []string) error {
 	client := api.NewClient(config.GetAPIKey())
-	functionID := args[0]
-	versionID, _ := cmd.Flags().GetString("version-id")
 	includeSecrets, _ := cmd.Flags().GetBool("include-secrets")
 
-	if versionID == "" {
-		versions, err := client.Functions.Versions.List(cmd.Context(), functionID)
-		if err != nil {
-			return output.Error(cmd, "Error listing function versions", err)
-		}
+	name, _ := cmd.Flags().GetString("name")
+	functionID, _ := cmd.Flags().GetString("function-id")
+	versionID, _ := cmd.Flags().GetString("version-id")
 
-		if len(versions.Functions) == 1 {
-			versionID = versions.Functions[0].VersionID
-		} else {
-			output.Info(cmd, "Multiple versions found. Please specify a version-id")
-			for _, version := range versions.Functions {
-				output.Info(cmd, fmt.Sprintf("Version ID: %s || Status: %s", version.VersionID, version.Status))
-			}
-			reader := bufio.NewReader(os.Stdin)
-			fmt.Print("Enter version-id: ")
-			versionID, _ = reader.ReadString('\n')
-			versionID = strings.TrimSpace(versionID)
-		}
+	identifier := ""
+	if len(args) > 0 {
+		identifier = args[0]
 	}
 
-	query := nvcf.FunctionVersionGetParams{
-		IncludeSecrets: nvcf.Bool(includeSecrets),
+	if identifier == "" && name == "" && functionID == "" && versionID == "" {
+		return listAllFunctions(cmd, client)
 	}
-	getFunctionResponse, err := client.Functions.Versions.Get(cmd.Context(), functionID, versionID, query)
+
+	functions, err := client.Functions.List(cmd.Context(), nvcf.FunctionListParams{})
 	if err != nil {
-		output.Error(cmd, "Error getting function", err)
-		return nil
+		return output.Error(cmd, "Error listing functions", err)
 	}
-	output.SingleFunction(cmd, getFunctionResponse.Function)
+
+	matchedFunctions := []nvcf.ListFunctionsResponseFunction{}
+	for _, fn := range functions.Functions {
+		if matchesIdentifier(fn, identifier, name, functionID, versionID) {
+			query := nvcf.FunctionVersionGetParams{
+				IncludeSecrets: nvcf.Bool(includeSecrets),
+			}
+			_, err := client.Functions.Versions.Get(cmd.Context(), fn.ID, fn.VersionID, query)
+			if err != nil {
+				return output.Error(cmd, fmt.Sprintf("Error getting function %s", fn.ID), err)
+			}
+			matchedFunctions = append(matchedFunctions, fn)
+		}
+	}
+
+	if len(matchedFunctions) == 0 {
+		return output.Error(cmd, "No matching functions found", nil)
+	}
+
+	output.Functions(cmd, matchedFunctions)
+	return nil
+}
+
+func matchesIdentifier(fn nvcf.ListFunctionsResponseFunction, identifier, name, functionID, versionID string) bool {
+	return (identifier != "" && (fn.Name == identifier || fn.ID == identifier || fn.VersionID == identifier)) ||
+		(name != "" && fn.Name == name) ||
+		(functionID != "" && fn.ID == functionID) ||
+		(versionID != "" && fn.VersionID == versionID)
+}
+
+func listAllFunctions(cmd *cobra.Command, client *api.Client) error {
+	functions, err := client.Functions.List(cmd.Context(), nvcf.FunctionListParams{})
+	if err != nil {
+		return output.Error(cmd, "Error listing functions", err)
+	}
+	output.Functions(cmd, functions.Functions)
 	return nil
 }
