@@ -80,8 +80,9 @@ func (c *BrevClient) RunDebuggingScript(instanceName string, image string, image
 		if err == nil {
 			return nil
 		}
-		fmt.Printf("SSH connection attempt %d failed: %v. Retrying...\n", i+1, err)
-		time.Sleep(10 * time.Second)
+		fmt.Printf("Connecting to instance %s\n", instanceName)
+		// fmt.Printf("SSH connection attempt %d failed: %v. Retrying...\n", i+1, err)
+		time.Sleep(7 * time.Second)
 	}
 	if err != nil {
 		return fmt.Errorf("failed to run debugging script: %w", err)
@@ -115,43 +116,29 @@ func runSSHExec(sshAlias string, args []string) error {
 	sshCmd.Stderr = os.Stderr
 	sshCmd.Stdout = os.Stdout
 	if err := sshCmd.Run(); err != nil {
-		return fmt.Errorf("error running SSH command: %w", err)
+		return fmt.Errorf("Connecting")
 	}
 	return nil
 }
 
 func generateDebuggingScript(image string, imageArgs string) string {
 	return fmt.Sprintf(`
-set -x
-
 # Start the debugging session
 echo "Starting debugging session"
 
-docker ps || true
-
-sleep 1
-
-docker ps || true 
-
-sleep 1
-
-docker ps || true 
-
-sleep 1
-
-docker ps || true 
+sudo docker ps || true
 
 # Install dependencies
 echo "Logging into nvcr.io using API credentials"
-echo %s | docker login nvcr.io --username '$oauthtoken' --password-stdin || true
 echo %s | sudo docker login nvcr.io --username '$oauthtoken' --password-stdin || true
 
 # Pull the container image
-docker pull %s
+echo "Pulling image %s"
+sudo docker pull %s --quiet
 
 # Run the container image
-docker run -it --gpus all %s
+sudo docker run %s %s
 
 echo "Debugging session complete"
-`, config.GetAPIKey(), config.GetAPIKey(), image, imageArgs)
+`, config.GetAPIKey(), image, image, image, imageArgs)
 }
