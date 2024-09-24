@@ -103,12 +103,10 @@ func runDebugStart(cmd *cobra.Command, args []string) error {
 	}
 	fmt.Println("Setting up a GPU powered VM for debugging")
 
-	instanceName := fmt.Sprintf("%s-debug", functionId)
-
+	instanceName := fmt.Sprintf("nvcf-%s-debug", functionId)
 	if instanceName == "" {
 		return fmt.Errorf("instance name is required. Please provide an instance name")
 	}
-
 	// hit the brev api to create an instance using
 	brevClient.CreateInstance(instanceName)
 
