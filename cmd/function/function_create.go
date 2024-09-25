@@ -69,10 +69,23 @@ func functionCreateCmd() *cobra.Command {
 		Use:   "create",
 		Short: "Create a new function",
 		Long:  `Create a new NVCF Function with the specified parameters. If you specify --from-version, we will create a new version of an existing function. You can also create and deploy a function in one step using the --deploy flag.`,
+		Example: `Create a new function:
+nvcf function create --name myfunction --inference-url /v1/chat/completions --inference-port 80 --health-uri /health --container-image nvcr.io/nvidia/example-image:latest
+   
+Create and deploy a new function from a file:
+nvcf function create --file deploy.yaml --deploy
+
+Create a new version of an existing function:
+nvcf function create --from-version existing-function-id --name newversion --inference-url /v2/chat/completions --inference-port 8080 --health-uri /healthcheck --container-image nvcr.io/nvidia/updated-image:v2
+`,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			fileSpec, _ := cmd.Flags().GetString("file")
+			deploy, _ := cmd.Flags().GetBool("deploy")
 			if fileSpec == "" {
 				requiredFlags := []string{"name", "inference-url", "inference-port", "health-uri", "container-image"}
+				if deploy {
+					requiredFlags = append(requiredFlags, "min-instances", "max-instances", "gpu", "instance-type", "backend", "max-request-concurrency")
+				}
 				for _, flag := range requiredFlags {
 					if err := cmd.MarkFlagRequired(flag); err != nil {
 						return err
