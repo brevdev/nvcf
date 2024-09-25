@@ -6,10 +6,9 @@ NVCF is a command-line interface (CLI) tool for managing and interacting with NV
 
 - Function management (create, list, update, delete)
 - Function deployment and invocation
-- Asset management
+- GPU and instance type management
 - Authentication handling
-- Queue management
-- Cluster group operations
+- Preflight checks for NVCF compatibility
 - Comprehensive error handling and logging
 - Multiple output formats (JSON, table)
 - Color-coded output for better readability
@@ -30,17 +29,17 @@ After installation, you can use the `nvcf` command to interact with NVIDIA Cloud
 # Authenticate with NVIDIA Cloud
 nvcf auth login
 
-# List all functions
-nvcf function list
+# List all active function
+nvcf function list --status ACTIVE
 
-# Create a new function
-nvcf function create --name my-function --inference-url https://example.com/function
+# Create a new function using a file
+nvcf function create -f deploy.yaml
 
-# Invoke a function
-nvcf invoke <function-id> --data '{"input": "Hello, World!"}'
+# Run preflight check on image to check endpoints
+nvcf preflight check tgi:latest
 
-# Get deployment details
-nvcf deployment get <function-id> <version-id>
+# Get available instance types
+nvcf gpus list
 ```
 
 For a full list of commands and options, use the `--help` flag:

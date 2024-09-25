@@ -23,9 +23,14 @@ func main() {
 
 func run() error {
 	rootCmd := &cobra.Command{
-		Use:               "nvcf",
-		Short:             "NVIDIA Cloud Functions CLI",
-		Long:              `A command-line interface for managing and interacting with NVIDIA Cloud Functions.`,
+		Use:   "nvcf",
+		Short: "NVIDIA Cloud Functions CLI",
+		Long: `A command-line interface for managing and interacting with NVIDIA Cloud Functions.
+
+Environment variables:
+  NVCF_BETA - Set to true to enable beta features
+  NVCF_SHOW_DOCS_CMD - Set to true to show the docs command
+`,
 		SilenceErrors:     true,
 		PersistentPreRunE: preRunAuthCheck,
 		Run: func(cmd *cobra.Command, args []string) {
@@ -39,7 +44,7 @@ func run() error {
 	rootCmd.PersistentFlags().Bool("json", false, "Output results in JSON format")
 	rootCmd.PersistentFlags().Bool("no-color", false, "Disable color output")
 	rootCmd.PersistentFlags().BoolP("quiet", "q", false, "Suppress non-error output")
-	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Enable verbose output")
+	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "Enable verbose output and show underlying API calls")
 
 	// Add commands
 	rootCmd.AddCommand(function.FunctionCmd())
