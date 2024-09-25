@@ -1,9 +1,11 @@
 package brev
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -49,12 +51,16 @@ const (
 	instanceType = "n1-standard-8:nvidia-tesla-t4:1" // gcp t4
 )
 
-func (c *BrevClient) CreateInstance(instanceName string) error {
+func (c *BrevClient) CreateInstance(functionId string, instanceName string) error {
+	err := saveDebugInstance(functionId, instanceName)
+	if err != nil {
+		return fmt.Errorf("error saving debug instance: %w", err)
+	}
 	cmd := exec.Command("brev", "create", instanceName, "-g", instanceType)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	err := cmd.Run()
+	err = cmd.Run()
 	if err != nil {
 		return fmt.Errorf("failed to create instance: %w", err)
 	}
@@ -99,6 +105,10 @@ func (c *BrevClient) DeleteInstance(instanceName string) error {
 	if err != nil {
 		return fmt.Errorf("failed to delete instance: %w", err)
 	}
+	err = deleteDebugInstance(instanceName)
+	if err != nil {
+		return fmt.Errorf("error deleting debug instance: %w", err)
+	}
 	return nil
 }
 
@@ -141,4 +151,73 @@ sudo docker run %s %s
 
 echo "Debugging session complete"
 `, config.GetAPIKey(), image, image, image, imageArgs)
+}
+
+// save debug instances to ~/.nvcf/debug_instances.json
+func saveDebugInstance(functionId, instanceName string) error {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+
+	configPath := filepath.Join(homeDir, ".nvcf", "debug_instances.json")
+
+	// Read existing instances
+	instances := make(map[string]string)
+	data, err := os.ReadFile(configPath)
+	if err == nil {
+		json.Unmarshal(data, &instances)
+	}
+
+	// Add or update the new instance
+	instances[functionId] = instanceName
+
+	// Write updated instances back to file
+	updatedData, err := json.MarshalIndent(instances, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	err = os.MkdirAll(filepath.Dir(configPath), 0700)
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(configPath, updatedData, 0600)
+}
+
+func deleteDebugInstance(functionId string) error {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+
+	configPath := filepath.Join(homeDir, ".nvcf", "debug_instances.json")
+
+	// Read existing instances
+	instances := make(map[string]string)
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			// If the file doesn't exist, there's nothing to delete
+			return nil
+		}
+		return err
+	}
+
+	err = json.Unmarshal(data, &instances)
+	if err != nil {
+		return err
+	}
+
+	// Remove the specified instance
+	delete(instances, functionId)
+
+	// Write updated instances back to file
+	updatedData, err := json.MarshalIndent(instances, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(configPath, updatedData, 0600)
 }

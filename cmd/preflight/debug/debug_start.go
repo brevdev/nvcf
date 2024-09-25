@@ -10,6 +10,7 @@ import (
 	"github.com/brevdev/nvcf/cmd/preflight/brev"
 	"github.com/brevdev/nvcf/config"
 	"github.com/brevdev/nvcf/output"
+	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 	"github.com/tmc/nvcf-go"
 )
@@ -103,13 +104,12 @@ func runDebugStart(cmd *cobra.Command, args []string) error {
 	}
 	fmt.Println("Setting up a GPU powered VM for debugging")
 
-	instanceName := fmt.Sprintf("nvcf-%s-debug", functionId)
+	// i want to append a random 5 character string to the end of the instance name
+	randomString := uuid.New().String()[:5]
+	instanceName := fmt.Sprintf("nvcf-%s-debug-%s", functionId, randomString)
 
-	if instanceName == "" {
-		return fmt.Errorf("instance name is required. Please provide an instance name")
-	}
 	// hit the brev api to create an instance using
-	brevClient.CreateInstance(instanceName)
+	brevClient.CreateInstance(functionId, instanceName)
 
 	// run the debugging script on the instance
 	err = brevClient.RunDebuggingScript(instanceName, image, imageArgs)

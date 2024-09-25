@@ -6,6 +6,7 @@ require (
 	github.com/briandowns/spinner v1.23.1
 	github.com/fatih/color v1.17.0
 	github.com/gdamore/tcell/v2 v2.7.1
+	github.com/google/uuid v1.6.0
 	github.com/olekukonko/tablewriter v0.0.5
 	github.com/rivo/tview v0.0.0-20240921122403-a64fc48d7654
 	github.com/spf13/cobra v1.8.1
