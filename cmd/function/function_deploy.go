@@ -96,7 +96,7 @@ func runFunctionDeploy(cmd *cobra.Command, args []string) error {
 			IncludeSecrets: nvcf.Bool(false),
 		})
 		if err != nil {
-			return output.Error(cmd, "Error checking function status. Please try again", err)
+			return output.Error(cmd, "Error deploying function. We tried to check the status of the function you provided but something went wrong. Please try again", err)
 		}
 		if fn.Function.Status != nvcf.FunctionResponseFunctionStatusInactive {
 			output.Info(cmd, fmt.Sprintf("This function is currently %s. ", fn.Function.Status))
@@ -129,14 +129,13 @@ func runFunctionDeploy(cmd *cobra.Command, args []string) error {
 }
 
 func createNewVersion(cmd *cobra.Command, client *api.Client, function nvcf.FunctionResponseFunction) (string, error) {
-	containerEnv := mapResponseContainerEnvToNewContainerEnv(function.ContainerEnvironment)
 	newVersion, err := client.Functions.Versions.New(cmd.Context(), function.ID, nvcf.FunctionVersionNewParams{
 		Name:                 nvcf.String(function.Name),
 		InferenceURL:         nvcf.String(function.InferenceURL),
 		InferencePort:        nvcf.Int(function.InferencePort),
 		ContainerImage:       nvcf.String(function.ContainerImage),
 		ContainerArgs:        nvcf.String(function.ContainerArgs),
-		ContainerEnvironment: nvcf.F(containerEnv),
+		ContainerEnvironment: nvcf.F(mapResponseContainerEnvToNewContainerEnv(function.ContainerEnvironment)),
 		APIBodyFormat:        nvcf.F(nvcf.FunctionVersionNewParamsAPIBodyFormat(function.APIBodyFormat)),
 		Description:          nvcf.F(function.Description),
 		Tags:                 nvcf.F(function.Tags),
