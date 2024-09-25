@@ -15,10 +15,11 @@ import (
 
 func gpuListCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "list",
-		Short: "List available GPUs",
-		Long:  "List available GPUs in NVCF in your org",
-		RunE:  runGpuList,
+		Aliases: []string{"ls"},
+		Use:     "list",
+		Short:   "List available GPUs",
+		Long:    "List available GPUs in NVCF in your org",
+		RunE:    runGpuList,
 	}
 
 	cmd.Flags().String("backend", "", "Filter by backend (e.g., GFN)")
