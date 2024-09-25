@@ -493,6 +493,6 @@ func WaitForDeployment(cmd *cobra.Command, client *api.Client, functionID, versi
 		return output.Error(cmd, "Error waiting for deployment", err)
 	}
 
-	output.Success(cmd, fmt.Sprintf("Function deployed (ID: %s, Version: %s)", functionID, versionID))
+	output.Success(cmd, fmt.Sprintf("\nFunction deployed (ID: %s, Version: %s)", functionID, versionID))
 	return nil
 }

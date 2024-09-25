@@ -90,7 +90,33 @@ func runFunctionDeploy(cmd *cobra.Command, args []string) error {
 		deploymentParams,
 	)
 	if err != nil {
-		return output.Error(cmd, "Error deploying function", err)
+		// check if this error is due to an ongoing deployment
+		// get the function and check the status
+		fn, err := client.Functions.Versions.Get(cmd.Context(), functionId, versionId, nvcf.FunctionVersionGetParams{
+			IncludeSecrets: nvcf.Bool(false),
+		})
+		if err != nil {
+			return output.Error(cmd, "Error deploying function. We tried to check the status of the function you provided but something went wrong. Please try again", err)
+		}
+		if fn.Function.Status != nvcf.FunctionResponseFunctionStatusInactive {
+			output.Info(cmd, fmt.Sprintf("This function is currently %s. ", fn.Function.Status))
+			output.Info(cmd, "Creating new version and deploying...")
+			newVersionToDeploy, err := createNewVersion(cmd, client, fn.Function)
+			if err != nil {
+				return output.Error(cmd, "Error creating new version to deploy", err)
+			}
+			_, err = client.FunctionDeployment.Functions.Versions.InitiateDeployment(
+				cmd.Context(),
+				functionId,
+				newVersionToDeploy,
+				deploymentParams,
+			)
+			if err != nil {
+				return output.Error(cmd, fmt.Sprintf("Error initiating deployment on new version %s", newVersionToDeploy), err)
+			}
+		} else {
+			return output.Error(cmd, "Error deploying function", err)
+		}
 	}
 
 	output.Success(cmd, fmt.Sprintf("Function %s version %s deployed successfully", functionId, versionId))
@@ -100,4 +126,55 @@ func runFunctionDeploy(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+}
+
+func createNewVersion(cmd *cobra.Command, client *api.Client, function nvcf.FunctionResponseFunction) (string, error) {
+	newVersion, err := client.Functions.Versions.New(cmd.Context(), function.ID, nvcf.FunctionVersionNewParams{
+		Name:                 nvcf.String(function.Name),
+		InferenceURL:         nvcf.String(function.InferenceURL),
+		InferencePort:        nvcf.Int(function.InferencePort),
+		ContainerImage:       nvcf.String(function.ContainerImage),
+		ContainerArgs:        nvcf.String(function.ContainerArgs),
+		ContainerEnvironment: nvcf.F(mapResponseContainerEnvToNewContainerEnv(function.ContainerEnvironment)),
+		APIBodyFormat:        nvcf.F(nvcf.FunctionVersionNewParamsAPIBodyFormat(function.APIBodyFormat)),
+		Description:          nvcf.F(function.Description),
+		Tags:                 nvcf.F(function.Tags),
+		FunctionType:         nvcf.F(nvcf.FunctionVersionNewParamsFunctionType(function.FunctionType)),
+		Models:               nvcf.F(mapResponseModelsToNewModels(function.Models)),
+		Health: nvcf.F(nvcf.FunctionVersionNewParamsHealth{
+			Protocol:           nvcf.F(nvcf.FunctionVersionNewParamsHealthProtocol(function.Health.Protocol)),
+			Port:               nvcf.F(function.Health.Port),
+			Timeout:            nvcf.F(function.Health.Timeout),
+			ExpectedStatusCode: nvcf.F(function.Health.ExpectedStatusCode),
+			Uri:                nvcf.String(function.Health.Uri),
+		}),
+	})
+	if err != nil {
+		return "", output.Error(cmd, "Error creating new version", err)
+	}
+
+	return newVersion.Function.VersionID, nil
+}
+
+func mapResponseContainerEnvToNewContainerEnv(containerEnv []nvcf.FunctionResponseFunctionContainerEnvironment) []nvcf.FunctionVersionNewParamsContainerEnvironment {
+	var newContainerEnv []nvcf.FunctionVersionNewParamsContainerEnvironment
+	for _, env := range containerEnv {
+		newContainerEnv = append(newContainerEnv, nvcf.FunctionVersionNewParamsContainerEnvironment{
+			Key:   nvcf.F(env.Key),
+			Value: nvcf.F(env.Value),
+		})
+	}
+	return newContainerEnv
+}
+
+func mapResponseModelsToNewModels(models []nvcf.FunctionResponseFunctionModel) []nvcf.FunctionVersionNewParamsModel {
+	var newModels []nvcf.FunctionVersionNewParamsModel
+	for _, model := range models {
+		newModels = append(newModels, nvcf.FunctionVersionNewParamsModel{
+			Name:    nvcf.F(model.Name),
+			Uri:     nvcf.F(model.Uri),
+			Version: nvcf.F(model.Version),
+		})
+	}
+	return newModels
 }
