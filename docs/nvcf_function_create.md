@@ -10,6 +10,20 @@ Create a new NVCF Function with the specified parameters. If you specify --from-
 nvcf function create [flags]
 ```
 
+### Examples
+
+```
+Create a new function:
+nvcf function create --name myfunction --inference-url /v1/chat/completions --inference-port 80 --health-uri /health --container-image nvcr.io/nvidia/example-image:latest
+   
+Create and deploy a new function from a file:
+nvcf function create --file deploy.yaml --deploy
+
+Create a new version of an existing function:
+nvcf function create --from-version existing-function-id --name newversion --inference-url /v2/chat/completions --inference-port 8080 --health-uri /healthcheck --container-image nvcr.io/nvidia/updated-image:v2
+
+```
+
 ### Options
 
 ```
@@ -49,7 +63,7 @@ nvcf function create [flags]
       --json       Output results in JSON format
       --no-color   Disable color output
   -q, --quiet      Suppress non-error output
-  -v, --verbose    Enable verbose output
+  -v, --verbose    Enable verbose output and show underlying API calls
 ```
 
 ### SEE ALSO
