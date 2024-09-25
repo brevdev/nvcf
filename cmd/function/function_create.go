@@ -139,7 +139,7 @@ func functionCreateCmd() *cobra.Command {
 				if err != nil {
 					return output.Error(cmd, "error creating function", err)
 				}
-				output.Success(cmd, fmt.Sprintf("Function version %s created successfully", resp.Function.VersionID))
+				output.Success(cmd, fmt.Sprintf("Version %s created for function %s", resp.Function.VersionID, existingFunctionID))
 				// deploy function if the deploy flag is set
 				if deploy {
 					return deployFunction(cmd, client, resp, gpu, instanceType, backend, maxInstances, minInstances, maxRequestConcurrency)
@@ -178,7 +178,7 @@ func functionCreateCmd() *cobra.Command {
 				if err != nil {
 					return output.Error(cmd, "error creating function", err)
 				}
-				output.Success(cmd, fmt.Sprintf("Function %s with id %s and version %s created successfully", name, resp.Function.ID, resp.Function.VersionID))
+				output.Success(cmd, fmt.Sprintf("Function %s created (ID: %s, Version: %s)", name, resp.Function.ID, resp.Function.VersionID))
 				if deploy {
 					return deployFunction(cmd, client, resp, gpu, instanceType, backend, maxInstances, minInstances, maxRequestConcurrency)
 				}
@@ -320,7 +320,7 @@ func deployFunction(cmd *cobra.Command, client *api.Client, resp *nvcf.CreateFun
 		return output.Error(cmd, "error deploying function", err)
 	}
 
-	output.Success(cmd, fmt.Sprintf("Function with FunctionID %s and VersionID %s deployed successfully", resp.Function.ID, resp.Function.VersionID))
+	output.Success(cmd, fmt.Sprintf("Function %s with VersionID %s deployed successfully", resp.Function.ID, resp.Function.VersionID))
 	output.Success(cmd, fmt.Sprintf("You can use 'nvcf function watch %s' to monitor the deployment", resp.Function.ID))
 
 	detatched, _ := cmd.Flags().GetBool("detatched")
@@ -396,7 +396,7 @@ func createAndDeployFunctionVersionFromFile(cmd *cobra.Command, client *api.Clie
 		return nil
 	}
 
-	output.Success(cmd, fmt.Sprintf("Function version %s created successfully for function %s", resp.Function.VersionID, existingFunctionID))
+	output.Success(cmd, fmt.Sprintf("Version %s created for function %s", resp.Function.VersionID, existingFunctionID))
 
 	if deploy {
 		return deployFunction(cmd, client, resp, gpu, instanceType, backend, maxInstances, minInstances, maxRequestConcurrency)
@@ -446,7 +446,7 @@ func createAndDeployFunctionFromFile(cmd *cobra.Command, client *api.Client, par
 		return deployFunction(cmd, client, resp, gpu, instanceType, backend, maxInstances, minInstances, maxRequestConcurrency)
 	}
 
-	output.Success(cmd, fmt.Sprintf("Function %s with id %s and version %s created successfully", params.Name, resp.Function.ID, resp.Function.VersionID))
+	output.Success(cmd, fmt.Sprintf("Function %s created (ID: %s, Version: %s)", params.Name, resp.Function.ID, resp.Function.VersionID))
 	return nil
 }
 
@@ -480,6 +480,6 @@ func WaitForDeployment(cmd *cobra.Command, client *api.Client, functionID, versi
 		return output.Error(cmd, "Error waiting for deployment", err)
 	}
 
-	output.Success(cmd, fmt.Sprintf("Function with FunctionID %s and VersionID %s deployed successfully", functionID, versionID))
+	output.Success(cmd, fmt.Sprintf("Function deployed (ID: %s, Version: %s)", functionID, versionID))
 	return nil
 }
