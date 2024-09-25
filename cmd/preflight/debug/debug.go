@@ -1,6 +1,8 @@
 package debug
 
 import (
+	"os"
+
 	"github.com/spf13/cobra"
 )
 
@@ -10,6 +12,7 @@ func DebugCmd() *cobra.Command {
 		Use:     "debug",
 		Short:   "Debug NVCF functions",
 		Long:    `Create and manage debug environments for NVCF functions`,
+		Hidden:  os.Getenv("NVCF_DEBUG") != "true",
 	}
 
 	cmd.AddCommand(debugStartCmd())
