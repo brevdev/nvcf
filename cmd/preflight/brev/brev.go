@@ -96,19 +96,26 @@ func (c *BrevClient) RunDebuggingScript(instanceName string, image string, image
 	return nil
 }
 
-func (c *BrevClient) DeleteInstance(instanceName string) error {
+func (c *BrevClient) DeleteInstance(functionId string) error {
+	instanceName, err := getDebugInstance(functionId)
+	if err != nil {
+		return err
+	}
+
 	cmd := exec.Command("brev", "delete", instanceName)
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	err := cmd.Run()
+	err = cmd.Run()
 	if err != nil {
 		return fmt.Errorf("failed to delete instance: %w", err)
 	}
-	err = deleteDebugInstance(instanceName)
+
+	err = deleteDebugInstance(functionId)
 	if err != nil {
 		return fmt.Errorf("error deleting debug instance: %w", err)
 	}
+
 	return nil
 }
 
@@ -220,4 +227,35 @@ func deleteDebugInstance(functionId string) error {
 	}
 
 	return os.WriteFile(configPath, updatedData, 0600)
+}
+
+func getDebugInstance(functionId string) (string, error) {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+
+	configPath := filepath.Join(homeDir, ".nvcf", "debug_instances.json")
+
+	// Read existing instances
+	instances := make(map[string]string)
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", fmt.Errorf("no debug instance found for function %s", functionId)
+		}
+		return "", err
+	}
+
+	err = json.Unmarshal(data, &instances)
+	if err != nil {
+		return "", err
+	}
+
+	instanceName, ok := instances[functionId]
+	if !ok {
+		return "", fmt.Errorf("no debug instance found for function %s", functionId)
+	}
+
+	return instanceName, nil
 }

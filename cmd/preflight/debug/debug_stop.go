@@ -9,13 +9,12 @@ import (
 
 func debugStopCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "stop",
+		Use:   "stop <function-id>",
 		Short: "Stop a debug environment",
 		Long:  `Stop and clean up a debug environment for an NVCF function`,
+		Args:  cobra.ExactArgs(1),
 		RunE:  runDebugStop,
 	}
-
-	cmd.Flags().StringP("function-id", "f", "", "The ID of the function to debug")
 
 	return cmd
 }
@@ -39,14 +38,7 @@ func runDebugStop(cmd *cobra.Command, args []string) error {
 		fmt.Println("Logged in to Brev")
 	}
 
-	functionId, err := cmd.Flags().GetString("function-id")
-	if err != nil {
-		return fmt.Errorf("error getting function-id flag: %w", err)
-	}
-
-	if functionId == "" {
-		return fmt.Errorf("function-id is required. Please provide a function-id using the -f or --function-id flag")
-	}
+	functionId := args[0]
 
 	// Delete the debug instance
 	err = brevClient.DeleteInstance(functionId)
