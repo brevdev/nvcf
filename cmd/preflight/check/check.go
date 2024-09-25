@@ -44,9 +44,9 @@ Key features:
 
 Use this command to validate your NVCF function before deployment.`,
 		Args: cobra.ExactArgs(1),
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			imageName = args[0]
-			runLocalDeploymentTest()
+			return runLocalDeploymentTest()
 		},
 	}
 	cmd.Flags().StringVar(&containerPort, "container-port", "8000", "Port that the server is listening on")
@@ -62,85 +62,63 @@ Use this command to validate your NVCF function before deployment.`,
 	return cmd
 }
 
-func runLocalDeploymentTest() {
+func runLocalDeploymentTest() error {
 	if protocol == "grpc" && (grpcServiceName == "" || grpcMethodName == "") {
-		fmt.Println("Error: gRPC service name and method name are required for gRPC protocol")
-		os.Exit(1)
+		return fmt.Errorf("gRPC service name and method name are required for gRPC protocol")
 	}
-
 	cst, err := containerutil.NewContainerSmokeTest()
 	if err != nil {
-		fmt.Printf("Error creating ContainerSmokeTest: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("error creating ContainerSmokeTest: %w", err)
 	}
-
 	// Set up signal handling for graceful shutdown
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-sigChan
 		fmt.Println("\nReceived interrupt signal. Cleaning up...")
-		cst.Cleanup()
-		os.Exit(1)
+		_ = cst.Cleanup()
 	}()
-
 	// Force cleanup if requested
 	if forceCleanup {
 		fmt.Println("Forcing cleanup of existing containers...")
 		if err := cst.ForceCleanup(imageName); err != nil {
-			fmt.Printf("Error during force cleanup: %v\n", err)
-			os.Exit(1)
+			return fmt.Errorf("error during force cleanup: %w", err)
 		}
 	}
-
-	defer cst.Cleanup()
-
-	err = cst.LaunchContainer(imageName, containerPort)
-	if err != nil {
-		fmt.Printf("Error launching container: %v\n", err)
-		os.Exit(1)
+	defer func() {
+		_ = cst.Cleanup()
+	}()
+	if err := cst.LaunchContainer(imageName, containerPort); err != nil {
+		return fmt.Errorf("error launching container: %w", err)
 	}
-
+	var healthErr error
 	if protocol == "http" {
-		err = cst.CheckHTTPHealthEndpoint(healthEndpoint, secondsToWaitForHealthy)
+		healthErr = cst.CheckHTTPHealthEndpoint(healthEndpoint, secondsToWaitForHealthy)
 	} else {
-		err = cst.CheckGRPCHealthEndpoint(secondsToWaitForHealthy)
+		healthErr = cst.CheckGRPCHealthEndpoint(secondsToWaitForHealthy)
 	}
-
-	if err != nil {
-		fmt.Printf("Error checking health endpoint: %v\n", err)
-		os.Exit(1)
+	if healthErr != nil {
+		return fmt.Errorf("error checking health endpoint: %w", healthErr)
 	}
-
 	fmt.Println("Health Check succeeded!")
-
 	if protocol == "http" {
 		var payload interface{}
-		err := json.Unmarshal([]byte(httpPayload), &payload)
-		if err != nil {
-			fmt.Printf("Error parsing HTTP payload: %v\n", err)
-			os.Exit(1)
+		if err := json.Unmarshal([]byte(httpPayload), &payload); err != nil {
+			return fmt.Errorf("error parsing HTTP payload: %w", err)
 		}
-
-		err = cst.TestHTTPInference(httpInferenceEndpoint, payload)
-		if err != nil {
-			fmt.Printf("Error testing HTTP inference: %v\n", err)
-			fmt.Println("HTTP inference test failed. Please check your application's endpoints and try again.")
-			os.Exit(1)
-			fmt.Println("HTTP inference test succeeded!")
-		} else if protocol == "grpc" {
-			var inputData map[string]interface{}
-			err := json.Unmarshal([]byte(grpcInputData), &inputData)
-			if err != nil {
-				fmt.Printf("Error parsing gRPC input data: %v\n", err)
-				os.Exit(1)
-			}
-
-			err = cst.TestGRPCInference(grpcServiceName, grpcMethodName, inputData, false)
-			if err != nil {
-				fmt.Printf("Error testing gRPC inference: %v\n", err)
-				os.Exit(1)
-			}
+		if err := cst.TestHTTPInference(httpInferenceEndpoint, payload); err != nil {
+			return fmt.Errorf("error testing HTTP inference: %w", err)
 		}
+		fmt.Println("HTTP inference test succeeded!")
+	} else if protocol == "grpc" {
+		var inputData map[string]interface{}
+		if err := json.Unmarshal([]byte(grpcInputData), &inputData); err != nil {
+			return fmt.Errorf("error parsing gRPC input data: %w", err)
+		}
+		if err := cst.TestGRPCInference(grpcServiceName, grpcMethodName, inputData, false); err != nil {
+			return fmt.Errorf("error testing gRPC inference: %w", err)
+		}
+		fmt.Println("gRPC inference test succeeded!")
 	}
+	return nil
 }
