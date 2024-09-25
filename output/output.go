@@ -294,6 +294,10 @@ var defaultOptions = TypeOptions{
 }
 
 func Type(s string, opts ...TypeOptions) {
+	if os.Getenv("CI") == "true" {
+		fmt.Println(s)
+		return
+	}
 	options := mergeOptions(defaultOptions, opts...)
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -338,6 +342,10 @@ func typeText(s string, options TypeOptions) {
 
 // TypeWithColor types text with the specified color
 func TypeWithColor(s string, c *color.Color, opts ...TypeOptions) {
+	if os.Getenv("CI") == "true" {
+		fmt.Println(s)
+		return
+	}
 	options := mergeOptions(defaultOptions, opts...)
 	coloredString := c.SprintFunc()(s)
 	Type(coloredString, options)
