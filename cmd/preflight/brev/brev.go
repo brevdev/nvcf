@@ -71,7 +71,9 @@ func (c *BrevClient) RunDebuggingScript(instanceName string, image string, image
 	debuggingScript := generateDebuggingScript(image, imageArgs)
 
 	cmd := exec.Command("brev", "refresh")
-	cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("issue running `brev refresh`: %w", err)
+	}
 
 	sshAlias := instanceName
 	sshCmd := []string{
@@ -126,7 +128,7 @@ func runSSHExec(sshAlias string, args []string) error {
 		return fmt.Errorf("error getting stdin pipe: %w", err)
 	}
 	for _, arg := range args {
-		si.Write([]byte(arg + "\n"))
+		_, _ = si.Write([]byte(arg + "\n"))
 	}
 	si.Close()
 
@@ -173,7 +175,7 @@ func saveDebugInstance(functionId, instanceName string) error {
 	instances := make(map[string]string)
 	data, err := os.ReadFile(configPath)
 	if err == nil {
-		json.Unmarshal(data, &instances)
+		_ = json.Unmarshal(data, &instances)
 	}
 
 	// Add or update the new instance
