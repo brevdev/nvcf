@@ -72,7 +72,10 @@ func StopSpinner(s *spinner.Spinner) {
 
 func Functions(cmd *cobra.Command, functions []nvcf.ListFunctionsResponseFunction) {
 	if isJSON(cmd) {
-		printJSON(cmd, functions)
+		err := printJSON(cmd, functions)
+		if err != nil {
+			return
+		}
 	} else {
 		printFunctionsTable(cmd, functions)
 	}
@@ -90,7 +93,10 @@ func printFunctionsTable(cmd *cobra.Command, functions []nvcf.ListFunctionsRespo
 
 func SingleFunction(cmd *cobra.Command, fn nvcf.FunctionResponseFunction) {
 	if isJSON(cmd) {
-		printJSON(cmd, fn)
+		err := printJSON(cmd, fn)
+		if err != nil {
+			return
+		}
 	} else {
 		printSingleFunctionTable(cmd, fn)
 	}
@@ -127,7 +133,10 @@ func printDeploymentsTable(cmd *cobra.Command, deployments []nvcf.DeploymentResp
 
 func SingleDeployment(cmd *cobra.Command, deployment nvcf.DeploymentResponse) {
 	if isJSON(cmd) {
-		printJSON(cmd, deployment)
+		err := printJSON(cmd, deployment)
+		if err != nil {
+			return
+		}
 	} else {
 		printSingleDeploymentTable(cmd, deployment)
 	}
@@ -143,7 +152,10 @@ func printSingleDeploymentTable(cmd *cobra.Command, deployment nvcf.DeploymentRe
 
 func GPUs(cmd *cobra.Command, clusterGroups []nvcf.ClusterGroupsResponseClusterGroup) {
 	if isJSON(cmd) {
-		printJSON(cmd, clusterGroups)
+		err := printJSON(cmd, clusterGroups)
+		if err != nil {
+			return
+		}
 	} else {
 		printGPUsTable(cmd, clusterGroups)
 	}

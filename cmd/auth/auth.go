@@ -46,13 +46,12 @@ func authLoginCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "login",
 		Short: "Authenticate with NVIDIA Cloud",
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			apiKey := output.Prompt("Enter your NVIDIA Cloud API key: ", true)
 
 			err := config.SetAPIKey(apiKey)
 			if err != nil {
-				output.Error(cmd, "Error saving API key", err)
-				return
+				return output.Error(cmd, "Error saving API key", err)
 			}
 
 			// Use the API key to get the first org
@@ -60,36 +59,32 @@ func authLoginCmd() *cobra.Command {
 			orgsInfo := map[string]interface{}{}
 			err = client.Get(cmd.Context(), "/v2/orgs", nil, &orgsInfo)
 			if err != nil {
-				output.Error(cmd, "Failed to fetch organization information", err)
-				return
+				return output.Error(cmd, "Failed to fetch organization information", err)
 			}
 
 			organizations, ok := orgsInfo["organizations"].([]interface{})
 			if !ok || len(organizations) == 0 {
-				output.Error(cmd, "No organizations found", nil)
-				return
+				return output.Error(cmd, "No organizations found", nil)
 			}
 
 			firstOrg, ok := organizations[0].(map[string]interface{})
 			if !ok {
-				output.Error(cmd, "Failed to parse organization information", nil)
-				return
+				return output.Error(cmd, "Failed to parse organization information", nil)
 			}
 
 			orgID, ok := firstOrg["name"].(string)
 			if !ok {
-				output.Error(cmd, "Organization ID not found", nil)
-				return
+				return output.Error(cmd, "Organization ID not found", nil)
 			}
 
 			err = config.SetOrgID(orgID)
 			if err != nil {
-				output.Error(cmd, "Error saving Org ID", err)
-				return
+				return output.Error(cmd, "Error saving Org ID", err)
 			}
 
 			output.PrintASCIIArt(cmd)
 			output.Success(cmd, fmt.Sprintf("Authentication successful. You are now authenticated with organization ID: %s", orgID))
+			return nil
 		},
 	}
 }
@@ -98,29 +93,27 @@ func authConfigureDockerCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "configure-docker",
 		Short: "Configure Docker to use NGC API key for nvcr.io",
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			apiKey := config.GetAPIKey()
 			if apiKey == "" {
-				output.Error(cmd, "NGC API key not found. Please run 'nvcf auth login' first.", nil)
-				return
+				return output.Error(cmd, "NGC API key not found. Please run 'nvcf auth login' first.", nil)
 			}
 			// Check if Docker is installed
 			_, err := exec.LookPath("docker")
 			if err != nil {
-				output.Error(cmd, "Docker is not installed or not in the system PATH", err)
-				return
+				return output.Error(cmd, "Docker is not installed or not in the system PATH", err)
 			}
 			// TODO: check for existing nvcr.io config?
 			dockerCmd := exec.Command("docker", "login", "nvcr.io", "-u", "$oauthtoken", "--password-stdin")
 			dockerCmd.Stdin = strings.NewReader(apiKey)
 			out, err := dockerCmd.CombinedOutput()
 			if err != nil {
-				output.Error(cmd, "Failed to configure Docker", err)
 				cmd.Println(string(out))
-				return
+				return output.Error(cmd, "Failed to configure Docker", err)
 			}
 			output.Success(cmd, "Docker configured successfully for nvcr.io")
 			cmd.Println(string(out))
+			return nil
 		},
 	}
 }
@@ -191,23 +184,21 @@ func authWhoAmICmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "whoami",
 		Short: "Display information about the authenticated user",
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			client := api.NewClient(config.GetAPIKey())
 			whoamiInfo := map[string]any{}
 			err := client.Get(cmd.Context(), whoamiURL, nil, &whoamiInfo)
 			if err != nil {
-				output.Error(cmd, "Failed to fetch user information", err)
-				return
+				return output.Error(cmd, "Failed to fetch user information", err)
 			}
 
 			jsonMode, _ := cmd.Flags().GetBool("json")
 			if jsonMode {
 				err = json.NewEncoder(cmd.OutOrStdout()).Encode(whoamiInfo)
 				if err != nil {
-					output.Error(cmd, "Failed to encode user information", err)
-					return
+					return output.Error(cmd, "Failed to encode user information", err)
 				}
-				return
+				return nil
 			}
 			userInfo, _ := whoamiInfo["user"].(map[string]any)
 			table := tablewriter.NewWriter(cmd.OutOrStdout())
@@ -218,6 +209,7 @@ func authWhoAmICmd() *cobra.Command {
 				userInfo["name"].(string),
 			})
 			table.Render()
+			return nil
 		},
 	}
 }
@@ -226,27 +218,24 @@ func authOrgsCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "orgs",
 		Short: "Display organization and team information for the authenticated user",
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			client := api.NewClient(config.GetAPIKey())
 			userInfo := map[string]interface{}{}
 			err := client.Get(cmd.Context(), "/v2/users/me", nil, &userInfo)
 			if err != nil {
-				output.Error(cmd, "Failed to fetch user information", err)
-				return
+				return output.Error(cmd, "Failed to fetch user information", err)
 			}
 			jsonMode, _ := cmd.Flags().GetBool("json")
 			if jsonMode {
 				err = json.NewEncoder(cmd.OutOrStdout()).Encode(userInfo)
 				if err != nil {
-					output.Error(cmd, "Failed to encode user information", err)
-					return
+					return output.Error(cmd, "Failed to encode user information", err)
 				}
-				return
+				return nil
 			}
 			userRoles, ok := userInfo["userRoles"].([]interface{})
 			if !ok {
-				output.Error(cmd, "Failed to parse user roles information", nil)
-				return
+				return output.Error(cmd, "Failed to parse user roles information", nil)
 			}
 			type OrgTeamInfo struct {
 				OrgName        string
@@ -304,6 +293,7 @@ func authOrgsCmd() *cobra.Command {
 				}
 			}
 			table.Render()
+			return nil
 		},
 	}
 
@@ -315,34 +305,31 @@ func authOrgIDCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "org-id",
 		Short: "Display the name of the first organization",
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			client := api.NewClient(config.GetAPIKey())
 			orgsInfo := map[string]interface{}{}
 			err := client.Get(cmd.Context(), "/v2/orgs", nil, &orgsInfo)
 			if err != nil {
-				output.Error(cmd, "Failed to fetch organization information", err)
-				return
+				return output.Error(cmd, "Failed to fetch organization information", err)
 			}
 
 			organizations, ok := orgsInfo["organizations"].([]interface{})
 			if !ok || len(organizations) == 0 {
-				output.Error(cmd, "No organizations found", nil)
-				return
+				return output.Error(cmd, "No organizations found", nil)
 			}
 
 			firstOrg, ok := organizations[0].(map[string]interface{})
 			if !ok {
-				output.Error(cmd, "Failed to parse organization information", nil)
-				return
+				return output.Error(cmd, "Failed to parse organization information", nil)
 			}
 
 			name, ok := firstOrg["name"].(string)
 			if !ok {
-				output.Error(cmd, "Organization name not found", nil)
-				return
+				return output.Error(cmd, "Organization name not found", nil)
 			}
 
 			fmt.Println(name)
+			return nil
 		},
 	}
 }

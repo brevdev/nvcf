@@ -63,7 +63,7 @@ func runFunctionWatch(cmd *cobra.Command, args []string) error {
 			functionID := args[0]
 			versions, err := client.Functions.Versions.List(cmd.Context(), functionID)
 			if err != nil {
-				output.Error(cmd, "Error getting function", err)
+				_ = output.Error(cmd, "Error getting function", err)
 				return
 			}
 			functions = &nvcf.ListFunctionsResponse{
@@ -74,7 +74,7 @@ func runFunctionWatch(cmd *cobra.Command, args []string) error {
 				Visibility: nvcf.F(visibilityParams),
 			})
 			if err != nil {
-				output.Error(cmd, "Error listing functions", err)
+				_ = output.Error(cmd, "Error listing functions", err)
 				return
 			}
 		}
