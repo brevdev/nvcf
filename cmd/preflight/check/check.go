@@ -25,10 +25,9 @@ var (
 	httpPayload             string
 )
 
-// NewCheckCmd returns a new check command for verifying container compatibility with NVCF.
 // This command runs a local deployment test to ensure the specified Docker image
 // can be successfully deployed and accessed.
-func NewCheckCmd() *cobra.Command {
+func CheckCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "check <image-name>",
 		Short: "Run local deployment test for NVCF compatibility",
@@ -38,7 +37,7 @@ and performs basic connectivity tests to ensure it meets NVCF requirements.`,
 		Args: cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			imageName = args[0]
-			runLocalDeploymentTest(cmd, args)
+			runLocalDeploymentTest()
 		},
 	}
 	cmd.Flags().StringVar(&containerPort, "container-port", "8000", "Port that the server is listening on")
@@ -54,7 +53,7 @@ and performs basic connectivity tests to ensure it meets NVCF requirements.`,
 	return cmd
 }
 
-func runLocalDeploymentTest(cmd *cobra.Command, args []string) {
+func runLocalDeploymentTest() {
 	if protocol == "grpc" && (grpcServiceName == "" || grpcMethodName == "") {
 		fmt.Println("Error: gRPC service name and method name are required for gRPC protocol")
 		os.Exit(1)
@@ -116,11 +115,9 @@ func runLocalDeploymentTest(cmd *cobra.Command, args []string) {
 
 		err = cst.TestHTTPInference(httpInferenceEndpoint, payload)
 		if err != nil {
-			if err != nil {
-				fmt.Printf("Error testing HTTP inference: %v\n", err)
-				fmt.Println("HTTP inference test failed. Please check your application's endpoints and try again.")
-				os.Exit(1)
-			}
+			fmt.Printf("Error testing HTTP inference: %v\n", err)
+			fmt.Println("HTTP inference test failed. Please check your application's endpoints and try again.")
+			os.Exit(1)
 			fmt.Println("HTTP inference test succeeded!")
 		} else if protocol == "grpc" {
 			var inputData map[string]interface{}
