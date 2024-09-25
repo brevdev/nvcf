@@ -36,13 +36,13 @@ func isQuiet(cmd *cobra.Command) bool {
 	return quiet
 }
 
-func printJSON(cmd *cobra.Command, data interface{}) {
+func printJSON(cmd *cobra.Command, data interface{}) error {
 	json, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
-		Error(cmd, "Error formatting JSON", err)
-		return
+		return Error(cmd, "Error formatting JSON", err)
 	}
 	fmt.Println(string(json))
+	return nil
 }
 
 // TODO: Implement secure input for secrets
@@ -106,7 +106,10 @@ func printSingleFunctionTable(cmd *cobra.Command, fn nvcf.FunctionResponseFuncti
 
 func Deployments(cmd *cobra.Command, deployments []nvcf.DeploymentResponse) {
 	if isJSON(cmd) {
-		printJSON(cmd, deployments)
+		err := printJSON(cmd, deployments)
+		if err != nil {
+			return
+		}
 	} else {
 		printDeploymentsTable(cmd, deployments)
 	}

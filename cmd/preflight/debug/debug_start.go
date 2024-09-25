@@ -109,7 +109,10 @@ func runDebugStart(cmd *cobra.Command, args []string) error {
 	instanceName := fmt.Sprintf("nvcf-%s-debug-%s", functionId, randomString)
 
 	// hit the brev api to create an instance using
-	brevClient.CreateInstance(functionId, instanceName)
+	err = brevClient.CreateInstance(functionId, instanceName)
+	if err != nil {
+		return output.Error(cmd, "Error creating instance", err)
+	}
 
 	// run the debugging script on the instance
 	err = brevClient.RunDebuggingScript(instanceName, image, imageArgs)

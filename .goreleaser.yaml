@@ -10,10 +10,7 @@ version: 2
 
 before:
   hooks:
-    # You may remove this if you don't use go modules.
     - go mod tidy
-    # you may remove this if you don't need go generate
-    - go generate ./...
 
 builds:
   - env:
@@ -22,6 +19,18 @@ builds:
       - linux
       - windows
       - darwin
+
+brews:
+  - name: nvcf
+    homepage: https://github.com/brevdev/nvcf
+    description: CLI tool for working with NVIDIA cloud functions
+    repository:
+      name: tap
+      owner: brevdev
+      name: homebrew-nvcf
+    commit_author:
+      name: github-actions
+      email: 41898282+github-actions[bot]@users.noreply.github.com
 
 archives:
   - format: tar.gz

@@ -70,7 +70,7 @@ dry-release:
 	goreleaser release --snapshot --clean
 
 release:
-	goreleaser --rm-dist
+	goreleaser release
 
 .PHONY: all build clean test check fmt vet lint q deps-lint help
 

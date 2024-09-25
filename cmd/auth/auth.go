@@ -165,13 +165,22 @@ func authLogoutCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "logout",
 		Short: "Logout from NVIDIA Cloud",
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			if !config.IsAuthenticated() {
 				output.Info(cmd, "You are currently not logged in")
-				return
+				return nil
 			}
-			config.ClearAPIKey()
+			err := config.ClearAPIKey()
+			if err != nil {
+				return output.Error(cmd, "Failed to clear API key", err)
+			}
+			err = config.ClearOrgID()
+			if err != nil {
+
+				return output.Error(cmd, "Failed to clear Org ID", err)
+			}
 			output.Success(cmd, "Logged out successfully")
+			return nil
 		},
 	}
 }
@@ -193,7 +202,11 @@ func authWhoAmICmd() *cobra.Command {
 
 			jsonMode, _ := cmd.Flags().GetBool("json")
 			if jsonMode {
-				json.NewEncoder(cmd.OutOrStdout()).Encode(whoamiInfo)
+				err = json.NewEncoder(cmd.OutOrStdout()).Encode(whoamiInfo)
+				if err != nil {
+					output.Error(cmd, "Failed to encode user information", err)
+					return
+				}
 				return
 			}
 			userInfo, _ := whoamiInfo["user"].(map[string]any)
@@ -223,7 +236,11 @@ func authOrgsCmd() *cobra.Command {
 			}
 			jsonMode, _ := cmd.Flags().GetBool("json")
 			if jsonMode {
-				json.NewEncoder(cmd.OutOrStdout()).Encode(userInfo)
+				err = json.NewEncoder(cmd.OutOrStdout()).Encode(userInfo)
+				if err != nil {
+					output.Error(cmd, "Failed to encode user information", err)
+					return
+				}
 				return
 			}
 			userRoles, ok := userInfo["userRoles"].([]interface{})
