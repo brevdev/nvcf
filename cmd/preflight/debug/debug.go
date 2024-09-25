@@ -12,7 +12,7 @@ func DebugCmd() *cobra.Command {
 		Use:     "debug",
 		Short:   "Debug NVCF functions",
 		Long:    `Create and manage debug environments for NVCF functions`,
-		Hidden:  os.Getenv("NVCF_DEBUG") != "true",
+		Hidden:  os.Getenv("NVCF_BETA") != "true",
 	}
 
 	cmd.AddCommand(debugStartCmd())
