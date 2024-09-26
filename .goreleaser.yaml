@@ -25,7 +25,6 @@ brews:
     homepage: https://github.com/brevdev/nvcf
     description: CLI tool for working with NVIDIA cloud functions
     repository:
-      name: tap
       owner: brevdev
       name: homebrew-nvcf
     commit_author:
