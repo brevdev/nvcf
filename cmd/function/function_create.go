@@ -383,15 +383,16 @@ func prepareFunctionVersionParamsFromFile(fnImage string, fn FunctionDef) nvcf.F
 	}
 
 	return nvcf.FunctionVersionNewParams{
-		Name:           nvcf.String(fn.FnName),
-		InferenceURL:   nvcf.String(fn.InferenceURL),
-		InferencePort:  nvcf.Int(fn.InferencePort),
-		ContainerImage: nvcf.String(fnImage),
-		ContainerArgs:  nvcf.String(fn.ContainerArgs),
-		APIBodyFormat:  nvcf.F(nvcf.FunctionVersionNewParamsAPIBodyFormat(apiBodyFormat)),
-		Description:    nvcf.F(fn.Description),
-		Tags:           nvcf.F(fn.Tags),
-		FunctionType:   nvcf.F(nvcf.FunctionVersionNewParamsFunctionType(functionType)),
+		Name:                 nvcf.String(fn.FnName),
+		InferenceURL:         nvcf.String(fn.InferenceURL),
+		InferencePort:        nvcf.Int(fn.InferencePort),
+		ContainerImage:       nvcf.String(fnImage),
+		ContainerEnvironment: nvcf.F(parseEnvVarsFromFileNewVersion(fn.ContainerEnvironment)),
+		ContainerArgs:        nvcf.String(fn.ContainerArgs),
+		APIBodyFormat:        nvcf.F(nvcf.FunctionVersionNewParamsAPIBodyFormat(apiBodyFormat)),
+		Description:          nvcf.F(fn.Description),
+		Tags:                 nvcf.F(fn.Tags),
+		FunctionType:         nvcf.F(nvcf.FunctionVersionNewParamsFunctionType(functionType)),
 		Health: nvcf.F(nvcf.FunctionVersionNewParamsHealth{
 			Protocol:           nvcf.F(nvcf.FunctionVersionNewParamsHealthProtocol(fn.Health.Protocol)),
 			Port:               nvcf.F(fn.Health.Port),
@@ -400,6 +401,32 @@ func prepareFunctionVersionParamsFromFile(fnImage string, fn FunctionDef) nvcf.F
 			Uri:                nvcf.String(fn.Health.Uri),
 		}),
 	}
+}
+
+func parseEnvVarsFromFileNewVersion(envVars []EnvVar) []nvcf.FunctionVersionNewParamsContainerEnvironment {
+	var containerEnv []nvcf.FunctionVersionNewParamsContainerEnvironment
+
+	for _, env := range envVars {
+		containerEnv = append(containerEnv, nvcf.FunctionVersionNewParamsContainerEnvironment{
+			Key:   nvcf.F(env.Key),
+			Value: nvcf.F(env.Value),
+		})
+	}
+
+	return containerEnv
+}
+
+func parseEnvVarsFromFile(envVars []EnvVar) []nvcf.FunctionNewParamsContainerEnvironment {
+	var containerEnv []nvcf.FunctionNewParamsContainerEnvironment
+
+	for _, env := range envVars {
+		containerEnv = append(containerEnv, nvcf.FunctionNewParamsContainerEnvironment{
+			Key:   nvcf.F(env.Key),
+			Value: nvcf.F(env.Value),
+		})
+	}
+
+	return containerEnv
 }
 
 func createAndDeployFunctionVersionFromFile(cmd *cobra.Command, client *api.Client, existingFunctionID string, params nvcf.FunctionVersionNewParams, deploy bool, gpu, instanceType, backend string, maxInstances, minInstances, maxRequestConcurrency int64) error {
@@ -429,15 +456,16 @@ func prepareFunctionParamsFromFile(fnImage string, fn FunctionDef) nvcf.Function
 	}
 
 	return nvcf.FunctionNewParams{
-		Name:           nvcf.String(fn.FnName),
-		InferenceURL:   nvcf.String(fn.InferenceURL),
-		InferencePort:  nvcf.Int(fn.InferencePort),
-		ContainerImage: nvcf.String(fnImage),
-		ContainerArgs:  nvcf.String(fn.ContainerArgs),
-		APIBodyFormat:  nvcf.F(nvcf.FunctionNewParamsAPIBodyFormat(apiBodyFormat)),
-		Description:    nvcf.F(fn.Description),
-		Tags:           nvcf.F(fn.Tags),
-		FunctionType:   nvcf.F(nvcf.FunctionNewParamsFunctionType(functionType)),
+		Name:                 nvcf.String(fn.FnName),
+		InferenceURL:         nvcf.String(fn.InferenceURL),
+		InferencePort:        nvcf.Int(fn.InferencePort),
+		ContainerImage:       nvcf.String(fnImage),
+		ContainerArgs:        nvcf.String(fn.ContainerArgs),
+		APIBodyFormat:        nvcf.F(nvcf.FunctionNewParamsAPIBodyFormat(apiBodyFormat)),
+		Description:          nvcf.F(fn.Description),
+		Tags:                 nvcf.F(fn.Tags),
+		FunctionType:         nvcf.F(nvcf.FunctionNewParamsFunctionType(functionType)),
+		ContainerEnvironment: nvcf.F(parseEnvVarsFromFile(fn.ContainerEnvironment)),
 		Health: nvcf.F(nvcf.FunctionNewParamsHealth{
 			Protocol:           nvcf.F(nvcf.FunctionNewParamsHealthProtocol(fn.Health.Protocol)),
 			Port:               nvcf.F(fn.Health.Port),
