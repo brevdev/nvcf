@@ -36,20 +36,23 @@ func isQuiet(cmd *cobra.Command) bool {
 	return quiet
 }
 
-func printJSON(cmd *cobra.Command, data interface{}) {
+func printJSON(cmd *cobra.Command, data interface{}) error {
 	json, err := json.MarshalIndent(data, "", "  ")
 	if err != nil {
-		Error(cmd, "Error formatting JSON", err)
-		return
+		return Error(cmd, "Error formatting JSON", err)
 	}
 	fmt.Println(string(json))
+	return nil
 }
 
 // TODO: Implement secure input for secrets
 func Prompt(message string, isSecret bool) string {
 	Type(message)
 	var input string
-	fmt.Scanln(&input)
+	_, err := fmt.Scanln(&input)
+	if err != nil {
+		return ""
+	}
 	return input
 }
 
@@ -72,7 +75,10 @@ func StopSpinner(s *spinner.Spinner) {
 
 func Functions(cmd *cobra.Command, functions []nvcf.ListFunctionsResponseFunction) {
 	if isJSON(cmd) {
-		printJSON(cmd, functions)
+		err := printJSON(cmd, functions)
+		if err != nil {
+			return
+		}
 	} else {
 		printFunctionsTable(cmd, functions)
 	}
@@ -90,7 +96,10 @@ func printFunctionsTable(cmd *cobra.Command, functions []nvcf.ListFunctionsRespo
 
 func SingleFunction(cmd *cobra.Command, fn nvcf.FunctionResponseFunction) {
 	if isJSON(cmd) {
-		printJSON(cmd, fn)
+		err := printJSON(cmd, fn)
+		if err != nil {
+			return
+		}
 	} else {
 		printSingleFunctionTable(cmd, fn)
 	}
@@ -106,7 +115,10 @@ func printSingleFunctionTable(cmd *cobra.Command, fn nvcf.FunctionResponseFuncti
 
 func Deployments(cmd *cobra.Command, deployments []nvcf.DeploymentResponse) {
 	if isJSON(cmd) {
-		printJSON(cmd, deployments)
+		err := printJSON(cmd, deployments)
+		if err != nil {
+			return
+		}
 	} else {
 		printDeploymentsTable(cmd, deployments)
 	}
@@ -124,7 +136,10 @@ func printDeploymentsTable(cmd *cobra.Command, deployments []nvcf.DeploymentResp
 
 func SingleDeployment(cmd *cobra.Command, deployment nvcf.DeploymentResponse) {
 	if isJSON(cmd) {
-		printJSON(cmd, deployment)
+		err := printJSON(cmd, deployment)
+		if err != nil {
+			return
+		}
 	} else {
 		printSingleDeploymentTable(cmd, deployment)
 	}
@@ -140,7 +155,10 @@ func printSingleDeploymentTable(cmd *cobra.Command, deployment nvcf.DeploymentRe
 
 func GPUs(cmd *cobra.Command, clusterGroups []nvcf.ClusterGroupsResponseClusterGroup) {
 	if isJSON(cmd) {
-		printJSON(cmd, clusterGroups)
+		err := printJSON(cmd, clusterGroups)
+		if err != nil {
+			return
+		}
 	} else {
 		printGPUsTable(cmd, clusterGroups)
 	}

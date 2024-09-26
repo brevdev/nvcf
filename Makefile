@@ -66,5 +66,11 @@ docs:
 cleandocs:
 	rm -rf ./docs
 
+dry-release:
+	goreleaser release --snapshot --clean
+
+release:
+	goreleaser release
+
 .PHONY: all build clean test check fmt vet lint q deps-lint help
 

@@ -35,7 +35,10 @@ Environment variables:
 		PersistentPreRunE: preRunAuthCheck,
 		Run: func(cmd *cobra.Command, args []string) {
 			output.PrintASCIIArt(cmd)
-			cmd.Usage()
+			err := cmd.Usage()
+			if err != nil {
+				return
+			}
 		},
 		DisableAutoGenTag: true,
 	}

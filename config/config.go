@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 )
@@ -23,7 +24,11 @@ func Init() {
 	configPath := filepath.Join(homeDir, ".nvcf", "config.json")
 	data, err := os.ReadFile(configPath)
 	if err == nil {
-		json.Unmarshal(data, &cfg)
+		err = json.Unmarshal(data, &cfg)
+		if err != nil {
+			fmt.Println("Failed to load config")
+			panic(err)
+		}
 	}
 
 	if v := os.Getenv("NGC_API_KEY"); v != "" {

@@ -22,8 +22,8 @@ func functionDeleteCmd() *cobra.Command {
 		RunE:    runFunctionDelete,
 	}
 	cmd.Flags().String("version-id", "", "The ID of the version")
-	cmd.Flags().Bool("all", false, "Delete all versions of the function")
-	cmd.Flags().Bool("force", false, "Forcefully delete a deployed function")
+	cmd.Flags().BoolP("all", "a", false, "Delete all versions of the function")
+	cmd.Flags().BoolP("force", "f", false, "Forcefully delete a deployed function")
 	return cmd
 }
 

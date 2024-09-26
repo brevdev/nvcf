@@ -405,8 +405,7 @@ func prepareFunctionVersionParamsFromFile(fnImage string, fn FunctionDef) nvcf.F
 func createAndDeployFunctionVersionFromFile(cmd *cobra.Command, client *api.Client, existingFunctionID string, params nvcf.FunctionVersionNewParams, deploy bool, gpu, instanceType, backend string, maxInstances, minInstances, maxRequestConcurrency int64) error {
 	resp, err := client.Functions.Versions.New(cmd.Context(), existingFunctionID, params)
 	if err != nil {
-		output.Error(cmd, "error creating function version", err)
-		return nil
+		return output.Error(cmd, "error creating function version", err)
 	}
 
 	output.Success(cmd, fmt.Sprintf("Version %s created for function %s", resp.Function.VersionID, existingFunctionID))
@@ -466,7 +465,6 @@ func createAndDeployFunctionFromFile(cmd *cobra.Command, client *api.Client, par
 func WaitForDeployment(cmd *cobra.Command, client *api.Client, functionID, versionID string) error {
 	spinner := output.NewSpinner("Waiting for deployment to complete...")
 	output.StartSpinner(spinner)
-	defer output.StopSpinner(spinner)
 
 	err := timeout.DoWithTimeout(func(ctx context.Context) error {
 		for ctx.Err() == nil {
@@ -492,6 +490,8 @@ func WaitForDeployment(cmd *cobra.Command, client *api.Client, functionID, versi
 	if err != nil {
 		return output.Error(cmd, "Error waiting for deployment", err)
 	}
+
+	output.StopSpinner(spinner)
 
 	output.Success(cmd, fmt.Sprintf("\nFunction deployed (ID: %s, Version: %s)", functionID, versionID))
 	return nil

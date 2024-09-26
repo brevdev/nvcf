@@ -16,10 +16,7 @@ func ListContains[K comparable](list []K, item K) bool {
 
 func ListHas[K any](list []K, has func(l K) bool) bool {
 	k := Find(list, has)
-	if k != nil {
-		return true
-	}
-	return false
+	return k != nil
 }
 
 func Find[T any](list []T, f func(T) bool) *T {

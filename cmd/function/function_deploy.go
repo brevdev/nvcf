@@ -20,7 +20,16 @@ func functionDeployCmd() *cobra.Command {
 		Long:    `Deploy an existing NVCF function. If you want to deploy a specific version, use the --version-id flag.`,
 		Example: "nvcf function deploy fid --version-id vid --gpu A100 --instance-type g5.4xlarge",
 		Args:    cobra.ExactArgs(1),
-		RunE:    runFunctionDeploy,
+		PreRunE: func(cmd *cobra.Command, args []string) error {
+			requiredFlags := []string{"gpu", "instance-type", "backend"}
+			for _, flag := range requiredFlags {
+				if err := cmd.MarkFlagRequired(flag); err != nil {
+					return err
+				}
+			}
+			return nil
+		},
+		RunE: runFunctionDeploy,
 	}
 
 	cmd.Flags().String("version-id", "", "The ID of the version to deploy")
@@ -31,10 +40,6 @@ func functionDeployCmd() *cobra.Command {
 	cmd.Flags().Int64("max-instances", 1, "Maximum number of instances")
 	cmd.Flags().Int64("max-request-concurrency", 1, "Maximum number of concurrent requests")
 	cmd.Flags().BoolP("detached", "d", false, "Detach from the deployment and return to the prompt")
-
-	cmd.MarkFlagRequired("gpu")
-	cmd.MarkFlagRequired("instance-type")
-	cmd.MarkFlagRequired("backend")
 
 	return cmd
 }
@@ -64,9 +69,18 @@ func runFunctionDeploy(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	gpu, _ := cmd.Flags().GetString("gpu")
-	instanceType, _ := cmd.Flags().GetString("instance-type")
-	backend, _ := cmd.Flags().GetString("backend")
+	gpu, err := cmd.Flags().GetString("gpu")
+	if err != nil {
+		return output.Error(cmd, "Error getting gpu", err)
+	}
+	instanceType, err := cmd.Flags().GetString("instance-type")
+	if err != nil {
+		return output.Error(cmd, "Error getting instance-type", err)
+	}
+	backend, err := cmd.Flags().GetString("backend")
+	if err != nil {
+		return output.Error(cmd, "Error getting backend", err)
+	}
 	minInstances, _ := cmd.Flags().GetInt64("min-instances")
 	maxInstances, _ := cmd.Flags().GetInt64("max-instances")
 	maxRequestConcurrency, _ := cmd.Flags().GetInt64("max-request-concurrency")
@@ -83,7 +97,7 @@ func runFunctionDeploy(cmd *cobra.Command, args []string) error {
 		}}),
 	}
 
-	_, err := client.FunctionDeployment.Functions.Versions.InitiateDeployment(
+	_, err = client.FunctionDeployment.Functions.Versions.InitiateDeployment(
 		cmd.Context(),
 		functionId,
 		versionId,
