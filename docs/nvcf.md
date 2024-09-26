@@ -6,6 +6,11 @@ NVIDIA Cloud Functions CLI
 
 A command-line interface for managing and interacting with NVIDIA Cloud Functions.
 
+Environment variables:
+  NVCF_BETA - Set to true to enable beta features
+  NVCF_SHOW_DOCS_CMD - Set to true to show the docs command
+
+
 ```
 nvcf [flags]
 ```
@@ -17,7 +22,7 @@ nvcf [flags]
       --json       Output results in JSON format
       --no-color   Disable color output
   -q, --quiet      Suppress non-error output
-  -v, --verbose    Enable verbose output
+  -v, --verbose    Enable verbose output and show underlying API calls
 ```
 
 ### SEE ALSO

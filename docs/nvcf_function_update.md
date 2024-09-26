@@ -34,7 +34,7 @@ nvcf function update fid --version-id vid --gpu A100 --instance-type g5.4xlarge 
       --json       Output results in JSON format
       --no-color   Disable color output
   -q, --quiet      Suppress non-error output
-  -v, --verbose    Enable verbose output
+  -v, --verbose    Enable verbose output and show underlying API calls
 ```
 
 ### SEE ALSO

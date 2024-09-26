@@ -5,8 +5,17 @@ Run local deployment test for NVCF compatibility
 ### Synopsis
 
 Run a local deployment test to verify container compatibility with NVCF.
+
 This command deploys the specified Docker image locally, checks its health,
 and performs basic connectivity tests to ensure it meets NVCF requirements.
+
+Key features:
+- Supports both HTTP and gRPC protocols
+- Customizable health check and inference endpoints
+- Configurable wait times for container readiness
+- Option to force cleanup of existing containers
+
+Use this command to validate your NVCF function before deployment.
 
 ```
 nvcf preflight check <image-name> [flags]
@@ -34,7 +43,7 @@ nvcf preflight check <image-name> [flags]
       --json       Output results in JSON format
       --no-color   Disable color output
   -q, --quiet      Suppress non-error output
-  -v, --verbose    Enable verbose output
+  -v, --verbose    Enable verbose output and show underlying API calls
 ```
 
 ### SEE ALSO
