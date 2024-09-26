@@ -18,7 +18,7 @@ NVCF is a command-line interface (CLI) tool for managing and interacting with NV
 To install the NVCF CLI, you need to have Go installed on your system. Then, you can use the following command:
 
 ```bash
-go install github.com/brevdev/nvcf@latest
+brew install brevdev/homebrew-nvcf/nvcf
 ```
 
 ## Usage
