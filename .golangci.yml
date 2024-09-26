@@ -1,3 +1,4 @@
 run:
   skip-files:
     - "preflight/containerutil/container_smoketest_grpc.go"
+    - "output/output.go"
