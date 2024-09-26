@@ -49,7 +49,10 @@ func printJSON(cmd *cobra.Command, data interface{}) error {
 func Prompt(message string, isSecret bool) string {
 	Type(message)
 	var input string
-	fmt.Scanln(&input)
+	_, err := fmt.Scanln(&input)
+	if err != nil {
+		return ""
+	}
 	return input
 }
 
