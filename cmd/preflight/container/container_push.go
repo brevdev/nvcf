@@ -1,14 +1,12 @@
 package container
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"os/exec"
 	"strings"
 
-	"github.com/brevdev/nvcf/api"
-	"github.com/brevdev/nvcf/config"
+	"github.com/brevdev/nvcf/cmd/auth"
 	"github.com/spf13/cobra"
 )
 
@@ -33,8 +31,13 @@ func runPush(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	// Check if the image exists locally
+	if err := checkAndPullImage(image, tag); err != nil {
+		return err
+	}
+
 	// Get the orgId
-	orgId, err := getOrgId()
+	orgId, err := auth.GetOrgId()
 	if err != nil {
 		return fmt.Errorf("failed to get organization ID: %w", err)
 	}
@@ -70,29 +73,25 @@ func runPush(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// getOrgId retrieves the organization ID
-func getOrgId() (string, error) {
-	client := api.NewClient(config.GetAPIKey())
-	orgsInfo := map[string]interface{}{}
-	err := client.Get(context.Background(), "/v2/orgs", nil, &orgsInfo)
-	if err != nil {
-		return "", err
+func checkAndPullImage(image, tag string) error {
+	// Check if the image exists locally
+	inspectCmd := exec.Command("docker", "inspect", fmt.Sprintf("%s:%s", image, tag))
+	if err := inspectCmd.Run(); err == nil {
+		// Image exists locally
+		fmt.Printf("Image %s:%s found locally\n", image, tag)
+		return nil
 	}
 
-	organizations, ok := orgsInfo["organizations"].([]interface{})
-	if !ok || len(organizations) == 0 {
-		return "", fmt.Errorf("no organizations found")
+	// Image doesn't exist locally, pull it
+	fmt.Printf("Image %s:%s not found locally. Pulling...\n", image, tag)
+	pullCmd := exec.Command("docker", "pull", fmt.Sprintf("%s:%s", image, tag))
+	pullCmd.Stdout = os.Stdout
+	pullCmd.Stderr = os.Stderr
+
+	if err := pullCmd.Run(); err != nil {
+		return fmt.Errorf("failed to pull image %s:%s: %w", image, tag, err)
 	}
 
-	firstOrg, ok := organizations[0].(map[string]interface{})
-	if !ok {
-		return "", fmt.Errorf("failed to parse organization information")
-	}
-
-	name, ok := firstOrg["name"].(string)
-	if !ok {
-		return "", fmt.Errorf("organization name not found")
-	}
-
-	return name, nil
+	fmt.Printf("Successfully pulled image %s:%s\n", image, tag)
+	return nil
 }

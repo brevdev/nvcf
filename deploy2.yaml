@@ -1,0 +1,23 @@
+fn_image: nvcr.io/0514617533638406/development/nvcf-jupyter-lab:0.0.8
+functions:
+  - name: test-jupyter-lab
+    inferenceUrl: "/echo"
+    inferencePort: 8000
+    healthUri: "/health"
+    custom: true
+    health:
+      protocol: HTTP
+      port: 80
+      expectedStatusCode: 200
+      timeout: 20
+      uri: "/health"
+    inst_backend: GCP-USCENT1-A
+    inst_gpu_type: H100
+    inst_type: GCP.GPU.H100_1x
+    inst_min: 1
+    inst_max: 1
+    containerEnvironment:
+      - key: SSH_PUBKEY
+        value: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCuHBN8zVeYhVa55kXacwJ13/Si/OpWOxpzfVHusVGS+HYpxvxORZJzbRVgwfUygyMgxkW33EVzWNigHLRWb2uA7T8E/fH7sES+4xO0d11yKkUre/8KSAa3X++75p86FQGLnIUrYQZm5kpY6gVZYAb68A/q3bUGrPEouj9amCVwBIJJaQ6AhQiB2vtjhLAgfbLjp+A29MuZYRIzHGljsI1RQgGOBUyeKK6So43MUB4Q+In+Cw1gzjUUv9NJDqbgtg+e9e28UQDU2XhIJEChUvOO0j9lBS4MgcA+K9btvX7sdQIriRuWaUYsrtXL6CbxIjZgclKuFUmMogUUWU7cLraavvDODzuFpNly1IwVVDYBgIAlQHsSOXkACwQigthECoM7qMBR29+xLcMrTD2YkjJJo/QVzCzcKqcqCn+0/8Es0MXGV7HQvEKLZW625hJ76twnFNOXuykJc7WlPbvqdWzBJBH8PDZDBoiQ1W9+pMK6qP3eB4JK6HXMKrtJEIQ28ZxiOgHFWsvUrlRD2VKPFzBOH6ZQe8mItsyy64zSCk3XyLLrLktq8gnOY9VOci6ukLKyLoS5LulzUjWVmTpeiJY2g0Frim+ZpJSIO24LW9Z+5fEpf3935xNGeCyWeO2Is/vY+6dEpDEV+sey2XrUe7nTw5xtfsemSwJTO5zmtjuWzQ== tom@brev.dev"
+      - key: CLOUDFLARE_TOKEN
+        value: "eyJhIjoiYjI5N2IzZTNiZmVlNGJlYTA0ZGZhNGI3ZTJmMzEwYTQiLCJ0IjoiNzljNWI0MzAtMWFlYS00NmNmLWE1NzItMGVmN2MxNDdmMDZmIiwicyI6ImJTQzU0UWpUMFZOQUQ2eGRsYVZrbVA1L012S1NoaENIR01vQ3BkZ29zWEU9In0="
